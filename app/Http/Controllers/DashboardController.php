@@ -4,15 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Materia;
 use App\Models\Instituto;
-use App\Models\Carrera;
 use App\Models\User;
 use Illuminate\Http\Request;
+<<<<<<< Updated upstream
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth; 
+=======
+use Illuminate\Support\Facades\Auth;
+>>>>>>> Stashed changes
 use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
+    /**
+     * Punto de entrada principal: Redirige según el rol/cargo del usuario.
+     */
     public function home(Request $request)
     {   
         $user = Auth::user();
@@ -103,7 +109,10 @@ class DashboardController extends Controller
             
             return $todasLasMaterias->unique('id'); 
         }
+
+        return collect();
     }
+<<<<<<< Updated upstream
 
 
     private function getMateriasFiltradas($institutoId, $carreraId = 'all')
@@ -238,3 +247,6 @@ class DashboardController extends Controller
         }
 
 } 
+=======
+}
+>>>>>>> Stashed changes

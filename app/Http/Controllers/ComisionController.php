@@ -23,7 +23,8 @@ class ComisionController extends Controller
         $query = Comision::query();
 
   
-        if ($user->hasAnyRole(['Admin', 'Admin_global'])) {
+        if ($user->hasAnyRole(['Admin', 'Admin_global','coord_academico'])) {
+            // Acceso completo a todas las comisiones
 
         } elseif ($user->hasAnyRole(['Admin_instituto', 'Consulta_instituto'])) {
             if ($user->instituto_id) {

@@ -4,7 +4,7 @@ use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\DictaController;
 use App\Http\Controllers\CargoController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\CarreraController; 
+use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\MateriaController;
 use App\Http\Controllers\ComisionController;
 use App\Http\Controllers\DashboardController;
@@ -13,18 +13,31 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', [DashboardController::class, 'home']) 
+// Esta es tu ruta actual modificada para que use el nombre 'dashboard'
+Route::get('/', [DashboardController::class, 'home'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+// DEBES AGREGAR ESTA RUTA para que el redireccionamiento funcione:
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard-coordinador', [DashboardController::class, 'dashboardCoordinador'])
+        ->name('dashboard.coordinador');
+        
+    
+    // Aquí irás agregando las rutas para los otros roles más adelante:
+    // Route::get('/dashboard-admin', [DashboardController::class, 'dashboardAdmin'])->name('dashboard.admin');
+});
 
 
 Route::middleware('auth')->group(function () {
     #UsuariusCrud
     Route::resource('users', UserController::class);
+    Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');
     Route::get('users/{user}/carreras', [UserController::class, 'carrerasCoordinador'])->name('coordinadores.carreras.edit');
     Route::patch('users/{user}/carreras', [UserController::class, 'updateCarrerasCoordinador'])->name('coordinadores.carreras.update');
 
 
+    Route::get('/profile/view', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -36,6 +49,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('docentes/{docente}/cargo/create', [DocenteController::class, 'createCargo'])->name('docentes.cargo.create');
     Route::post('docentes/{docente}/cargo', [DocenteController::class, 'addCargo'])->name('docentes.cargo.store');
+    Route::patch('docentes/{docente}/toggle-status', [DocenteController::class, 'toggleStatus'])->name('docentes.toggleStatus');
 
     //Rutas espacios curricualres
     Route::resource('carreras', CarreraController::class);
@@ -44,11 +58,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('dictas', DictaController::class);
     Route::patch('materias/{materia}/toggle-status', [MateriaController::class, 'toggleStatus'])->name('materias.toggleStatus');
     Route::patch('carreras/{carrera}/toggle-status', [CarreraController::class, 'toggleStatus'])->name('carreras.toggleStatus');
-
+    Route::patch('comisiones/{comision}/toggle-status', [ComisionController::class, 'toggleStatus'])->name('comisiones.toggleStatus');
 
 });
 
-Route::get('/test', fn () => Inertia::render('Test'))->name('test');
+Route::get('/test', fn() => Inertia::render('Test'))->name('test');
 
 /*
 Route::get('/', function () {
@@ -61,4 +75,4 @@ Route::get('/', function () {
 });
 */
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

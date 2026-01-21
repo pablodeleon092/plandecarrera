@@ -71,7 +71,13 @@ class RolesYPermisosSeeder extends Seeder
             'Consulta_instituto' => [
                 'consultar_carrera', 
                 'consultar_docente'
-            ], 
+            ],
+            'Coordinador Academico' => [
+                'consultar_carrera',
+                'modificar_carrera',
+                'consultar_docente',
+                'modificar_docente'
+            ],
         ];
 
         foreach ($roles as $rol => $permisosRol) {
