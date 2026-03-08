@@ -39,4 +39,10 @@ class Docente extends Model
         return $this->belongsToMany(Comision::class, 'dictas', 'docente_id', 'comision_id')
                     ->withPivot('id'); // Opcional: trae el ID de la relación dicta
     }
+    public function dictas()
+    {
+        // Esto es lo que busca el controlador cuando hace whereHas('dictas')
+        return $this->hasMany(Dicta::class, 'docente_id');
+    }
+
 }

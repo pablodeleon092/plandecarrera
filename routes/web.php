@@ -13,18 +13,17 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Esta es tu ruta actual modificada para que use el nombre 'dashboard'
 Route::get('/', [DashboardController::class, 'home'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-// DEBES AGREGAR ESTA RUTA para que el redireccionamiento funcione:
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard-coordinador', [DashboardController::class, 'dashboardCoordinador'])
         ->name('dashboard.coordinador');
-        
+    route::get('/dashboard-admin', [DashboardController::class, 'dashboardAdmin'])
+        ->name('dashboard.admin');
     
-    // Aquí irás agregando las rutas para los otros roles más adelante:
+    // aca agregar  las rutas para los otros roles más adelante:
     // Route::get('/dashboard-admin', [DashboardController::class, 'dashboardAdmin'])->name('dashboard.admin');
 });
 

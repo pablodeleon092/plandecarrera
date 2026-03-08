@@ -2,251 +2,172 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Materia;
-use App\Models\Instituto;
-use App\Models\User;
 use Illuminate\Http\Request;
-<<<<<<< Updated upstream
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth; 
-=======
 use Illuminate\Support\Facades\Auth;
->>>>>>> Stashed changes
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use App\Models\Materia;
+use App\Models\Docente;
+use App\Models\Carrera;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
-    /**
-     * Punto de entrada principal: Redirige según el rol/cargo del usuario.
-     */
     public function home(Request $request)
-    {   
+    {
         $user = Auth::user();
-        $selectedInstitutoId = $request->input('instituto_id');
-        $selectedCarreraId = $request->input('carrera_id'); // Podría ser 'all' o un ID numérico
-
-        // 1. Obtener Institutos disponibles (usando tu método existente)
-        $institutosDisponibles = $this->getInstitutosPorRol($user); 
         
-        // 2. Determinar el Instituto Seleccionado
-        if (!$selectedInstitutoId) {
-            // Inicializar con el primer instituto si no hay filtro
-            $selectedInstitutoId = $institutosDisponibles->first()?->id;
-        }
+        return match ($user->cargo) {
+            'Administrador' => redirect()->route('dashboard.admin'),
+            'Coordinador Academico' => redirect()->route('dashboard.coordinador'),
+            default => Inertia::render('Gestion/Dashboard', ['user' => $user]),
+        };
+    }
 
-        // 3. Obtener Materias Filtradas (Nueva Lógica)
-        $materiasFiltradas = $this->getMateriasFiltradas($selectedInstitutoId, $selectedCarreraId);
 
-    
-        return Inertia::render('Gestion/Dashboard', [
-            'user' => $user,
-            'institutos' => $institutosDisponibles,
-            'selectedInstitutoId' => (int)$selectedInstitutoId, // Pasar el ID seleccionado
-            'selectedCarreraId' => $selectedCarreraId ?: 'all', // Pasar el ID seleccionado
-            'materias' => $materiasFiltradas,
+    public function dashboardCoordinador(Request $request) 
+    {
+        $user = auth()->user();
+        $institutoId = $user->instituto_id; 
+
+        // 1. MATERIAS (Estructura: 1 Materia -> N Planes) 
+        $materiasCompartidas = Materia::query()
+            ->whereHas('planes.carrera', function($query) use ($institutoId) {
+                $query->where('instituto_id', $institutoId);
+            })
+            ->with(['planes.carrera']) 
+            ->get()
+            ->filter(function ($materia) {
+                $cantidadCarreras = $materia->planes
+                    ->pluck('carrera_id')
+                    ->unique()
+                    ->count();
+                return $cantidadCarreras > 1; 
+            })
+            ->map(function ($materia) {
+                return [
+                    'id' => $materia->id,
+                    'nombre' => $materia->nombre,
+                    'codigo' => $materia->codigo ?? 'S/C',
+                    'carreras_nombres' => $materia->planes
+                        ->map(fn($plan) => $plan->carrera->nombre ?? null)
+                        ->filter()
+                        ->unique()
+                        ->values()
+                ];
+            })
+            ->values();
+
+        // 2. DOCENTES MULTI-CARRERA
+        $docentesStats = Docente::whereHas('dictas', function($q) use ($institutoId) {
+                $q->whereHas('comision.materia.planes.carrera', function($query) use ($institutoId) {
+                    $query->where('instituto_id', $institutoId);
+                });
+            })
+            ->withCount(['dictas as total_carreras' => function ($query) use ($institutoId) {
+                $query->select(DB::raw('count(distinct(planes.carrera_id))'))
+                    ->join('comisiones', 'dictas.comision_id', '=', 'comisiones.id')
+                    ->join('materias', 'comisiones.id_materia', '=', 'materias.id')
+                    ->join('plan_materia', 'materias.id', '=', 'plan_materia.materia_id')
+                    ->join('planes', 'plan_materia.plan_id', '=', 'planes.id')
+                    ->join('carreras', 'planes.carrera_id', '=', 'carreras.id')
+                    ->where('carreras.instituto_id', $institutoId);
+            }])
+            ->get();
+
+        $docentesMulti = $docentesStats
+            ->filter(fn($d) => $d->total_carreras > 1)
+            ->map(function ($docente) use ($institutoId) {
+                 $nombresCarreras = DB::table('carreras')
+                    ->join('planes', 'carreras.id', '=', 'planes.carrera_id')
+                    ->join('plan_materia', 'planes.id', '=', 'plan_materia.plan_id')
+                    ->join('materias', 'plan_materia.materia_id', '=', 'materias.id')
+                    ->join('comisiones', 'materias.id', '=', 'comisiones.id_materia')
+                    ->join('dictas', 'comisiones.id', '=', 'dictas.comision_id')
+                    ->where('dictas.docente_id', $docente->id)
+                    ->where('carreras.instituto_id', $institutoId)
+                    ->distinct()
+                    ->pluck('carreras.nombre');
+                
+                return [
+                    'id' => $docente->id,
+                    'nombre' => $docente->nombre,
+                    'apellido' => $docente->apellido,
+                    'legajo' => $docente->legajo,
+                    'total_carreras' => $docente->total_carreras,
+                    'email' => $docente->email,
+                    'carreras_lista' => $nombresCarreras,
+                ];
+            })->values();
+
+        // 3. SUPERPOSICIONES POTENCIALES
+        $superposiciones = DB::table('dictas')
+            ->join('comisiones', 'dictas.comision_id', '=', 'comisiones.id')
+            ->join('docentes', 'dictas.docente_id', '=', 'docentes.id')
+            ->whereExists(function ($query) use ($institutoId) {
+                $query->select(DB::raw(1))
+                    ->from('materias')
+                    ->join('plan_materia', 'materias.id', '=', 'plan_materia.materia_id')
+                    ->join('planes', 'plan_materia.plan_id', '=', 'planes.id')
+                    ->join('carreras', 'planes.carrera_id', '=', 'carreras.id')
+                    ->whereColumn('materias.id', 'comisiones.id_materia') 
+                    ->where('carreras.instituto_id', $institutoId);
+            })
+            ->select(
+                'docentes.id',
+                'docentes.nombre',
+                'docentes.apellido',
+                'comisiones.anio',         
+                'comisiones.cuatrimestre', 
+                DB::raw('COUNT(dictas.comision_id) as cantidad_comisiones')
+            )
+            ->groupBy('docentes.id', 'docentes.nombre', 'docentes.apellido', 'comisiones.anio', 'comisiones.cuatrimestre')
+            ->havingRaw('COUNT(dictas.comision_id) > 1') 
+            ->get();
+
+
+        // 4. CÁLCULO TOTAL PARA EL PORCENTAJE
+        $totalMateriasInstituto = Materia::whereHas('planes.carrera', function($q) use ($institutoId){
+            $q->where('instituto_id', $institutoId);
+        })->count();
+        // ---------------------------------
+
+        return Inertia::render('Gestion/DashboardCoordinadorV2', [
+            'auth' => ['user' => $user],
+            
+            'metrics' => [
+                'sharedPercentage' => $totalMateriasInstituto > 0 
+                    ? round(($materiasCompartidas->count() / $totalMateriasInstituto) * 100, 1) 
+                    : 0,
+                'multiCareerTeachersCount' => $docentesMulti->count(),
+                'conflictsCount' => $superposiciones->count(), 
+                'totalCareers' => \App\Models\Carrera::where('instituto_id', $institutoId)->count(),
+            ],
+
+            'stats' => [
+                'multiCarrera' => $docentesMulti->count(),
+                'monoCarrera'  => $docentesStats->where('total_carreras', 1)->count(),
+                'institutoNombre' => $user->instituto->nombre ?? 'Instituto',
+                'docentesDetalle' => $docentesMulti,
+                'superposicionesDetalle' => $superposiciones
+            ],
+
+            'materiasCompartidas' => [
+                'list' => $materiasCompartidas
+            ],
         ]);
     }
-
-    private function getInstitutosPorRol(User $user)
+    
+    public function dashboardAdmin()
     {
-        $rol = $user->cargo;
-
-        if (in_array($rol, ['Administrador', 'Administrativo de Secretaria Academica'])) {
-   
-            return Instituto::with('carreras.planActual')->get(['id', 'nombre']);
-                    
-        } elseif (in_array($rol, ['Administrativo de instituto', 'Director de instituto', 'Coordinador Academico', 'Consejero'])) {
-            
-            $user->instituto->load(['carreras' => function ($query) {
-                        $query->with('planActual');
-                    }]);
-            return collect([$user->instituto]);
-
-        } elseif ($rol === 'Coordinador de Carrera') {
-        
-            $user->instituto->load(['carreras' => function ($query) use ($user) {
-
-                $carreraIds = $user->carreras()->pluck('carrera_id');
-                
-                $query->whereIn('id', $carreraIds) 
-                    ->with('planActual'); 
-            }]);
-
-            return collect([$user->instituto]);
-
-        } else {
-
-            return collect(); 
-        }
-
+        return Inertia::render('Gestion/dashboardAdmin', [
+            'auth' => ['user' => Auth::user()],
+            'stats' => [
+                'totalUsuarios' => \App\Models\User::count(),
+                'totalDocentes' => \App\Models\Docente::count(),
+                'totalCarreras' => \App\Models\Carrera::count(),
+                'totalMaterias' => \App\Models\Materia::count(),
+            ]
+        ]);
     }
-
-    private function getMateriasDisponibles(User $user, $institutosDisponibles)
-    {
-
-        $materiasAsignadas = $user->materias; 
-
-        if ($materiasAsignadas->isNotEmpty()) {
-            
-            $materiasAsignadas->load('comisiones'); 
-            
-            return $materiasAsignadas;
-
-        } else {
-            
-            $todasLasMaterias = collect();
-            
-            $institutosDisponibles->load([
-                    'carreras.planActual.materias.comisiones' 
-                ]);
-
-            foreach ($institutosDisponibles as $instituto) {
-                
-                foreach ($instituto->carreras as $carrera) {
-                    $todasLasMaterias = $todasLasMaterias->merge($carrera->planActual->materias); 
-                }
-            }
-            
-            return $todasLasMaterias->unique('id'); 
-        }
-
-        return collect();
-    }
-<<<<<<< Updated upstream
-
-
-    private function getMateriasFiltradas($institutoId, $carreraId = 'all')
-    {
-            // 🚨 Cargos a filtrar
-            $cargosDisponibles = [
-                'Titular',
-                'Asociado',
-                'Adjunto',
-                'Jefe de Trabajos Practicos',
-                'Ayudante de Primera'
-            ];
-
-            $anioActual = date('Y'); // Obtener el año actual (e.g., 2025)
-
-            $comisionesEagerLoad = [
-                // 1. FILTRAR POR MATERIAS ACTIVAS (estado = true)
-                'planActual.materias' => function ($query) {
-                    // Restringir: Solo materias activas
-                    $query->where('estado', true);
-                },
-
-                // 2. FILTRAR POR COMISIONES DEL AÑO ACTUAL Y APLICAR FILTROS DE CARGO
-                'planActual.materias.comisiones' => function ($query) use ($cargosDisponibles, $anioActual) {
-                    
-                    // 🛑 FILTRO DE AÑO: Solo comisiones del año actual
-                    $query->where('anio', $anioActual) // Asume que 'anio' es el campo de año en la tabla 'comisiones'
-                    
-                        // Cargar y filtrar las 'dictas' (asignaciones docentes)
-                        ->with([
-                        'dictas' => function ($q) use ($cargosDisponibles) {
-                            $q->with('docente', 'cargo')
-                                ->whereHas('cargo', function ($qCargo) use ($cargosDisponibles) {
-                                    $qCargo->whereIn('nombre', $cargosDisponibles); 
-                                });
-                        }
-                    ]);
-                }
-            ];
-                
-            $user = Auth::user();
-            $materiasColeccion = collect();
-
-            if ($carreraId !== 'all' && is_numeric($carreraId)) {
-                // Lógica para una carrera específica
-                $carrera = Carrera::where('id', $carreraId)
-                                ->where('instituto_id', $institutoId)
-                                ->with($comisionesEagerLoad)
-                                ->first();
-                                
-                if ($carrera && $carrera->planActual) {
-                    $materiasColeccion = $carrera->planActual->materias;
-                }
-            } else {
-                // Lógica para todas las carreras del instituto
-                $institutoQuery = Instituto::where('id', $institutoId);
-                
-                if ($user->cargo === 'Coordinador de Carrera') {
-
-                    $carreraIdsAsignadas = $user->carreras()->pluck('carrera_id');
-                        
-                        // Cargar SOLO las carreras del instituto que están en la lista de asignadas
-                    $institutoQuery->with(['carreras' => function ($qCarrera) use ($comisionesEagerLoad, $carreraIdsAsignadas) {
-                        $qCarrera->whereIn('id', $carreraIdsAsignadas);
-                        $qCarrera->with($comisionesEagerLoad);
-                    }]);
-                } else {
-                    $institutoQuery->with(['carreras' => function ($qCarrera) use ($comisionesEagerLoad) {
-                        $qCarrera->with($comisionesEagerLoad);
-                    }]);
-                }
-
-                $instituto = $institutoQuery->first();
-                    
-                // Procesar las materias de las carreras cargadas
-                if ($instituto) {
-                    foreach ($instituto->carreras as $carrera) {
-                        if ($carrera->planActual) {
-                            // Mergeamos las materias de los planes de cada carrera
-                            $materiasColeccion = $materiasColeccion->merge($carrera->planActual->materias);
-                        }
-                    }
-                    $materiasColeccion = $materiasColeccion->unique('id');
-                }
-            }
-
-
-            $mapaCargos = [
-                'Titular' => 'Titular',
-                'Asociado' => 'Asociado',
-                'Adjunto' => 'Adjunto',
-                'Jefe de Trabajos Practicos' => 'JTP',
-                'Ayudante de Primera' => 'Asist'
-            ];
-            
-            $materiasColeccion->each(function ($materia) use ($cargosDisponibles, $mapaCargos) {
-                
-                $docentesPorCargo = array_fill_keys(array_keys($mapaCargos), []);
-                $docenteKeys = []; // Para asegurar unicidad por cargo y docente
-
-                foreach ($materia->comisiones as $comision) {
-                    foreach ($comision->dictas as $dicta) {
-                        $cargoNombre = $dicta->cargo->nombre;
-                        $docente = $dicta->docente;
-
-                        if (in_array($cargoNombre, $cargosDisponibles)) {
-                            
-                            $claveCorta = $mapaCargos[$cargoNombre];
-                            $uniqueKey = $claveCorta . '_' . $docente->id;
-                            
-                            // Añadimos el docente solo si no ha sido procesado ya para ese cargo en esta materia
-                            if (!isset($docenteKeys[$uniqueKey])) {
-                                // Formato: Apellido, Nombre
-                                $docentesPorCargo[$claveCorta][] = "{$docente->apellido}, {$docente->nombre}";
-                                $docenteKeys[$uniqueKey] = true;
-                            }
-                        }
-                    }
-                }
-
-                // Asignar los strings formateados como nuevos atributos de la materia
-                foreach ($docentesPorCargo as $claveCorta => $nombres) {
-                    // Usamos setAttribute para agregar un dato temporal que se serializará a JSON
-                    $materia->setAttribute($claveCorta, implode('; ', $nombres));
-                }
-            });
-
-            // --- 3. Devolución de la Colección Procesada ---
-
-            // La colección de materias ya tiene los nuevos atributos Titular, Asociado, JTP, etc.
-            return $materiasColeccion;
-        }
-
-} 
-=======
 }
->>>>>>> Stashed changes

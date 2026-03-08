@@ -150,4 +150,5 @@ class Materia extends Model
         return $this->estado === true;
     }
 
+
 }
