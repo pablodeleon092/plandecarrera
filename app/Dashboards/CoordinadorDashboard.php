@@ -26,18 +26,18 @@ class CoordinadorDashboard implements DashboardStrategy
             $selectedCarreraId = $carreras->first()->id;
         }
 
-        // Eliminamos el Inertia::lazy para que en la primera carga (con la carrera por defecto)
-        // los datos viajen de inmediato al frontend.
         $mapaCurricular = null;
         if ($selectedCarreraId) {
             $mapaCurricular = $this->getResumenMapaCurricular($selectedCarreraId);
+            $coberturaPorAño = $this->getCoberturaPorAño($selectedCarreraId);
         }
 
         return Inertia::render('Gestion/DashboardCoordinador', [
             'user' => $user,
             'carreras' => $carreras,
             'selectedCarreraId' => $selectedCarreraId ? (int) $selectedCarreraId : null,
-            'mapaCurricular' => $mapaCurricular, // Ya no es lazy, es data directa
+            'mapaCurricular' => $mapaCurricular,
+            'coberturaPorAño' => $coberturaPorAño, // Ya no es lazy, es data directa
         ]);
     }
 
@@ -70,6 +70,53 @@ class CoordinadorDashboard implements DashboardStrategy
                     'estado' => $this->determinarEstadoEvolucionado($materia)
                 ];
             })
+        ];
+    }
+
+    private function getCoberturaPorAño($carreraId)
+    {
+        // Cargamos la relación: Comisiones -> Dictas (donde está el cargo) -> Docente
+        $carrera = Carrera::with([
+            'planActual.materias.comisiones.dictas.docente',
+            'planActual.materias.comisiones.dictas.cargo'
+        ])->findOrFail($carreraId);
+
+        $plan = $carrera->planActual;
+        if (!$plan) return null;
+
+        $materiasAgrupadas = $plan->materias->map(function ($materia) {
+            $cuat = $materia->cuatrimestre;
+            if ($materia->regimen = 'cuatrimestral') {
+                $año = ceil($cuat / 2);
+            } else {
+                $año = $cuat;
+            }
+
+            $comisionesData = $materia->comisiones->map(function($comision) {
+                return [
+                    'nombre' => $comision->nombre,
+                    'es_valida' => $comision->estaCompleta(),
+                    // Aquí recorremos 'dictas' porque es el que une al docente con su cargo en esta comisión
+                    'docentes' => $comision->dictas->map(function($dicta) {
+                        return [
+                            'nombre_completo' => "{$dicta->docente->nombre_completo}",
+                            'cargo' => $dicta->cargo->nombre ?? 'Sin Cargo'
+                        ];
+                    })
+                ];
+            });
+            return [
+                'id' => $materia->id,
+                'nombre' => $materia->nombre,
+                'año' => $año,
+                'cuatrimestre' => $cuat,
+                'comisiones' => $comisionesData,
+            ];
+        })->groupBy('año');
+
+        return [
+            'plan_nombre' => $plan->nombre,
+            'años' => $materiasAgrupadas
         ];
     }
 

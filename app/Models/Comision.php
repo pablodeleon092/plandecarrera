@@ -148,5 +148,22 @@ class Comision extends Model
         });
     }
 
+    public function estaCompleta()
+    {
+        // Cargamos los nombres de los cargos de los dictas asociados
+        $cargos = $this->dictas->map(fn($d) => strtolower($d->cargo->nombre ?? ''));
+
+        // 1. Verificar Responsable (Titular o Adjunto)
+        $tieneResponsable = $cargos->contains(fn($c) => 
+            str_contains($c, 'titular') || str_contains($c, 'adjunto')
+        );
+        
+        // 2. Verificar Auxiliar (JTP o Ayudante)
+        $tieneAuxiliar = $cargos->contains(fn($c) => 
+            str_contains($c, 'jefe de trabajos') || str_contains($c, 'ayudante')
+        );
+
+        return $tieneResponsable && $tieneAuxiliar;
+    }
 
 }

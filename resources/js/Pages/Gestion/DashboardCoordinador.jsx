@@ -9,6 +9,7 @@ export default function DashboardCoordinador({
     carreras, // Lista para el select
     selectedCarreraId,
     mapaCurricular, // Info de getResumenMapaCurricular
+    coberturaPorAño,
 }) {
     const [currentTab, setCurrentTab] = useState('resumen');
 
@@ -27,7 +28,7 @@ export default function DashboardCoordinador({
 
     const tabs = [
         { id: 'resumen', label: 'Mapa Curricular' },
-        { id: 'docentes', label: 'Mis Docentes' },
+        { id: 'coberturaPorAño', label: 'Cobertura Docentes por Año' },
         { id: 'alertas', label: 'Alertas', badge: 0 },
     ];
 
@@ -164,7 +165,65 @@ export default function DashboardCoordinador({
                     )}
 
                     {/* OTROS TABS (VACÍOS POR AHORA) */}
-                    {currentTab === 'docentes' && <div className="bg-white p-6 rounded-lg shadow">Próximamente: Lista de docentes por carrera</div>}
+                    {currentTab === 'coberturaPorAño' && (
+                        <div className="space-y-8">
+                            {Object.entries(coberturaPorAño.años).map(([año, materias]) => (
+                                <div key={año} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                    {/* Cabecera del Año */}
+                                    <div className="bg-indigo-600 px-6 py-3">
+                                        <h3 className="text-white font-bold text-lg">{año}º Año</h3>
+                                    </div>
+
+                                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        {materias.map((materia) => (
+                                            <div key={materia.id} className="border rounded-lg p-4 bg-gray-50">
+                                                <h4 className="font-bold text-gray-800 border-b pb-2 mb-3">
+                                                    {materia.nombre}
+                                                    <span className="text-xs font-normal text-gray-500 ml-2">
+                                                        ({materia.cuatrimestre}º Cuat.)
+                                                    </span>
+                                                </h4>
+
+                                                <div className="space-y-4">
+                                                    {materia.comisiones.map((com, cIdx) => (
+                                                        <div 
+                                                            key={cIdx} 
+                                                            className={`p-2 rounded border shadow-sm transition-colors ${
+                                                                com.es_valida 
+                                                                ? 'bg-white border-gray-100' 
+                                                                : 'bg-red-50 border-red-300' // Resalta solo la comisión incompleta
+                                                            }`}
+                                                        >
+                                                            <p className="text-xs font-bold text-indigo-600 uppercase mb-1">
+                                                                {com.nombre}
+                                                            </p>
+                                                            <ul className="space-y-2">
+                                                                {com.docentes.length > 0 ? (
+                                                                    com.docentes.map((doc, dIdx) => (
+                                                                        <li key={dIdx} className="flex justify-between items-center text-sm">
+                                                                            <span className="text-gray-700">{doc.nombre_completo}</span>
+                                                                            <span className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full font-medium">
+                                                                                {doc.cargo}
+                                                                            </span>
+                                                                        </li>
+                                                                    ))
+                                                                ) : (
+                                                                    <li className="text-xs italic text-red-400">Sin docentes asignados</li>
+                                                                )}
+                                                            </ul>
+                                                        </div>
+                                                    ))}
+                                                    {materia.comisiones.length === 0 && (
+                                                        <p className="text-xs italic text-gray-400">Sin comisiones creadas</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                     {currentTab === 'alertas' && <div className="bg-white p-6 rounded-lg shadow">Próximamente: Alertas de falta de cobertura</div>}
                 </div>
             </div>
