@@ -2,7 +2,11 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import KPICard from '@/Components/Dashboard/KPICard';
-import StatusIndicator from '@/Components/Dashboard/StatusIndicator';
+import { 
+    ExclamationTriangleIcon, 
+    ClockIcon, 
+    CheckBadgeIcon 
+} from '@heroicons/react/24/solid'
 
 import DataTable from '@/Components/DataTable';
 export default function DashboardCoordinador({
@@ -13,6 +17,7 @@ export default function DashboardCoordinador({
     coberturaPorAño,
     equipoDocenteCarrera,
     cargaHorariaPlan,
+    kpis,
 }) {
     const [currentTab, setCurrentTab] = useState('resumen');
 
@@ -163,13 +168,36 @@ export default function DashboardCoordinador({
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
-                    {/* KPI CARDS - PLACEHOLDERS */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        <KPICard title="Total Materias" value="--" subtitle="Cargando..." status="neutral" />
-                        <KPICard title="Docentes Asignados" value="--" subtitle="Cargando..." status="neutral" />
-                        <KPICard title="Comisiones" value="--" subtitle="Cargando..." status="neutral" />
-                        <KPICard title="Estado Plan" value="--" subtitle="Plan Vigente" status="neutral" />
-                    </div>
+            {/* KPI CARDS */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {/* KPI Cobertura */}
+                <KPICard
+                    title="Cobertura de Comisiones"
+                    value={`${kpis?.cobertura_equipo}%`}
+                    // Ahora podemos mostrar el desglose real (ej: "18 de 20")
+                    subtitle={`${kpis?.comisiones_completas} de ${kpis?.total_comisiones} comisiones cubiertas`}
+                    icon={<CheckBadgeIcon className="w-6 h-6 text-green-600" />}
+                    color="green"
+                />
+
+                {/* KPI Ratio Horas */}
+                <KPICard
+                    title="Balance Teórico/Práctico"
+                    value={`${kpis?.ratio_teoria}% / ${kpis?.ratio_practica}%`}
+                    subtitle="Distribución de carga horaria"
+                    icon={<ClockIcon className="w-6 h-6 text-blue-600" />}
+                    color="blue"
+                />
+
+                {/* KPI Riesgo */}
+                <KPICard
+                    title="Riesgo de Continuidad"
+                    value={kpis?.materias_riesgo}
+                    subtitle="Materias con docente único"
+                    icon={<ExclamationTriangleIcon className="w-6 h-6 text-orange-600" />}
+                    color={kpis?.materias_riesgo > 0 ? "orange" : "green"}
+                />
+            </div>
 
                     {/* TABS */}
                     <div className="border-b border-gray-200 mb-6">

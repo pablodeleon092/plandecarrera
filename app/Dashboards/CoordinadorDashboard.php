@@ -32,6 +32,7 @@ class CoordinadorDashboard implements DashboardStrategy
             $coberturaPorAño = $this->getCoberturaPorAño($selectedCarreraId);
             $equipoDocenteCarrera = $this->getEquipoDocenteCarrera($selectedCarreraId);
             $cargaHorariaDelPlanPorAño = $this->getCargaHorariaDelPlanPorAño($selectedCarreraId);
+            $kpis = $this->getKpisCarrera($selectedCarreraId);
         }
 
         return Inertia::render('Gestion/DashboardCoordinador', [
@@ -42,6 +43,7 @@ class CoordinadorDashboard implements DashboardStrategy
             'coberturaPorAño' => $coberturaPorAño,
             'equipoDocenteCarrera' => $equipoDocenteCarrera, 
             'cargaHorariaPlan' => $cargaHorariaDelPlanPorAño,
+            'kpis' => $kpis,
         ]);
     }
 
@@ -229,4 +231,43 @@ class CoordinadorDashboard implements DashboardStrategy
         return 'Cobertura Parcial';
     }
 
+    private function getKpisCarrera($carreraId)
+    {
+        $carrera = Carrera::findOrFail($carreraId);
+
+        $plan = $carrera->planActual;
+
+        $materias = $plan->materias;
+        // Obtenemos todas las comisiones del plan en una sola colección
+        $todasLasComisiones = $materias->flatMap->comisiones;
+        $totalComisiones = $todasLasComisiones->count();
+        
+        if ($totalComisiones === 0) return null;
+
+        // 1. % de COMISIONES con equipo completo
+        // Usamos el método estaCompleta() que ya movimos al modelo Comision
+        $comisionesCompletas = $todasLasComisiones->filter(fn($c) => $c->estaCompleta())->count();
+        $porcentajeCobertura = ($comisionesCompletas / $totalComisiones) * 100;
+
+        // 2. Ratio Horas Teóricas/Prácticas (Mantenemos la lógica por comisión)
+        $horasTeoricas = $todasLasComisiones->sum('horas_teoricas');
+        $horasPracticas = $todasLasComisiones->sum('horas_practicas');
+        
+        $totalHoras = $horasTeoricas + $horasPracticas;
+        $ratioTeoria = $totalHoras > 0 ? ($horasTeoricas / $totalHoras) * 100 : 0;
+        $ratioPractica = $totalHoras > 0 ? ($horasPracticas / $totalHoras) * 100 : 0;
+
+        // 3. Materias con "Docente Único" (Mantenemos a nivel Materia por riesgo de cátedra)
+        $materiasRiesgo = $materias->filter(fn($m) => $m->tieneDocenteUnico())->count();
+
+        return [
+            'cobertura_equipo' => round($porcentajeCobertura, 1),
+            'comisiones_completas' => $comisionesCompletas,
+            'total_comisiones' => $totalComisiones,
+            'ratio_teoria' => round($ratioTeoria, 1),
+            'ratio_practica' => round($ratioPractica, 1),
+            'materias_riesgo' => $materiasRiesgo,
+        ];
+    }
+    
 }
