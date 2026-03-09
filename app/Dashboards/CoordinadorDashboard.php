@@ -30,6 +30,7 @@ class CoordinadorDashboard implements DashboardStrategy
         if ($selectedCarreraId) {
             $mapaCurricular = $this->getResumenMapaCurricular($selectedCarreraId);
             $coberturaPorAño = $this->getCoberturaPorAño($selectedCarreraId);
+            $equipoDocenteCarrera = $this->getEquipoDocenteCarrera($selectedCarreraId);
         }
 
         return Inertia::render('Gestion/DashboardCoordinador', [
@@ -37,7 +38,8 @@ class CoordinadorDashboard implements DashboardStrategy
             'carreras' => $carreras,
             'selectedCarreraId' => $selectedCarreraId ? (int) $selectedCarreraId : null,
             'mapaCurricular' => $mapaCurricular,
-            'coberturaPorAño' => $coberturaPorAño, // Ya no es lazy, es data directa
+            'coberturaPorAño' => $coberturaPorAño,
+            'equipoDocenteCarrera' => $equipoDocenteCarrera, // Ya no es lazy, es data directa
         ]);
     }
 
@@ -117,6 +119,49 @@ class CoordinadorDashboard implements DashboardStrategy
         return [
             'plan_nombre' => $plan->nombre,
             'años' => $materiasAgrupadas
+        ];
+    }
+
+    private function getEquipoDocenteCarrera($carreraId)
+    {
+        $carrera = Carrera::with([
+            'planActual.materias.comisiones.dictas.docente.cargos'
+        ])->findOrFail($carreraId);
+
+        $plan = $carrera->planActual;
+        
+        if (!$plan) return ['docentes' => []];
+
+        // Debug: Verifica si el plan tiene materias
+        // dd($plan->materias->count()); 
+
+        $docentes = collect();
+
+        foreach ($plan->materias as $materia) {
+            foreach ($materia->comisiones as $comision) {
+                foreach ($comision->dictas as $dicta) {
+                    if ($dicta->docente) {
+                        $docentes->push($dicta->docente);
+                    }
+                }
+            }
+        }
+
+        $docentesUnicos = $docentes->unique('id');
+
+        return [
+            'docentes' => $docentesUnicos->map(function ($docente) {
+                return [
+                    'id' => $docente->id,
+                    'nombre' => $docente->nombre_completo,
+                    'modalidad_desempeño' => $docente->modalidad_desempeño,
+                    'cargos' => $docente->cargos->map(fn($c) => [
+                        'nombre' => $c->nombre,
+                        'nro_materias_asig' => $c->nro_materias_asig,
+                        'sum_horas_frente_aula' => $c->sum_horas_frente_aula,
+                    ]),
+                ];
+            })->values()
         ];
     }
 

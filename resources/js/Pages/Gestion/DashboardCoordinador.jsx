@@ -10,6 +10,7 @@ export default function DashboardCoordinador({
     selectedCarreraId,
     mapaCurricular, // Info de getResumenMapaCurricular
     coberturaPorAño,
+    equipoDocenteCarrera,
 }) {
     const [currentTab, setCurrentTab] = useState('resumen');
 
@@ -29,10 +30,10 @@ export default function DashboardCoordinador({
     const tabs = [
         { id: 'resumen', label: 'Mapa Curricular' },
         { id: 'coberturaPorAño', label: 'Cobertura Docentes por Año' },
-        { id: 'alertas', label: 'Alertas', badge: 0 },
+        { id: 'equipoDocenteCarrera', label: 'Equipo Docente', badge: 0 },
     ];
 
-    const columns = [
+    const columnsResumen = [
         { 
             label: 'Cuat.', 
             key: 'cuatrimestre', 
@@ -88,6 +89,43 @@ export default function DashboardCoordinador({
         }
     ];
 
+    const columnsDocentes = [
+        { 
+            label: 'Docente', 
+            key: 'nombre',
+            className: 'font-bold text-gray-900' 
+        },
+        { 
+            label: 'Modalidad', 
+            key: 'modalidad_desempeño',
+            render: (docente) => (
+                <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                    {docente.modalidad_desempeño || 'No definida'}
+                </span>
+            )
+        },
+        { 
+            label: 'Cargos y Carga Horaria', 
+            key: 'cargos',
+            render: (docente) => (
+                <div className="flex flex-col gap-2 my-1">
+                    {docente.cargos.length > 0 ? (
+                        docente.cargos.map((cargo, idx) => (
+                            <div key={idx} className="text-xs bg-gray-50 border border-gray-100 p-2 rounded">
+                                <div className="font-semibold text-gray-700">{cargo.nombre}</div>
+                                <div className="text-gray-500 flex gap-3 mt-1">
+                                    <span>📚 Materias: {cargo.nro_materias_asig}</span>
+                                    <span>⏰ Horas Aula: {cargo.sum_horas_frente_aula}h</span>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <span className="text-gray-400 italic text-xs">Sin cargos registrados</span>
+                    )}
+                </div>
+            )
+        }
+    ];
 
     return (
         <AuthenticatedLayout
@@ -154,7 +192,7 @@ export default function DashboardCoordinador({
                     {currentTab === 'resumen' && (
                         <div className="mt-6">
                             <DataTable 
-                                columns={columns} 
+                                columns={columnsResumen} 
                                 data={mapaCurricular?.materias || []}
                                 hover={true}
                                 emptyMessage="No hay materias cargadas para esta carrera."
@@ -224,7 +262,25 @@ export default function DashboardCoordinador({
                             ))}
                         </div>
                     )}
-                    {currentTab === 'alertas' && <div className="bg-white p-6 rounded-lg shadow">Próximamente: Alertas de falta de cobertura</div>}
+                    {currentTab === 'equipoDocenteCarrera' && (
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold text-gray-800">Cuerpo Docente de la Carrera</h3>
+                                <span className="text-sm text-gray-500">
+                                    Total: {equipoDocenteCarrera?.docentes?.length || 0} docentes
+                                </span>
+                            </div>
+                            
+                            <DataTable 
+                                columns={columnsDocentes} 
+                                data={equipoDocenteCarrera?.docentes || []}
+                                hover={true}
+                                emptyMessage="No se encontraron docentes vinculados a esta carrera."
+                                actions={false}
+                                disableScroll={false}
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </AuthenticatedLayout>
