@@ -31,6 +31,7 @@ class CoordinadorDashboard implements DashboardStrategy
             $mapaCurricular = $this->getResumenMapaCurricular($selectedCarreraId);
             $coberturaPorAño = $this->getCoberturaPorAño($selectedCarreraId);
             $equipoDocenteCarrera = $this->getEquipoDocenteCarrera($selectedCarreraId);
+            $cargaHorariaDelPlanPorAño = $this->getCargaHorariaDelPlanPorAño($selectedCarreraId);
         }
 
         return Inertia::render('Gestion/DashboardCoordinador', [
@@ -39,7 +40,8 @@ class CoordinadorDashboard implements DashboardStrategy
             'selectedCarreraId' => $selectedCarreraId ? (int) $selectedCarreraId : null,
             'mapaCurricular' => $mapaCurricular,
             'coberturaPorAño' => $coberturaPorAño,
-            'equipoDocenteCarrera' => $equipoDocenteCarrera, // Ya no es lazy, es data directa
+            'equipoDocenteCarrera' => $equipoDocenteCarrera, 
+            'cargaHorariaPlan' => $cargaHorariaDelPlanPorAño,
         ]);
     }
 
@@ -164,6 +166,56 @@ class CoordinadorDashboard implements DashboardStrategy
             })->values()
         ];
     }
+
+    private function getCargaHorariaDelPlanPorAño($carreraId)
+    {
+        $carrera = Carrera::with([
+            'planActual.materias.comisiones.dictas'
+        ])->findOrFail($carreraId);
+
+        $plan = $carrera->planActual;
+        if (!$plan) return null;
+
+        $materiasAgrupadas = $plan->materias->map(function ($materia) {
+            $cuat = $materia->cuatrimestre;
+            // Corrección de lógica de año
+            $año = ($materia->regimen == 'cuatrimestral') ? ceil($cuat / 2) : $cuat;
+
+            $comisionesData = $materia->comisiones->map(function($comision) {
+                // Sumamos las horas que los docentes efectivamente tienen frente al aula
+                $horasAsignadas = $comision->dictas->sum('horas_frente_aula');
+                
+                // Definimos si se cumple (puedes ajustar la lógica si deben ser exactas)
+                $estaCubierta = $horasAsignadas >= $comision->horas_totales;
+
+                return [
+                    'nombre' => $comision->nombre,
+                    'horas_teoricas' => $comision->horas_teoricas,
+                    'horas_practicas' => $comision->horas_practicas,
+                    'horas_totales_requeridas' => $comision->horas_totales,
+                    'horas_asignadas_real' => $horasAsignadas,
+                    'es_valida' => $estaCubierta,
+                    'deficit' => $comision->horas_totales - $horasAsignadas
+                ];
+            });
+
+            return [
+                'id' => $materia->id,
+                'nombre' => $materia->nombre,
+                'año' => $año,
+                'cuatrimestre' => $cuat,
+                'comisiones' => $comisionesData,
+                // La materia está OK solo si todas sus comisiones cubren las horas
+                'horas_ok' => $comisionesData->every('es_valida')
+            ];
+        })->groupBy('año');
+
+        return [
+            'plan_nombre' => $plan->nombre,
+            'años' => $materiasAgrupadas
+        ];
+    }
+
 
     private function determinarEstadoEvolucionado($materia)
     {

@@ -3,6 +3,7 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import KPICard from '@/Components/Dashboard/KPICard';
 import StatusIndicator from '@/Components/Dashboard/StatusIndicator';
+
 import DataTable from '@/Components/DataTable';
 export default function DashboardCoordinador({
     user,
@@ -11,6 +12,7 @@ export default function DashboardCoordinador({
     mapaCurricular, // Info de getResumenMapaCurricular
     coberturaPorAño,
     equipoDocenteCarrera,
+    cargaHorariaPlan,
 }) {
     const [currentTab, setCurrentTab] = useState('resumen');
 
@@ -31,6 +33,7 @@ export default function DashboardCoordinador({
         { id: 'resumen', label: 'Mapa Curricular' },
         { id: 'coberturaPorAño', label: 'Cobertura Docentes por Año' },
         { id: 'equipoDocenteCarrera', label: 'Equipo Docente', badge: 0 },
+        { id: 'cargaHorariaPlan', label: 'Carga Horaria' },
     ];
 
     const columnsResumen = [
@@ -202,7 +205,6 @@ export default function DashboardCoordinador({
                         </div>
                     )}
 
-                    {/* OTROS TABS (VACÍOS POR AHORA) */}
                     {currentTab === 'coberturaPorAño' && (
                         <div className="space-y-8">
                             {Object.entries(coberturaPorAño.años).map(([año, materias]) => (
@@ -279,6 +281,76 @@ export default function DashboardCoordinador({
                                 actions={false}
                                 disableScroll={false}
                             />
+                        </div>
+                    )}
+                    {currentTab === 'cargaHorariaPlan' && (
+                        <div className="space-y-10">
+                            {Object.entries(cargaHorariaPlan.años).map(([año, materias]) => (
+                                <div key={año} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+                                    <div className="bg-indigo-600 px-6 py-3">
+                                        <h3 className="text-white font-bold text-lg">{año}º Año</h3>
+                                    </div>
+
+                                    <div className="p-6 grid grid-cols-1 xl:grid-cols-2 gap-8">
+                                        {materias.map((materia) => (
+                                            <div key={materia.id} className={`border-l-4 rounded-r-lg p-5 shadow-sm ${materia.horas_ok ? 'border-green-500 bg-green-50/30' : 'border-amber-500 bg-amber-50/30'}`}>
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div>
+                                                        <h4 className="font-bold text-gray-900 text-lg leading-tight">{materia.nombre}</h4>
+                                                        <p className="text-xs text-gray-500 uppercase tracking-wide">Cuatrimestre: {materia.cuatrimestre}º</p>
+                                                    </div>
+                                                    {materia.horas_ok ? 
+                                                        <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg> : 
+                                                        <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                        </svg>
+                                                    }
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    {materia.comisiones.map((com, cIdx) => (
+                                                        <div key={cIdx} className="bg-white border border-gray-200 rounded-lg p-4">
+                                                            <div className="flex justify-between items-center mb-2">
+                                                                <span className="text-sm font-bold text-slate-700">{com.nombre}</span>
+                                                                <span className={`text-xs font-bold px-2 py-1 rounded ${com.es_valida ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                                    {com.horas_asignadas_real} / {com.horas_totales_requeridas} hs
+                                                                </span>
+                                                            </div>
+
+                                                            {/* Barra de Progreso de Horas */}
+                                                            <div className="w-full bg-gray-100 rounded-full h-2.5 mb-2">
+                                                                <div 
+                                                                    className={`h-2.5 rounded-full transition-all ${com.es_valida ? 'bg-green-500' : 'bg-amber-500'}`} 
+                                                                    style={{ width: `${Math.min((com.horas_asignadas_real / com.horas_totales_requeridas) * 100, 100)}%` }}
+                                                                ></div>
+                                                            </div>
+
+                                                            <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-500">
+                                                                <div className="flex justify-between border-b border-gray-50 pb-1">
+                                                                    <span>Teóricas:</span>
+                                                                    <span className="font-medium text-gray-700">{com.horas_teoricas}h</span>
+                                                                </div>
+                                                                <div className="flex justify-between border-b border-gray-50 pb-1">
+                                                                    <span>Prácticas:</span>
+                                                                    <span className="font-medium text-gray-700">{com.horas_practicas}h</span>
+                                                                </div>
+                                                            </div>
+
+                                                            {!com.es_valida && com.deficit > 0 && (
+                                                                <p className="mt-2 text-[10px] text-red-600 font-semibold italic">
+                                                                    * Faltan cubrir {com.deficit} horas frente al aula.
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
