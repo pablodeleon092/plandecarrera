@@ -17,7 +17,7 @@ class DashboardFactory
             'Secretaría académica'  => new SecretariaDashboard(),
             'Director de instituto' => new DirectorDashboard(),
             'Coordinador académico' => new CoordinadorAcademicoDashboard(),
-            'Coordinador de carrera' => new CoordinadorDashboard(),
+            'Coordinador de Carrera' => new CoordinadorDashboard(),
             'Administrador'          => new DefaultDashboard(),
         };
     }

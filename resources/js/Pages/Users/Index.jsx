@@ -143,6 +143,7 @@ export default function Index({ auth, users }) {
                 <DataTable
                     columns={columns}
                     data={filteredData}
+                    
                     onShow={(user) => router.visit(route('users.show', user.id))}
                     onEdit={canEditusers
                         ? (user) => router.visit(route('users.edit', user.id))

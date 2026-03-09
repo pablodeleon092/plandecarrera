@@ -23,6 +23,8 @@ class Docente extends Model
         'email',
     ];
 
+    protected $appends = ['nombre_completo'];
+
     protected $table = 'docentes';
 
     // Relación con Cargos
@@ -70,6 +72,11 @@ class Docente extends Model
                 });
 
         });
+    }
+
+    public function getNombreCompletoAttribute()
+    {
+        return "{$this->nombre} {$this->apellido}";
     }
 
 }
