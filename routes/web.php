@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\MateriaController;
 use App\Http\Controllers\ComisionController;
+use App\Http\Controllers\PlanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Foundation\Application;
@@ -51,7 +52,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('materias/{materia}/toggle-status', [MateriaController::class, 'toggleStatus'])->name('materias.toggleStatus');
     Route::patch('carreras/{carrera}/toggle-status', [CarreraController::class, 'toggleStatus'])->name('carreras.toggleStatus');
     Route::patch('comisiones/{comision}/toggle-status', [ComisionController::class, 'toggleStatus'])->name('comisiones.toggleStatus');
-
+    //Rutas planes
+    Route::get('/planes/create/{carrera}', [PlanController::class, 'create'])->name('planes.create');
+    Route::post('/planes/store', [PlanController::class, 'store'])->name('planes.store');
+    Route::patch('/planes/{plan}/desactivar', [PlanController::class, 'desactivar'])->name('planes.desactivar');
+    Route::delete('/planes/{plan}', [PlanController::class, 'destroy'])->name('planes.destroy');
 });
 
 Route::get('/test', fn() => Inertia::render('Test'))->name('test');

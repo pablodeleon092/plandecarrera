@@ -49,7 +49,13 @@ class Carrera extends Model
     public function planActual()
     {
         return $this->hasOne(Plan::class, 'carrera_id')
-                    ->whereNull('anio_fin');
+            ->where(function ($query) {
+                $query->whereNull('anio_fin')
+                    ->orWhereYear('anio_fin', '>=', now()->year); // Cambiado a whereYear
+            })
+            ->orderByRaw('anio_fin IS NULL ASC')
+            ->orderBy('anio_fin', 'asc')
+            ->orderBy('anio_comienzo', 'asc');
     }
 
 

@@ -92,17 +92,20 @@ class CarreraController extends Controller
         // Cargamos la relación con instituto (si no viene por defecto)
         $carrera->load([
             'instituto',
+            'planes.materias',
             'planActual.materias'
         ]);
 
-    $materias = $carrera->planActual?->materias()
-        ->orderBy('cuatrimestre')         
-        ->orderBy('nombre', 'desc')        
-        ->get() ?? collect([]);
+        $materias = $carrera->planActual?->materias()
+            ->orderBy('cuatrimestre')         
+            ->orderBy('nombre', 'desc')        
+            ->get() ?? collect([]);
+
+        $planes = $carrera->planes;
 
         return Inertia::render('Carreras/Show', [
             'carrera' => $carrera,
-            'materias' => $materias,
+            'planes' => $planes,
         ]);
     }
 

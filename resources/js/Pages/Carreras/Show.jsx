@@ -7,7 +7,7 @@ import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import DangerButton from '@/Components/Buttons/DangerButton';
 
-export default function Show({ auth, carrera, materias }) {
+export default function Show({ auth, carrera, planes }) {
     const [tab, setTab] = useState('info');
 
     const handleDelete = () => {
@@ -70,13 +70,6 @@ export default function Show({ auth, carrera, materias }) {
 
                                 {/* Botones */}
                                 <div className="flex gap-3">
-                                    <PrimaryButton
-                                        as={Link}
-                                        href={route('carreras.edit', carrera.id)}
-                                    >
-                                        Editar
-                                    </PrimaryButton>
-
                                     <DangerButton
                                         onClick={handleDelete}
                                     >
@@ -123,7 +116,10 @@ export default function Show({ auth, carrera, materias }) {
                             {tab === 'info' ? (
                                 <CarreraInfo carrera={carrera} />
                             ) : (
-                                <CarreraMaterias carrera={carrera} materias={materias} />
+                                <CarreraMaterias 
+                                    carrera={carrera} 
+                                    planes={planes} 
+                                />
                             )}
                         </div>
 
