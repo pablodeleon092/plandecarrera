@@ -7,10 +7,12 @@ import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
 import TableFilters from '@/Components/TableFilters';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
+import { PrinterIcon } from '@heroicons/react/24/outline';
 
-export default function Index({ auth, docentes, flash, filters: initialFilters = {} }) {
+export default function Index({ auth, institutos, carreras, docentes, flash, filters: initialFilters = {} }) {
     const [filters, setFilters] = useState({
         search: initialFilters.search || '',
+        cargos: initialFilters.cargos || '',
         es_activo: initialFilters.es_activo || '',
     });
 
@@ -24,9 +26,13 @@ export default function Index({ auth, docentes, flash, filters: initialFilters =
         });
     };
 
+
     const filterConfig = [
         {
-            key: 'search', label: 'Buscar', type: 'text', value: filters.search, placeholder: 'Buscar por nombre, apellido o legajo...'
+            key: 'search', label: 'Nombre', type: 'text', value: filters.search, placeholder: 'Buscar por nombre, apellido o legajo...'
+        },
+        {
+            key: 'cargos', label: 'Cargo', type: 'text', value: filters.cargos, placeholder: 'Buscar por cargo...'
         },
         {
             key: 'es_activo', label: 'Estado', type: 'select', value: filters.es_activo,
@@ -34,10 +40,39 @@ export default function Index({ auth, docentes, flash, filters: initialFilters =
                 { value: '1', label: 'Activo' },
                 { value: '0', label: 'Inactivo' }
             ]
+        },        
+        {
+            key: 'instituto_id',
+            label: 'Instituto',
+            type: 'select',
+            value: filters.instituto_id,
+            options: institutos.map(inst => ({ value: inst.id.toString(), label: inst.nombre }))
+        },
+        {
+            key: 'carrera_id',
+            label: 'Carrera',
+            type: 'select',
+            value: filters.carrera_id,
+            options: carreras.map(c => ({ value: c.id.toString(), label: c.nombre })),
+            disabled: !filters.instituto_id // Se deshabilita si no hay instituto elegido
+        },
+        {
+            key: 'materia', label: 'Materia', type: 'text', value: filters.materia, placeholder: 'Buscar por materia...'
         }
     ];
 
+    const handleExportarPdf = () => {
 
+        const params = Object.fromEntries(
+            Object.entries(filters).filter(([_, v]) => v !== "" && v !== null && v !== undefined)
+        );
+
+        const queryString = new URLSearchParams(params).toString();
+
+        const url = route('docentes.exportar') + (queryString ? `?${queryString}` : '');
+        window.location.href = url; 
+    };
+    
     const activeFilters = Object.fromEntries(
         Object.entries(filters).filter(([key, value]) => value !== '' && value !== null)
     );
@@ -95,6 +130,16 @@ export default function Index({ auth, docentes, flash, filters: initialFilters =
                             filters={filterConfig}
                             onChange={handleFilterChange}
                         />
+                        <button
+                            onClick={handleExportarPdf}
+                            className="inline-flex items-center px-4 py-2 bg-red-600 border 
+                            border-transparent rounded-md font-semibold 
+                            text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:border-red-900 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150"
+                            title="Exportar lista filtrada a PDF"
+                        >
+                            <PrinterIcon className="w-4 h-4" />
+                            Exportar PDF
+                        </button>
                     </div>
 
                     <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -124,6 +169,29 @@ export default function Index({ auth, docentes, flash, filters: initialFilters =
                                                     </Link>
                                                 )).reduce((prev, curr) => [prev, ', ', curr]) : '—'
                                     )
+                                },
+                                {
+                                    key: 'materias',
+                                    label: 'Materias',
+                                    render: (doc) => {
+                                        if (!doc.dictas) return <span className="text-gray-400">Sin materias</span>;
+                                        const links = doc.dictas.map((dicta) => {
+                                            const materia = dicta.comision?.materia;
+                                            if (!materia) return null;
+                                            return (
+                                                <Link
+                                                    key={materia.id}
+                                                    href={route('materias.show', materia.id)} 
+                                                    className="text-indigo-600 hover:underline"
+                                                >
+                                                    {materia.nombre}
+                                                </Link>
+                                            );
+                                        }).filter(Boolean); 
+                                        return links.length > 0 
+                                            ? links.reduce((prev, curr) => [prev, ', ', curr])
+                                            : <span className="text-gray-400">Sin materias</span>;
+                                    }
                                 }
                             ]}
                             data={docentes.data}

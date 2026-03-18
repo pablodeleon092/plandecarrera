@@ -36,10 +36,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rutas para la gestión de Docentes
+    Route::get('/docentes/exportar', [DocenteController::class, 'exportar'])->name('docentes.exportar');
     Route::resource('docentes', DocenteController::class);
     Route::resource('cargos', CargoController::class);
-
-
     Route::get('docentes/{docente}/cargo/create', [DocenteController::class, 'createCargo'])->name('docentes.cargo.create');
     Route::post('docentes/{docente}/cargo', [DocenteController::class, 'addCargo'])->name('docentes.cargo.store');
     Route::patch('docentes/{docente}/toggle-status', [DocenteController::class, 'toggleStatus'])->name('docentes.toggleStatus');

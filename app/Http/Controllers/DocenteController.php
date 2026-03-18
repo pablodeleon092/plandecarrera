@@ -2,9 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Docente;
 use App\Models\Dedicacion;
+use App\Models\Materia;
+use App\Models\Instituto;
+use App\Models\Carrera;
+use App\Models\User;
+use App\Models\Docente;
+use App\Models\Dicta;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Services\ReportService;
 use App\Http\Requests\StoreDocenteRequest;
 use Inertia\Inertia;
 
@@ -15,38 +22,71 @@ class DocenteController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Docente::query();
+        $query = Docente::query()->with(['cargos.dedicacion']);
 
-        // Aplicar filtro de búsqueda
-        if ($request->has('search') && $request->input('search')) {
+        if ($request->filled('search')) {
             $search = $request->input('search');
-            // Limpiar la búsqueda de comas y espacios extra, y dividir en términos
             $searchTerms = array_filter(explode(' ', str_replace(',', ' ', $search)));
 
             $query->where(function ($q) use ($searchTerms) {
                 foreach ($searchTerms as $term) {
-                    // Asegurarse de que CADA término de búsqueda exista en alguna de las columnas
-                    $q->where(fn($subQuery) => $subQuery->where('nombre', 'ilike', "%{$term}%")
-                        ->orWhere('apellido', 'ilike', "%{$term}%")
-                        ->orWhere('legajo', 'like', "%{$term}%"));
+                    $q->where(function ($sub) use ($term) {
+                        $sub->where('nombre', 'ilike', "%{$term}%")
+                            ->orWhere('apellido', 'ilike', "%{$term}%")
+                            ->orWhere('legajo', 'like', "%{$term}%");
+                    });
                 }
             });
         }
 
-        // Aplicar filtro de estado
-        if ($request->filled('es_activo')) {
-            // El valor de es_activo será '1' para activos o '0' para inactivos.
-            // Lo convertimos a booleano para la consulta.
-            $query->where('es_activo', $request->input('es_activo') == '1');
+        if ($request->filled('cargos')) {
+            $cargoTerm = $request->input('cargos');
+            $query->whereHas('cargos', function ($q) use ($cargoTerm) {
+                $q->where('nombre', 'ilike', "%{$cargoTerm}%");
+            });
         }
 
-        $docentes = $query->with('cargos')
-            ->orderBy('apellido')
-            ->paginate(15)
-            ->withQueryString();
+        if ($request->filled('es_activo')) {
+            $query->where('es_activo', $request->boolean('es_activo'));
+        }
+
+        if ($request->filled('instituto_id') && $request->filled('carrera_id')) {
+            $query->deInstitutoYCarrera($request->instituto_id, $request->carrera_id);
+            
+        } else if ($request->filled('instituto_id'))
+        {
+            $query->deInstituto($request->instituto_id);
+        }
+
+        if ($request->filled('materia')) {
+            $materiaTerm = $request->input('materia');
+            $query->whereHas('dictas.comision.materia', function ($q) use ($materiaTerm) {
+                $q->where('nombre', 'ilike', "%{$materiaTerm}%");
+            });
+        }
+
+        $docentes = $query->with([
+                'cargos',
+                'dictas.comision.materia' 
+        ])
+        ->orderBy('apellido')
+        ->paginate(15)
+        ->withQueryString();
+
+        $user = Auth::user();
+        $institutosDisponibles = $this->getInstitutosPorRol($user);
+        $carreras = collect();
+        
+        if ($request->filled('instituto_id')) {
+            $carreras = Carrera::where('instituto_id', $request->instituto_id)
+                ->orderBy('nombre')
+                ->get(['id', 'nombre']);
+        }
 
         return Inertia::render('Docentes/Index', [
             'docentes' => $docentes,
+            'institutos' => $institutosDisponibles,
+            'carreras' => $carreras,
             'filters' => $request->only(['search', 'es_activo']),
             'flash' => [
                 'success' => session('success'),
@@ -159,4 +199,113 @@ class DocenteController extends Controller
 
         return back();
     }
+
+    private function getDocentesFiltrados($selectedInstitutoId, $selectedCarreraId)
+    {
+        if (!$selectedInstitutoId) {
+            return collect();
+        }
+
+        $query = Docente::query();
+
+        if ($selectedCarreraId && $selectedCarreraId !== 'all') {
+            $query->deInstitutoYCarrera($selectedInstitutoId, $selectedCarreraId);
+        } else {
+            $query->deInstituto($selectedInstitutoId);
+        }
+
+        $docentes = $query->with([
+            'cargos.dedicacion',
+            'comisiones.materia',
+        ])
+            ->orderBy('apellido')
+            ->paginate(15)
+            ->withQueryString();
+
+        $docentes->through(function ($doc) {
+
+            return [
+                'id' => $doc->id,
+                'nombre' => $doc->nombre . ' ' . $doc->apellido,
+                'modalidad' => $doc->modalidad_desempeño,
+                'horas' => $doc->carga_horaria,
+
+                'cargos' => $doc->cargos->map(function ($cargo) {
+                    return [
+                        'nombre' => $cargo->nombre,
+                        'dedicacion' => $cargo->dedicacion?->nombre,
+                    ];
+                })->values(),
+
+                'materias' => $doc->comisiones->map(fn($c) => $c->materia->nombre)
+                    ->unique()
+                    ->values(),
+            ];
+        });
+
+        return $docentes;
+    }
+    
+    private function getInstitutosPorRol(User $user)
+    {
+        $rol = $user->cargo;
+
+        if (in_array($rol, ['Administrador', 'Administrativo de Secretaria Academica'])) {
+
+            return Instituto::with('carreras.planActual')->get(['id', 'nombre']);
+
+        } elseif (in_array($rol, ['Administrativo de instituto', 'Director de instituto', 'Coordinador Academico', 'Consejero'])) {
+
+            $user->instituto->load([
+                'carreras' => function ($query) {
+                    $query->with('planActual');
+                }
+            ]);
+            return collect([$user->instituto]);
+
+        } elseif ($rol === 'Coordinador de Carrera') {
+
+            $user->instituto->load([
+                'carreras' => function ($query) use ($user) {
+
+                    $carreraIds = $user->carreras()->pluck('carrera_id');
+
+                    $query->whereIn('id', $carreraIds)
+                        ->with('planActual');
+                }
+            ]);
+
+
+
+            return collect([$user->instituto]);
+
+        } else {
+
+            return collect();
+        }
+    }
+
+    public function exportar(Request $request, ReportService $reportService)
+    {
+        try {
+          
+            $path = $reportService->generarDocentesPdf($request);
+
+  
+            if (!$path || !file_exists($path)) {
+                return back()->with('error', 'Error: El motor Jasper no generó el archivo. Verifique la configuración de Java en el servidor.');
+            }
+
+     
+            return response()->download($path, 'mapa_de_carreras.pdf', [
+                'Content-Type' => 'application/pdf',
+            ])->deleteFileAfterSend(true); 
+            
+        } catch (\Exception $e) {
+            \Log::error("Error en reporte Jasper: " . $e->getMessage());
+            
+            return back()->with('error', 'Error en el reporte: ' . $e->getMessage());
+        }
+    }  
+    
 }
