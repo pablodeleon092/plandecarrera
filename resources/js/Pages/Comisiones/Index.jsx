@@ -5,6 +5,7 @@ import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
 import TableFilters from '@/Components/TableFilters';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
+import KPICard from '@/Components/Dashboard/KPICard';
 
 export default function Index({ auth, comisiones, modalidades, sedes, flash, filters: initialFilters = {} }) {
     const [filters, setFilters] = useState({
@@ -28,6 +29,14 @@ export default function Index({ auth, comisiones, modalidades, sedes, flash, fil
             preserveScroll: true
         });
     };
+
+    const activeFilters = Object.fromEntries(
+        Object.entries(filters).filter(([key, value]) => value !== '' && value !== null)
+    );
+
+    // Calcular totales para las tarjetas de resumen
+    const totalComisiones = comisiones.meta?.total || comisiones.data.length;
+    const comisionesActivas = useMemo(() => comisiones.data.filter(c => c.estado).length, [comisiones.data]);
 
     const filterConfig = [
         {
@@ -177,11 +186,17 @@ export default function Index({ auth, comisiones, modalidades, sedes, flash, fil
 
                     <PaginatorButtons meta={comisiones?.meta} paginator={comisiones} routeName={'comisiones.index'} routeParams={activeFilters} />
 
-                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Total Comisiones</p>
-                            <p className="text-2xl font-bold text-gray-900">{comisiones.meta?.total || comisiones.data.length}</p>
-                        </div>
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <KPICard
+                            title="Total Comisiones"
+                            value={totalComisiones}
+                            status="neutral"
+                        />
+                        <KPICard
+                            title="Comisiones Activas"
+                            value={comisionesActivas}
+                            status="success"
+                        />
                     </div>
                 </div>
             </div>

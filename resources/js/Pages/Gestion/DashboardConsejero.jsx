@@ -35,7 +35,6 @@ export default function DashboardConsejero({
         { id: 'resumen', label: 'Resumen' },
         { id: 'carreras', label: 'Carreras' },
         { id: 'docentes', label: 'Docentes' },
-        { id: 'alertas', label: 'Alertas', badge: alertasSobrecarga.length + alertasSinCobertura.length },
         { id: 'tendencias', label: 'Tendencias' },
     ];
 
@@ -214,8 +213,8 @@ export default function DashboardConsejero({
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <span className={`text-sm font-semibold ${carrera.porcentajeCobertura >= 90 ? 'text-green-600' :
-                                                            carrera.porcentajeCobertura >= 70 ? 'text-yellow-600' :
-                                                                'text-red-600'
+                                                        carrera.porcentajeCobertura >= 70 ? 'text-yellow-600' :
+                                                            'text-red-600'
                                                         }`}>
                                                         {carrera.porcentajeCobertura}%
                                                     </span>

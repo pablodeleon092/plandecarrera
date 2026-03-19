@@ -7,7 +7,6 @@ import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import DangerButton from '@/Components/Buttons/DangerButton';
 
 // Nota: Se asume que recibes las props: auth, coordinador, carrerasAsignadas, carrerasRestantes, flash.
-// Tu componente original usaba 'plan' y 'carrera', he asumido que necesitas 'coordinador' para la ruta PUT.
 export default function AsignarCarrerasCoordinador({ auth, coordinador, carrerasAsignadas, carrerasRestantes, flash }) {
 
     // 1. RENOMBRAR ESTADOS
