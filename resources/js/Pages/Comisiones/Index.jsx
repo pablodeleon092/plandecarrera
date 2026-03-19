@@ -123,11 +123,6 @@ export default function Index({ auth, comisiones, modalidades, sedes, flash, fil
         }
     ];
 
-    const activeFilters = Object.fromEntries(
-        Object.entries(filters).filter(([key, value]) => value !== '' && value !== null)
-    );
-
-
     const handleDelete = (comision) => {
         if (confirm('¿Estás seguro de eliminar esta comision?')) {
             router.delete(route('comisiones.destroy', comision.id));
