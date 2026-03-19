@@ -49,15 +49,12 @@ class Docente extends Model
         //  trae el ID de la relación dicta
     }
 
-    public function scopeDeInstitutoYCarrera($query, $institutoId, $carreraId)
+    public function scopeDeCarrera($query, $carreraId)
     {
-        return $query->whereHas('comisiones.materia.planes', function ($q) use ($institutoId, $carreraId) {
+        return $query->whereHas('comisiones.materia.planes', function ($q) use ($carreraId) {
 
             $q->whereNull('anio_fin')               // plan activo
-                ->where('carrera_id', $carreraId)     // misma carrera
-                ->whereHas('carrera', function ($c) use ($institutoId) {
-                    $c->where('instituto_id', $institutoId); // instituto al que pertenece la carrera
-                });
+                ->where('carrera_id', $carreraId);
 
         });
     }

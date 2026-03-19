@@ -12,29 +12,45 @@ class ReportService
         $input = storage_path('app/reports/reporte_docentes.jrxml');
         $output = storage_path('app/reports/pdf/reporte_' . time());
 
+        // Obtenemos el array de filtros que viene de la URL
+        $filters = $request->input('filters', []);
         $params = [];
 
-        // Solo agregamos al array si REALMENTE hay un ID
+        // 1. Filtros fijos (si los sigues usando fuera del array dinámico)
         if ($request->filled('instituto_id')) {
             $params['ID_INSTITUTO'] = (int)$request->query('instituto_id');
         }
-
         if ($request->filled('carrera_id')) {
             $params['ID_CARRERA'] = (int)$request->query('carrera_id');
         }
 
-        // Para los filtros de texto (ILIKE)
-        if ($request->filled('cargos')) {
-            $params['FILTRO_CARGO'] = $request->query('cargos');
-        }
+        // 2. Mapeo del array dinámico de DynamicFilters
+        foreach ($filters as $f) {
+            $field = $f['field'] ?? null;
+            $operator = $f['operator'] ?? null;
+            $value = $f['value'] ?? null;
 
-        if ($request->filled('materia')) {
-            $params['FILTRO_MATERIA'] = $request->query('materia');
-        }        
+            if (!$field || !$operator) continue;
+
+            $paramBase = $this->getParamName($field);
+
+            if (!empty($value) || $value === '0' || $operator === 'between') {
+                
+                $params["OP_{$paramBase}"] = $operator;
+
+                if ($operator === 'between' && is_array($value)) {
+                    if (!empty($value['min'])) $params["MIN_{$paramBase}"] = $value['min'];
+                    if (!empty($value['max'])) $params["MAX_{$paramBase}"] = $value['max'];
+                } else {
+                    $params["VALOR_{$paramBase}"] = $value;
+                }
+            }
+        } 
+        #dd($params);
         $options = [
                 'format' => ['pdf'],
                 'locale' => 'es_AR',
-                'params' => $params, // <--- Este array ahora puede estar vacío []
+                'params' => $params, 
                 'db_connection' => [
                     'driver'   => 'postgres',
                     'username' => env('DB_USERNAME'),
@@ -48,5 +64,20 @@ class ReportService
         $jasper->process($input, $output, $options)->execute();
 
         return $output . '.pdf';
+    }
+
+    private function getParamName($field)
+    {
+        $map = [
+            'carga_horaria'           => 'HORAS',
+            'legajo'                  => 'LEGAJO',
+            'cargos.nombre'           => 'CARGO',
+            'cargos.dedicacion.id' => 'DEDICACION',
+            'modalidad_desempeño'     => 'MODALIDAD',
+            'dictas.comision.materia.nombre' => 'MATERIA',
+            'nombre'                  => 'NOMBRE'
+        ];
+
+        return $map[$field] ?? strtoupper($field);
     }
 }

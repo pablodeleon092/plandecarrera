@@ -8,10 +8,12 @@ use App\Models\Instituto;
 use App\Models\Carrera;
 use App\Models\User;
 use App\Models\Docente;
+use App\Models\Dedicaciones;
 use App\Models\Dicta;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Services\ReportService;
+use App\Services\QueryFilter;
 use App\Http\Requests\StoreDocenteRequest;
 use Inertia\Inertia;
 
@@ -22,48 +24,14 @@ class DocenteController extends Controller
      */
     public function index(Request $request)
     {
+
+        $queryFilter = new QueryFilter;
+
+        $filters = $request->all();
+
         $query = Docente::query()->with(['cargos.dedicacion']);
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $searchTerms = array_filter(explode(' ', str_replace(',', ' ', $search)));
-
-            $query->where(function ($q) use ($searchTerms) {
-                foreach ($searchTerms as $term) {
-                    $q->where(function ($sub) use ($term) {
-                        $sub->where('nombre', 'ilike', "%{$term}%")
-                            ->orWhere('apellido', 'ilike', "%{$term}%")
-                            ->orWhere('legajo', 'like', "%{$term}%");
-                    });
-                }
-            });
-        }
-
-        if ($request->filled('cargos')) {
-            $cargoTerm = $request->input('cargos');
-            $query->whereHas('cargos', function ($q) use ($cargoTerm) {
-                $q->where('nombre', 'ilike', "%{$cargoTerm}%");
-            });
-        }
-
-        if ($request->filled('es_activo')) {
-            $query->where('es_activo', $request->boolean('es_activo'));
-        }
-
-        if ($request->filled('instituto_id') && $request->filled('carrera_id')) {
-            $query->deInstitutoYCarrera($request->instituto_id, $request->carrera_id);
-            
-        } else if ($request->filled('instituto_id'))
-        {
-            $query->deInstituto($request->instituto_id);
-        }
-
-        if ($request->filled('materia')) {
-            $materiaTerm = $request->input('materia');
-            $query->whereHas('dictas.comision.materia', function ($q) use ($materiaTerm) {
-                $q->where('nombre', 'ilike', "%{$materiaTerm}%");
-            });
-        }
+        $queryFilter->apply($query, $filters);
 
         $docentes = $query->with([
                 'cargos',
@@ -75,18 +43,20 @@ class DocenteController extends Controller
 
         $user = Auth::user();
         $institutosDisponibles = $this->getInstitutosPorRol($user);
-        $carreras = collect();
         
-        if ($request->filled('instituto_id')) {
-            $carreras = Carrera::where('instituto_id', $request->instituto_id)
-                ->orderBy('nombre')
-                ->get(['id', 'nombre']);
-        }
+        $ids = $institutosDisponibles->pluck('id');
+        
+        $carreras = Carrera::whereIn('instituto_id', $ids)
+        ->orderBy('nombre')
+        ->get(['id', 'nombre']);
+
+        $dedicaciones = Dedicaciones::all();
 
         return Inertia::render('Docentes/Index', [
             'docentes' => $docentes,
             'institutos' => $institutosDisponibles,
             'carreras' => $carreras,
+            'dedicaciones' => $dedicaciones,
             'filters' => $request->only(['search', 'es_activo']),
             'flash' => [
                 'success' => session('success'),
@@ -199,52 +169,6 @@ class DocenteController extends Controller
 
         return back();
     }
-
-    private function getDocentesFiltrados($selectedInstitutoId, $selectedCarreraId)
-    {
-        if (!$selectedInstitutoId) {
-            return collect();
-        }
-
-        $query = Docente::query();
-
-        if ($selectedCarreraId && $selectedCarreraId !== 'all') {
-            $query->deInstitutoYCarrera($selectedInstitutoId, $selectedCarreraId);
-        } else {
-            $query->deInstituto($selectedInstitutoId);
-        }
-
-        $docentes = $query->with([
-            'cargos.dedicacion',
-            'comisiones.materia',
-        ])
-            ->orderBy('apellido')
-            ->paginate(15)
-            ->withQueryString();
-
-        $docentes->through(function ($doc) {
-
-            return [
-                'id' => $doc->id,
-                'nombre' => $doc->nombre . ' ' . $doc->apellido,
-                'modalidad' => $doc->modalidad_desempeño,
-                'horas' => $doc->carga_horaria,
-
-                'cargos' => $doc->cargos->map(function ($cargo) {
-                    return [
-                        'nombre' => $cargo->nombre,
-                        'dedicacion' => $cargo->dedicacion?->nombre,
-                    ];
-                })->values(),
-
-                'materias' => $doc->comisiones->map(fn($c) => $c->materia->nombre)
-                    ->unique()
-                    ->values(),
-            ];
-        });
-
-        return $docentes;
-    }
     
     private function getInstitutosPorRol(User $user)
     {
@@ -288,9 +212,8 @@ class DocenteController extends Controller
     public function exportar(Request $request, ReportService $reportService)
     {
         try {
-          
+            
             $path = $reportService->generarDocentesPdf($request);
-
   
             if (!$path || !file_exists($path)) {
                 return back()->with('error', 'Error: El motor Jasper no generó el archivo. Verifique la configuración de Java en el servidor.');
