@@ -42,13 +42,9 @@ class DocenteController extends Controller
         ->withQueryString();
 
         $user = Auth::user();
-        $institutosDisponibles = $this->getInstitutosPorRol($user);
+        $institutosDisponibles = $user->getInstitutosAutorizados();
         
-        $ids = $institutosDisponibles->pluck('id');
-        
-        $carreras = Carrera::whereIn('instituto_id', $ids)
-        ->orderBy('nombre')
-        ->get(['id', 'nombre']);
+        $carreras = $institutosDisponibles->pluck('carreras');
 
         $dedicaciones = Dedicaciones::all();
 
@@ -169,44 +165,6 @@ class DocenteController extends Controller
         return back();
     }
     
-    private function getInstitutosPorRol(User $user)
-    {
-        $rol = $user->cargo;
-
-        if (in_array($rol, ['Administrador', 'Administrativo de Secretaria Academica'])) {
-
-            return Instituto::with('carreras.planActual')->get(['id', 'nombre']);
-
-        } elseif (in_array($rol, ['Administrativo de instituto', 'Director de instituto', 'Coordinador Academico', 'Consejero'])) {
-
-            $user->instituto->load([
-                'carreras' => function ($query) {
-                    $query->with('planActual');
-                }
-            ]);
-            return collect([$user->instituto]);
-
-        } elseif ($rol === 'Coordinador de Carrera') {
-
-            $user->instituto->load([
-                'carreras' => function ($query) use ($user) {
-
-                    $carreraIds = $user->carreras()->pluck('carrera_id');
-
-                    $query->whereIn('id', $carreraIds)
-                        ->with('planActual');
-                }
-            ]);
-
-
-
-            return collect([$user->instituto]);
-
-        } else {
-
-            return collect();
-        }
-    }
 
     public function exportar(Request $request, ReportService $reportService)
     {
