@@ -25,11 +25,11 @@ class DocenteController extends Controller
     public function index(Request $request)
     {
 
+        $query = Docente::query()->with(['cargos.dedicacion']);
+
         $queryFilter = new QueryFilter;
 
         $filters = $request->all();
-
-        $query = Docente::query()->with(['cargos.dedicacion']);
 
         $queryFilter->apply($query, $filters);
 

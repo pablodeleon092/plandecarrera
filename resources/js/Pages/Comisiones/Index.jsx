@@ -3,25 +3,11 @@ import { Head, Link, router } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
 import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
-import TableFilters from '@/Components/TableFilters';
+import GestionComisiones from '@/Components/Filters/GestionComisiones';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 
-export default function Index({ auth, comisiones, modalidades, sedes, flash, filters: initialFilters = {} }) {
-    const [filters, setFilters] = useState({
-        search: initialFilters.search || '',
-        modalidad: initialFilters.modalidad || '',
-        sede: initialFilters.sede || ''
-    });
+export default function Index({ auth, comisiones, carreras, institutos, flash}) {
 
-    const handleFilterChange = (key, value) => {
-        const newFilters = { ...filters, [key]: value };
-        setFilters(newFilters);
-        router.get(route('comisiones.index'), newFilters, {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-        });
-    };
 
     const handleToggleStatus = (comision) => {
         router.patch(route('comisiones.toggleStatus', comision), {}, {
@@ -29,29 +15,6 @@ export default function Index({ auth, comisiones, modalidades, sedes, flash, fil
         });
     };
 
-    const filterConfig = [
-        {
-            key: 'search',
-            label: 'Buscar',
-            type: 'text',
-            value: filters.search,
-            placeholder: 'Buscar por codigo o materia...'
-        },
-        {
-            key: 'modalidad',
-            label: 'Modalidad',
-            type: 'select',
-            value: filters.modalidad,
-            options: modalidades.map(m => ({ value: m, label: m }))
-        },
-        {
-            key: 'sede',
-            label: 'Sede',
-            type: 'select',
-            value: filters.sede,
-            options: sedes.map(s => ({ value: s, label: s }))
-        }
-    ];
 
     const columns = [
         {
@@ -114,11 +77,6 @@ export default function Index({ auth, comisiones, modalidades, sedes, flash, fil
         }
     ];
 
-    const activeFilters = Object.fromEntries(
-        Object.entries(filters).filter(([key, value]) => value !== '' && value !== null)
-    );
-
-
     const handleDelete = (comision) => {
         if (confirm('¿Estás seguro de eliminar esta comision?')) {
             router.delete(route('comisiones.destroy', comision.id));
@@ -149,10 +107,11 @@ export default function Index({ auth, comisiones, modalidades, sedes, flash, fil
                     <ListHeader
                         title="Listado de Comisiones"
                     />
+ 
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
-                        <TableFilters
-                            filters={filterConfig}
-                            onChange={handleFilterChange}
+                        <GestionComisiones
+                            institutos = {institutos}
+                            carreras = {carreras}
                         />
                     </div>
 
@@ -175,7 +134,7 @@ export default function Index({ auth, comisiones, modalidades, sedes, flash, fil
                         />
                     </div>
 
-                    <PaginatorButtons meta={comisiones?.meta} paginator={comisiones} routeName={'comisiones.index'} routeParams={activeFilters} />
+                    <PaginatorButtons meta={comisiones?.meta} paginator={comisiones} routeName={'comisiones.index'}/>
 
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="bg-white rounded-lg shadow p-4">

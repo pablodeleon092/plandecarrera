@@ -148,6 +148,14 @@ class Comision extends Model
         });
     }
 
+    public function scopeByCarrera($query, $carreraId)
+    {
+        return $query->whereHas('materia', function ($q) use ($carreraId) {
+            // Invoca el scope 'ByCarreras' del modelo Materia
+            $q->byCarrera ($carreraIds);
+        });
+    }
+
     public function estaCompleta()
     {
         // Cargamos los nombres de los cargos de los dictas asociados

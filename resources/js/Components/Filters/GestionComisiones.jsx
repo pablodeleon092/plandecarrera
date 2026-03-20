@@ -3,14 +3,23 @@ import { router } from '@inertiajs/react';
 import DynamicFilters from '@/Components/Filters/DynamicFilters';
 import { PrinterIcon } from '@heroicons/react/24/outline';
 
-export default function gestionMaterias ({institutos, carreras}) {
+export default function gestionComisiones ({institutos, carreras}) {
     // Definimos qué campos pueden ser filtrados
     const availableFields = [
         { key: 'nombre', label: 'Nombre', type: 'string' },
         { key: 'codigo', label: 'Codigo', type: 'string' },
+        { key: 'materia.nombre', label: 'Materia', type: 'string' },
         { key: 'estado', label: 'Estado', type: 'select', 
           options: [{ value: '1', label: 'Activo' }, { value: '0', label: 'Inactivo' }] 
         },
+        { key: 'turno', label: 'Turno', type: 'select', 
+          options: [{ value: 'Tarde', label: 'Tarde' }, { value: 'Mañana', label: 'Mañana' }] 
+        },
+        { key: 'modalidad', label: 'Modalidad', type: 'select', 
+          options: [{ value: 'presencial', label: 'Presencial' }, 
+                    { value: 'virtual', label: 'Virtual' }, 
+                    { value: 'mixta', label: 'Mixta' }] 
+        },                   
         { 
             key: 'regimen', 
             label: 'Regimen', 
@@ -20,13 +29,10 @@ export default function gestionMaterias ({institutos, carreras}) {
                 { value: 'Cuatrimestral', label: 'cuatrimestal' }
             ]
         },
-        { key: 'sede', label: 'Sede', type: 'select', 
-          options: [{ value: 'Ushuaia', label: 'Ushuaia' }, { value: 'Rio Grande', label: 'Rio grande' }] 
-        },
-        { key: 'cuatrimestre', label: 'Cuatrimestre', type: 'select', 
-          options: [{ value: '1ro', label: '1ro' }, { value: '2do', label: '2do' }] 
-        },        
-        { key: 'horas_semanales', label: 'Horas Semanales', type: 'number' },
+        { key: 'anio', label: 'Año', type: 'number' },
+        { key: 'horas_teoricas', label: 'Horas Teoricas', type: 'number' },
+        { key: 'horas_practicas', label: 'Horas Practicas', type: 'number' },
+        { key: 'horas_totales', label: 'Horas Totales', type: 'number' },
         { key: 'by_Instituto', label: 'Instituto', type: 'select', 
           options: institutos.map(i => ({ value: i.id.toString(), label: i.nombre }))
         },
@@ -39,7 +45,7 @@ export default function gestionMaterias ({institutos, carreras}) {
 
     const handleApplyFilters = (key, value) => {
         const newFilters = { ...activeFilters, [key]: value };
-        router.get(route('materias.index'), 
+        router.get(route('comisiones.index'), 
         newFilters, {
             preserveScroll: true,
             preserveState: true,

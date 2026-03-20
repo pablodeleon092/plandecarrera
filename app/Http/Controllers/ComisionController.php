@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Comision;
+use App\Models\User;
 use App\Models\Materia;
 use Inertia\Inertia;
+use App\Models\Instituto;
+use App\Models\Carrera;
+use App\Services\QueryFilter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -44,26 +48,11 @@ class ComisionController extends Controller
             $query->whereRaw('1 = 0');
         }
 
+        $queryFilter = new QueryFilter;
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('codigo', 'like', "%$search%")
-                ->orWhereHas('materia', function ($mq) use ($search) {
-                    $mq->where('nombre', 'like', "%$search%");
-                });
-            });
-        }
+        $filters = $request->all();
 
-        if ($request->filled('modalidad')) {
-            $query->where('modalidad', $request->modalidad);
-        }
-
-        if ($request->filled('sede')) {
-            $query->where('sede', $request->sede);
-        }
-
-
+        $queryFilter->apply($query, $filters);
 
         $comisiones = $query
             ->with('materia')
@@ -71,13 +60,18 @@ class ComisionController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-
+        $institutosDisponibles = $this->getInstitutosPorRol($user);
+        
+        $ids = $institutosDisponibles->pluck('id');
+        
+        $carreras = Carrera::whereIn('instituto_id', $ids)
+        ->orderBy('nombre')
+        ->get(['id', 'nombre']);
 
         return Inertia::render('Comisiones/Index', [
             'comisiones' => $comisiones,
-            'filters' => $request->only(['search', 'modalidad', 'sede']),
-            'modalidades' => Comision::select('modalidad')->distinct()->pluck('modalidad'),
-            'sedes' => Comision::select('sede')->distinct()->pluck('sede'),
+            'carreras' => $carreras,
+            'institutos' => $institutosDisponibles
         ]);
     }
 
@@ -247,6 +241,45 @@ class ComisionController extends Controller
 
         return redirect()->route('comisiones.index')
             ->with('success', 'Estado de la comisión actualizado exitosamente.');
+    }
+
+    private function getInstitutosPorRol(User $user)
+    {
+        $rol = $user->cargo;
+
+        if (in_array($rol, ['Administrador', 'Administrativo de Secretaria Academica'])) {
+
+            return Instituto::with('carreras.planActual')->get(['id', 'nombre']);
+
+        } elseif (in_array($rol, ['Administrativo de instituto', 'Director de instituto', 'Coordinador Academico', 'Consejero'])) {
+
+            $user->instituto->load([
+                'carreras' => function ($query) {
+                    $query->with('planActual');
+                }
+            ]);
+            return collect([$user->instituto]);
+
+        } elseif ($rol === 'Coordinador de Carrera') {
+
+            $user->instituto->load([
+                'carreras' => function ($query) use ($user) {
+
+                    $carreraIds = $user->carreras()->pluck('carrera_id');
+
+                    $query->whereIn('id', $carreraIds)
+                        ->with('planActual');
+                }
+            ]);
+
+
+
+            return collect([$user->instituto]);
+
+        } else {
+
+            return collect();
+        }
     }
 
 
