@@ -12,8 +12,6 @@ class Materia extends Model
 
     protected $table = 'materias';
 
-
-
     protected $fillable = [
         'nombre',
         'codigo',
@@ -104,6 +102,13 @@ class Materia extends Model
     {
         return $query->whereHas('planes', function ($q) use ($carreraIds) {
             $q->whereIn('carrera_id', $carreraIds);
+        });
+    }
+
+    public function scopeByCarrera($query, $carreraId)
+    {
+        return $query->whereHas('planes', function ($q) use ($carreraId) {
+            $q->where('carrera_id', $carreraId);
         });
     }
 

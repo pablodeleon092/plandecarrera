@@ -57,7 +57,6 @@ class DocenteController extends Controller
             'institutos' => $institutosDisponibles,
             'carreras' => $carreras,
             'dedicaciones' => $dedicaciones,
-            'filters' => $request->only(['search', 'es_activo']),
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),

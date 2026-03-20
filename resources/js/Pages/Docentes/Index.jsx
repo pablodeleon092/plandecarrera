@@ -66,7 +66,6 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                             carreras = {carreras}
                             dedicaciones={dedicaciones}
                         />
-
                     </div>
 
                     <div className="bg-white rounded-lg shadow overflow-hidden">
