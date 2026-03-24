@@ -86,14 +86,21 @@ export default function Index({ auth, comisiones, modalidades, sedes, flash, fil
             className: 'text-sm font-medium text-gray-900',
         },
         {
-            key: 'horas_teoricas',
-            label: 'Horas Teoria',
-            className: 'text-sm font-medium text-gray-900',
-        },
-        {
-            key: 'horas_practicas',
-            label: 'Horas Practica',
-            className: 'text-sm font-medium text-gray-900',
+            key: 'horarios',
+            label: 'Horarios',
+            render: (comision) => (
+                <div className="text-sm text-gray-700 space-y-1">
+                    {comision.horarios && comision.horarios.length > 0 ? (
+                        comision.horarios.map((h) => (
+                            <div key={h.id} className="capitalize">
+                                {h.dia_semana} {h.hora_inicio.substring(0, 5)}–{h.hora_fin.substring(0, 5)}
+                            </div>
+                        ))
+                    ) : (
+                        <span className="text-gray-400">—</span>
+                    )}
+                </div>
+            )
         },
     ];
 

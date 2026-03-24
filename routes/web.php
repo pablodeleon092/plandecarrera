@@ -11,6 +11,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HorarioController;
 use Inertia\Inertia;
 
 Route::get('/', [DashboardController::class, 'home'])
@@ -50,6 +51,8 @@ Route::middleware('auth')->group(function () {
     Route::post('docentes/{docente}/cargo', [DocenteController::class, 'addCargo'])->name('docentes.cargo.store');
     Route::patch('docentes/{docente}/toggle-status', [DocenteController::class, 'toggleStatus'])->name('docentes.toggleStatus');
 
+
+    
     //Rutas espacios curricualres
     Route::resource('carreras', CarreraController::class);
     Route::resource('materias', MateriaController::class);
@@ -59,6 +62,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('carreras/{carrera}/toggle-status', [CarreraController::class, 'toggleStatus'])->name('carreras.toggleStatus');
     Route::patch('comisiones/{comision}/toggle-status', [ComisionController::class, 'toggleStatus'])->name('comisiones.toggleStatus');
 
+    // Rutas para la gestión de Horarios
+    Route::get('comisiones/{comision}/horarios', [HorarioController::class, 'index'])->name('horarios.index');
+    Route::post('comisiones/{comision}/horarios', [HorarioController::class, 'store'])->name('horarios.store');
+    Route::delete('horarios/{horario}', [HorarioController::class, 'destroy'])->name('horarios.destroy');
 });
 
 Route::get('/test', fn() => Inertia::render('Test'))->name('test');
