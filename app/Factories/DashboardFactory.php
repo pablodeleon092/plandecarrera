@@ -7,6 +7,7 @@ use App\Dashboards\SecretariaDashboard;
 use App\Dashboards\DirectorDashboard;
 use App\Dashboards\CoordinadorDashboard;
 use App\Dashboards\DefaultDashboard;
+use App\Dashboards\CoordinadorAcademicoDashboard;
 
 class DashboardFactory
 {
@@ -16,7 +17,7 @@ class DashboardFactory
             'Consejero'             => new ConsejeroDashboard(),
             'Secretaría académica'  => new SecretariaDashboard(),
             'Director de instituto' => new DirectorDashboard(),
-            'Coordinador académico' => new CoordinadorAcademicoDashboard(),
+            'Coordinador Academico' => new CoordinadorAcademicoDashboard(),
             'Coordinador de Carrera' => new CoordinadorDeCarreraDashboard(),
             'Administrador'          => new DefaultDashboard(),
         };

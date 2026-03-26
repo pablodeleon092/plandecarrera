@@ -3,6 +3,9 @@ namespace App\Dashboards;
 use App\Contracts\DashboardStrategy;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Materia;
@@ -11,9 +14,6 @@ use App\Models\Carrera;
 use App\Models\Docente;
 use App\Models\Dicta;
 use App\Models\Comision;
-    
-
-namespace App\Strategies\Dashboards;
 
 class CoordinadorAcademicoDashboard implements DashboardStrategy
 {
@@ -29,7 +29,7 @@ class CoordinadorAcademicoDashboard implements DashboardStrategy
         
         $totalMaterias = $this->getTotalMateriasInstituto($institutoId);
 
-        return Inertia::render('Gestion/DashboardCoordinadorV2', [
+        return Inertia::render('Gestion/DashboardCoordinadorAcademico', [
             'auth' => ['user' => $user],
             
             'metrics' => [

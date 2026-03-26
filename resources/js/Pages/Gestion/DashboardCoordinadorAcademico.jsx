@@ -73,7 +73,7 @@ export default function DashboardCoordinadorAcademico({
                         </button>
                         <button
                             onClick={() =>setActiveTab('comisiones')}
-                            classname={`pb-2 px-2 font-medium transition-colors duration-200 ${activeTab === 'comisiones' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`pb-2 px-2 font-medium transition-colors duration-200 ${activeTab === 'comisiones' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                             Comisiones
                         </button>

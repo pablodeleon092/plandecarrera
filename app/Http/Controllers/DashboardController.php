@@ -10,7 +10,7 @@ use App\Models\Materia;
 use App\Models\Docente;
 use App\Models\Carrera;
 use App\Models\User;
-namespace App\Factories\DashboardFactory;
+use App\Factories\DashboardFactory;
 
 class DashboardController extends Controller
 {
