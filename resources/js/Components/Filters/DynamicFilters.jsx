@@ -1,4 +1,4 @@
-export default function GestionPersonal ({ fields, filters, onChange }) {
+export default function DynamicFilters ({ fields, filters, onChange }) {
 
     const OPERATORS = {
         string: [

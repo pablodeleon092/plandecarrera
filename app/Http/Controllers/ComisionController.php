@@ -62,7 +62,9 @@ class ComisionController extends Controller
             
         $institutosDisponibles = $user->getInstitutosAutorizados();
         
-        $carreras = $institutosDisponibles->pluck('carreras');
+        $carreras = $institutosDisponibles->flatMap(function ($instituto) {
+            return $instituto->carreras;
+        })->values();
 
         return Inertia::render('Comisiones/Index', [
             'comisiones' => $comisiones,

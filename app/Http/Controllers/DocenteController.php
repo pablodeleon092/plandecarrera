@@ -44,8 +44,10 @@ class DocenteController extends Controller
         $user = Auth::user();
         $institutosDisponibles = $user->getInstitutosAutorizados();
         
-        $carreras = $institutosDisponibles->pluck('carreras');
-
+        $carreras = $institutosDisponibles->flatMap(function ($instituto) {
+            return $instituto->carreras;
+        })->values();
+        
         $dedicaciones = Dedicaciones::all();
 
         return Inertia::render('Docentes/Index', [

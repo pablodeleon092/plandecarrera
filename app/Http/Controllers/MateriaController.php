@@ -60,7 +60,9 @@ class MateriaController extends Controller
 
         $institutosDisponibles = $user->getInstitutosAutorizados();
         
-        $carreras = $institutosDisponibles->pluck('carreras');
+        $carreras = $institutosDisponibles->flatMap(function ($instituto) {
+            return $instituto->carreras;
+        })->values();
 
         return Inertia::render('Materias/Index', [
             'materias' => $materias,

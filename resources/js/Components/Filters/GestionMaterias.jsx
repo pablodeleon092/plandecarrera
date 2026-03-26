@@ -17,15 +17,13 @@ export default function gestionMaterias ({institutos, carreras}) {
             type: 'select', 
             options: [
                 { value: 'anual', label: 'Anual' },
-                { value: 'Cuatrimestral', label: 'cuatrimestal' }
+                { value: 'cuatrimestral', label: 'Cuatrimestal' }
             ]
         },
         { key: 'sede', label: 'Sede', type: 'select', 
           options: [{ value: 'Ushuaia', label: 'Ushuaia' }, { value: 'Rio Grande', label: 'Rio grande' }] 
         },
-        { key: 'cuatrimestre', label: 'Cuatrimestre', type: 'select', 
-          options: [{ value: '1ro', label: '1ro' }, { value: '2do', label: '2do' }] 
-        },        
+        { key: 'cuatrimestre', label: 'Cuatrimestre', type: 'number' },        
         { key: 'horas_semanales', label: 'Horas Semanales', type: 'number' },
         { key: 'by_Instituto', label: 'Instituto', type: 'select', 
           options: institutos.map(i => ({ value: i.id.toString(), label: i.nombre }))
