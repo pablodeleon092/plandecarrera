@@ -33,6 +33,34 @@ export default function gestionComisiones ({institutos, carreras}) {
         { key: 'horas_teoricas', label: 'Horas Teoricas', type: 'number' },
         { key: 'horas_practicas', label: 'Horas Practicas', type: 'number' },
         { key: 'horas_totales', label: 'Horas Totales', type: 'number' },
+        { 
+                key: 'horarios.dia_semana', 
+                label: 'Día de la Semana', 
+                type: 'select', 
+                options: [
+                    { value: 'lunes', label: 'Lunes' },
+                    { value: 'martes', label: 'Martes' },
+                    { value: 'miercoles', label: 'Miércoles' },
+                    { value: 'jueves', label: 'Jueves' },
+                    { value: 'viernes', label: 'Viernes' },
+                    { value: 'sabado', label: 'Sábado' }
+                ] 
+            },
+            { 
+                key: 'horarios.hora_inicio', 
+                label: 'Hora Inicio', 
+                type: 'time' 
+            },
+            { 
+                key: 'horarios.hora_fin', 
+                label: 'Hora Fin', 
+                type: 'time' 
+            },
+            { 
+                key: 'horarios.aula', 
+                label: 'Aula', 
+                type: 'string' 
+            },
         { key: 'by_Instituto', label: 'Instituto', type: 'select', 
           options: institutos.map(i => ({ value: i.id.toString(), label: i.nombre }))
         },

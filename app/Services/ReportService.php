@@ -16,14 +16,6 @@ class ReportService
         $filters = $request->input('filters', []);
         $params = [];
 
-        // 1. Filtros fijos (si los sigues usando fuera del array dinámico)
-        if ($request->filled('instituto_id')) {
-            $params['ID_INSTITUTO'] = (int)$request->query('instituto_id');
-        }
-        if ($request->filled('carrera_id')) {
-            $params['ID_CARRERA'] = (int)$request->query('carrera_id');
-        }
-
         // 2. Mapeo del array dinámico de DynamicFilters
         foreach ($filters as $f) {
             $field = $f['field'] ?? null;

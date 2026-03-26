@@ -16,6 +16,12 @@ export default function DynamicFilters ({ fields, filters, onChange }) {
         select: [
             { value: 'equals', label: 'Es' },
             { value: 'not_equals', label: 'No es' }
+        ],
+        time: [
+        { value: 'equals', label: 'A las' },
+        { value: 'greater', label: 'Después de las' },
+        { value: 'less', label: 'Antes de las' },
+        { value: 'between', label: 'Entre horas' }
         ]
     };
 
@@ -89,47 +95,49 @@ export default function DynamicFilters ({ fields, filters, onChange }) {
                             ))}
                         </select>
 
-                        {/* 3. Input del Valor (Dinámico) */}
-                        <div className="flex-1">
-                            {fieldConfig.type === 'select' ? (
-                                <select 
-                                    value={filter.value} 
-                                    onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
-                                    className="border p-1 rounded w-full"
-                                >
-                                    <option value="">Seleccione...</option>
-                                    {fieldConfig.options.map(opt => (
-                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                    ))}
-                                </select>
-                            ) : filter.operator === 'between' ? (
-                                <div className="flex gap-2">
-                                    <input 
-                                        type="number" 
-                                        placeholder="Min" 
-                                        value={filter.value.min || ''} 
-                                        onChange={(e) => updateFilter(filter.id, 'value', { ...filter.value, min: e.target.value })}
-                                        className="border p-1 rounded w-full"
-                                    />
-                                    <span className="self-center">-</span>
-                                    <input 
-                                        type="number" 
-                                        placeholder="Max" 
-                                        value={filter.value.max || ''} 
-                                        onChange={(e) => updateFilter(filter.id, 'value', { ...filter.value, max: e.target.value })}
-                                        className="border p-1 rounded w-full"
-                                    />
-                                </div>
-                            ) : (
+                    {/* 3. Input del Valor (Dinámico) */}
+                    <div className="flex-1">
+                        {fieldConfig.type === 'select' ? (
+                            <select 
+                                value={filter.value} 
+                                onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
+                                className="border p-1 rounded w-full"
+                            >
+                                <option value="">Seleccione...</option>
+                                {fieldConfig.options.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        ) : filter.operator === 'between' ? (
+                            <div className="flex gap-2">
                                 <input 
-                                    type={fieldConfig.type === 'number' ? 'number' : 'text'} 
-                                    placeholder="Valor..." 
-                                    value={filter.value} 
-                                    onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
+                                    /* Si el tipo es time, usa time. Si no, usa number por defecto del between */
+                                    type={fieldConfig.type === 'time' ? 'time' : 'number'} 
+                                    placeholder="Min" 
+                                    value={filter.value.min || ''} 
+                                    onChange={(e) => updateFilter(filter.id, 'value', { ...filter.value, min: e.target.value })}
                                     className="border p-1 rounded w-full"
                                 />
-                            )}
-                        </div>
+                                <span className="self-center">-</span>
+                                <input 
+                                    type={fieldConfig.type === 'time' ? 'time' : 'number'} 
+                                    placeholder="Max" 
+                                    value={filter.value.max || ''} 
+                                    onChange={(e) => updateFilter(filter.id, 'value', { ...filter.value, max: e.target.value })}
+                                    className="border p-1 rounded w-full"
+                                />
+                            </div>
+                        ) : (
+                            <input 
+                                /* Detecta si es time, number o texto normal */
+                                type={fieldConfig.type === 'time' ? 'time' : fieldConfig.type === 'number' ? 'number' : 'text'} 
+                                placeholder="Valor..." 
+                                value={filter.value} 
+                                onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
+                                className="border p-1 rounded w-full"
+                            />
+                        )}
+                    </div>
 
                         {/* 4. Botón de Eliminar */}
                         <button 
