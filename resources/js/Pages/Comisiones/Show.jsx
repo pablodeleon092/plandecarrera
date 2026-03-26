@@ -4,6 +4,7 @@ import { Head, Link } from '@inertiajs/react';
 import ComisionInfo from './Partials/ComisionInfo';
 import ComisionDocentes from './Partials/ComisionDocentes';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
+import ComisionHorarios from './Partials/ComisionHorarios';
 
 export default function ShowComision({ auth, comision, flash, docentes, allDocentes }) {
 
@@ -78,8 +79,14 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                     </div>
                                 </div>
 
-                                {/* No hay botones de editar/eliminar en tu versión original, así que los omitimos.
-                                    Si querés agregar, me avisás y los sumo. */}
+                                <div className="flex gap-2">
+                                    <Link
+                                        href={route('comisiones.edit', comision.id)}
+                                        className="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white text-sm font-medium rounded-md transition"
+                                    >
+                                        Editar comisión
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -109,19 +116,35 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                 >
                                     Docentes
                                 </button>
+
+
+                                <button
+                                    onClick={() => setCurrentTab('horarios')}
+                                    className={`px-4 py-2 font-semibold transition border-b-2 ${
+                                        currentTab === 'horarios'
+                                            ? 'border-blue-600 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Horarios
+                                </button>
                             </div>
                         </div>
 
                         {/* Contenido dinámico */}
                         <div className="p-8">
-                            {currentTab === 'informacion' ? (
+                            {currentTab === 'informacion' && (
                                 <ComisionInfo comision={comision} />
-                            ) : (
+                            )}
+                            {currentTab === 'docentes' && (
                                 <ComisionDocentes
                                     comision={comision}
                                     docentes={docentes}
                                     allDocentes={allDocentes}
                                 />
+                            )}
+                            {currentTab === 'horarios' && (
+                                <ComisionHorarios comision={comision} />
                             )}
                         </div>
                     </div>

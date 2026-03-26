@@ -47,6 +47,11 @@ class Comision extends Model
     public function dictas()
     {
         return $this->hasMany(Dicta::class, 'comision_id');
+    } 
+
+    public function horarios()
+    {
+        return $this->hasMany(Horario::class, 'comision_id');
     }
 
     public function getDocentesWithCargoAttribute()

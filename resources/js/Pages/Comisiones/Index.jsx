@@ -54,27 +54,22 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
             className: 'text-sm font-medium text-gray-900',
         },
         {
-            key: 'horas',
-            label: 'Horas (T/P)',
-            render: (c) => (
-                <div className="text-xs">
-                    <span className="font-semibold">{c.horas_teoricas}</span> / <span className="font-semibold">{c.horas_practicas}</span>
+            key: 'horarios',
+            label: 'Horarios',
+            render: (comision) => (
+                <div className="text-sm text-gray-700 space-y-1">
+                    {comision.horarios && comision.horarios.length > 0 ? (
+                        comision.horarios.map((h) => (
+                            <div key={h.id} className="capitalize">
+                                {h.dia_semana} {h.hora_inicio.substring(0, 5)}–{h.hora_fin.substring(0, 5)}
+                            </div>
+                        ))
+                    ) : (
+                        <span className="text-gray-400">—</span>
+                    )}
                 </div>
             )
         },
-
-        {
-            key: 'estado',
-            label: 'Estado',
-            render: (comision) => (
-                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${comision.estado
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                    }`}>
-                    {comision.estado ? 'Activa' : 'Inactiva'}
-                </span>
-            )
-        }
     ];
 
     const handleDelete = (comision) => {

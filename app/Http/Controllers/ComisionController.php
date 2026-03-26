@@ -27,7 +27,8 @@ class ComisionController extends Controller
         $query = Comision::query();
 
   
-        if ($user->hasAnyRole(['Admin', 'Admin_global'])) {
+        if ($user->hasAnyRole(['Admin', 'Admin_global','coord_academico'])) {
+            // Acceso completo a todas las comisiones
 
         } elseif ($user->hasAnyRole(['Admin_instituto', 'Consulta_instituto'])) {
             if ($user->instituto_id) {
@@ -55,7 +56,7 @@ class ComisionController extends Controller
         $queryFilter->apply($query, $filters);
 
         $comisiones = $query
-            ->with('materia')
+            ->with(['materia', 'horarios'])
             ->orderBy('id', 'desc')
             ->paginate(15)
             ->withQueryString();
@@ -75,7 +76,7 @@ class ComisionController extends Controller
 
     public function show($id)
     {
-        $comision = Comision::with('materia')->findOrFail($id);
+        $comision = Comision::with('materia', 'horarios')->findOrFail($id);
         $docentes = $comision->dictas()->exists() 
             ? $comision->docentes_with_cargo
             : collect(); // colección vacía
@@ -102,7 +103,7 @@ class ComisionController extends Controller
     
     public function edit($id)
     {
-        $comision = Comision::with('materia')->findOrFail($id);
+        $comision = Comision::with('materia', 'horarios')->findOrFail($id);
         $materias = \App\Models\Materia::where('estado', true)->get()->map(function ($materia) {
             return [
                 'id' => $materia->id,
@@ -120,7 +121,7 @@ class ComisionController extends Controller
 
     public function update(Request $request, $id)
     {
-        $comision = Comision::with('materia')->findOrFail($id);
+        $comision = Comision::with('materia', 'horarios')->findOrFail($id);
         try {
             $validated = $request->validate([
                 'codigo' => [

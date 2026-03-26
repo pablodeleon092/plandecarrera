@@ -13,7 +13,7 @@ use App\Models\Docente;
 use App\Models\Dicta;
 use App\Models\Comision;
 
-class CoordinadorDashboard implements DashboardStrategy
+class CoordinadorDeCarreraDashboard implements DashboardStrategy
 {
 
     public function render(User $user, Request $request): Response
