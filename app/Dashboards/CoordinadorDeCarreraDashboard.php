@@ -12,12 +12,10 @@ use App\Models\Carrera;
 use App\Models\Docente;
 use App\Models\Dicta;
 use App\Models\Comision;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
-use Inertia\Response;
+
 
 class CoordinadorDeCarreraDashboard implements DashboardStrategy
 {
@@ -40,6 +38,8 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
             $cargaHorariaDelPlanPorAño = $this->getCargaHorariaDelPlanPorAño($selectedCarreraId);
             $kpis = $this->getKpisCarrera($selectedCarreraId);
         }
+
+
 
         return Inertia::render('Gestion/DashboardCoordinador', [
             'user' => $user,

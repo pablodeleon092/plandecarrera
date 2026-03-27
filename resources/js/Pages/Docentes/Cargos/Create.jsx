@@ -89,7 +89,11 @@ export default function Create({ auth, docente, dedicaciones, flash }) {
                             <div className="flex justify-end space-x-4">
                                 <DangerButton
                                     as={Link}
-                                    href={route('docentes.edit', docente.id)}
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        window.history.back();
+                                    }}
                                 >
                                     Cancelar
                                 </DangerButton>

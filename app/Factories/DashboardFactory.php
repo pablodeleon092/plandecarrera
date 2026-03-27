@@ -5,7 +5,7 @@ use App\Contracts\DashboardStrategy;
 use App\Dashboards\ConsejeroDashboard;
 use App\Dashboards\SecretariaDashboard;
 use App\Dashboards\DirectorDashboard;
-use App\Dashboards\CoordinadorDashboard;
+use App\Dashboards\CoordinadorDeCarreraDashboard;
 use App\Dashboards\DefaultDashboard;
 use App\Dashboards\CoordinadorAcademicoDashboard;
 

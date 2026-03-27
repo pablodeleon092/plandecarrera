@@ -197,7 +197,11 @@ export default function Create({ auth, materias, materia, flash }) {
                             <div className="flex justify-end space-x-4">
                                 <DangerButton
                                     as={Link}
-                                    href={route('comisiones.index')}
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        window.history.back();
+                                    }}
                                 >
                                     Cancelar
                                 </DangerButton>

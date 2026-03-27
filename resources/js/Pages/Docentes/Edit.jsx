@@ -141,7 +141,11 @@ export default function Edit({ auth, docente, flash }) {
                                     <div className="flex justify-end space-x-4">
                                         <DangerButton
                                             as={Link}
-                                            href={route('docentes.index')}
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                window.history.back();
+                                            }}
                                         >
                                             Cancelar
                                         </DangerButton>

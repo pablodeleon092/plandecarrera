@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import DangerButton from '@/Components/Buttons/DangerButton';
+import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 
 export default function Edit({ auth, materia }) {
     const { data, setData, put, processing, errors } = useForm({
@@ -36,16 +37,26 @@ export default function Edit({ auth, materia }) {
 
             <div className="py-12">
                 <div className="mx-auto max-w-3xl sm:px-6 lg:px-8">
-                    <div className="mb-6">
-                        <Link
-                            href="/materias"
-                            className="text-blue-600 hover:text-blue-800 flex items-center gap-2 transition"
+                    <div className="mb-4">
+                        <SecondaryButton
+                            as={Link}
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                window.history.back();
+                            }}
+                            className="flex items-center gap-2"
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                />
                             </svg>
-                            Volver a Materias
-                        </Link>
+                            Volver
+                        </SecondaryButton>
                     </div>
 
                     <div className="mb-8">
@@ -207,7 +218,11 @@ export default function Edit({ auth, materia }) {
                         <div className="flex gap-4 pt-6 border-t">
                             <DangerButton
                                 as={Link}
-                                href="/materias"
+                                href="#"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    window.history.back();
+                                }}
                                 className="flex-1 justify-center"
                             >
                                 Cancelar

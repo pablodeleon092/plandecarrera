@@ -71,7 +71,8 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                     <div className="bg-white rounded-lg shadow overflow-hidden">
                         <DataTable
                             columns={[
-                                { key: 'legajo', label: 'Legajo' },
+                                { key: 'legajo', 
+                                  label: 'Legajo' },
                                 { key: 'nombre_completo', label: 'Nombre Completo', render: (doc) => `${doc.apellido}, ${doc.nombre}` },
                                 { key: 'email', label: 'Email' },
                                 {
@@ -115,7 +116,7 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                                             );
                                         }).filter(Boolean); 
                                         return links.length > 0 
-                                            ? links.reduce((prev, curr) => [prev, ', ', curr])
+                                            ? <div className="flex flex-col space-y-1">{links}</div>
                                             : <span className="text-gray-400">Sin materias</span>;
                                     }
                                 }

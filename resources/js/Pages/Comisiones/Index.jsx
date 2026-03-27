@@ -20,14 +20,13 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
         {
             key: 'codigo',
             label: 'Codigo',
-            className: 'text-sm font-medium text-gray-900',
             nowrap: false
         },
         {
             key: 'id_materia',
             label: 'Materia',
             render: (comision) => (
-                <span className="text-sm text-gray-900 block min-w-[150px] whitespace-normal">
+                <span>
                     {comision.materia?.nombre || '-'}
                 </span>
             ),
@@ -36,22 +35,22 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
         {
             key: 'turno',
             label: 'Turno',
-            className: 'text-sm font-medium text-gray-900',
+
         },
         {
             key: 'modalidad',
             label: 'Modalidad',
-            className: 'text-sm font-medium text-gray-900',
+
         },
         {
             key: 'sede',
             label: 'Sede',
-            className: 'text-sm font-medium text-gray-900',
+
         },
         {
             key: 'anio',
             label: 'Año',
-            className: 'text-sm font-medium text-gray-900',
+
         },
         {
             key: 'horarios',
