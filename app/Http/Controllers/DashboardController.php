@@ -62,6 +62,11 @@ class DashboardController extends Controller
             'kpis' => $kpis,
             'currentYear' => $currentYear,
             'currentSemester' => $currentSemester,
+            'materiasCompartidas' => $this->getMateriasCompartidas($institutoId),
+            'docentesMultiCarrera' => $this->getDocentesMultiCarrera($institutoId),
+            'conflictosHorarios'   => $this->getConflictosHorarios($institutoId, $currentYear, $currentSemester),
+            'totalCarreras'        => Carrera::where('instituto_id', $institutoId)->count(),
+            'visionGeneral'        => $this->getVisionGeneral($institutoId),
         ]);
     }
 
@@ -588,5 +593,166 @@ class DashboardController extends Controller
             }
         }
     }
+/**
+     * Materias compartidas entre 2 o más carreras del instituto
+     */
+    private function getMateriasCompartidas($institutoId)
+    {
+        $carreraIds = Carrera::where('instituto_id', $institutoId)->pluck('id');
 
+        $materias = Materia::query()
+            ->whereHas('planes', function($q) use ($carreraIds) {
+                $q->whereIn('carrera_id', $carreraIds);
+            })
+            ->with(['planes' => function($q) use ($carreraIds) {
+                $q->whereIn('carrera_id', $carreraIds)->with('carrera:id,nombre');
+            }])
+            ->select('id', 'nombre', 'codigo')
+            ->get()
+            ->filter(function($materia) {
+                $carrerasUnicas = $materia->planes->pluck('carrera_id')->unique();
+                return $carrerasUnicas->count() >= 2;
+            })
+            ->map(function($materia) {
+                $carreras = $materia->planes
+                    ->pluck('carrera.nombre')
+                    ->unique()
+                    ->filter()
+                    ->values()
+                    ->toArray();
+
+                return [
+                    'id'             => $materia->id,
+                    'nombre'         => $materia->nombre,
+                    'codigo'         => $materia->codigo,
+                    'carreras'       => $carreras,
+                    'total_carreras' => count($carreras),
+                ];
+            })
+            ->values();
+
+        $totalMaterias = Materia::whereHas('planes.carrera', function($q) use ($institutoId) {
+            $q->where('instituto_id', $institutoId);
+        })->count();
+
+        $porcentaje = $totalMaterias > 0
+            ? round(($materias->count() / $totalMaterias) * 100, 1)
+            : 0;
+
+        return [
+            'total'      => $materias->count(),
+            'porcentaje' => $porcentaje,
+            'materias'   => $materias,
+        ];
+    }
+
+    /**
+     * Docentes que dictan en 2 o más carreras del instituto
+     */
+    private function getDocentesMultiCarrera($institutoId)
+    {
+        $carreraIds = Carrera::where('instituto_id', $institutoId)->pluck('id');
+
+        $docentes = Docente::query()
+            ->deInstituto($institutoId)
+            ->whereHas('comisiones.materia.planes', function($q) use ($carreraIds) {
+                $q->whereIn('carrera_id', $carreraIds);
+            })
+            ->with(['comisiones.materia.planes' => function($q) use ($carreraIds) {
+                $q->whereIn('carrera_id', $carreraIds)->with('carrera:id,nombre');
+            }])
+            ->select('id', 'nombre', 'apellido', 'legajo', 'email')
+            ->get()
+            ->filter(function($docente) {
+                $carrerasUnicas = $docente->comisiones
+                    ->flatMap(fn($c) => $c->materia->planes->pluck('carrera_id'))
+                    ->unique();
+                return $carrerasUnicas->count() >= 2;
+            })
+            ->map(function($docente) {
+                $carreras = $docente->comisiones
+                    ->flatMap(fn($c) => $c->materia->planes->pluck('carrera.nombre'))
+                    ->unique()
+                    ->filter()
+                    ->values()
+                    ->toArray();
+
+                $iniciales = strtoupper(
+                    substr($docente->apellido, 0, 1) . substr($docente->nombre, 0, 1)
+                );
+
+                return [
+                    'id'              => $docente->id,
+                    'nombre_completo' => $docente->apellido . ', ' . $docente->nombre,
+                    'iniciales'       => $iniciales,
+                    'legajo'          => $docente->legajo,
+                    'email'           => $docente->email,
+                    'carreras'        => $carreras,
+                    'total_carreras'  => count($carreras),
+                ];
+            })
+            ->values();
+
+        return [
+            'total'    => $docentes->count(),
+            'docentes' => $docentes,
+        ];
+    }
+
+    /**
+     * Conflictos: docentes asignados a más de una comisión en el mismo período
+     */
+    private function getConflictosHorarios($institutoId, $year, $semester)
+    {
+        $conflictos = Dicta::query()
+            ->whereHas('comision', function($q) use ($year, $semester, $institutoId) {
+                $q->where('anio', $year)
+                  ->where('cuatrimestre', $semester)
+                  ->whereHas('materia.planes.carrera', function($c) use ($institutoId) {
+                      $c->where('instituto_id', $institutoId);
+                  });
+            })
+            ->with([
+                'docente:id,nombre,apellido',
+                'comision:id,nombre,turno,id_materia',
+                'comision.materia:id,nombre',
+            ])
+            ->get()
+            ->groupBy('docente_id')
+            ->filter(fn($dictas) => $dictas->count() >= 2)
+            ->map(function($dictas) {
+                $docente = $dictas->first()->docente;
+                return [
+                    'docente'    => $docente->apellido . ', ' . $docente->nombre,
+                    'comisiones' => $dictas->map(fn($d) => [
+                        'nombre'  => $d->comision->nombre,
+                        'materia' => $d->comision->materia->nombre,
+                        'turno'   => $d->comision->turno,
+                    ])->values(),
+                ];
+            })
+            ->values();
+
+        return [
+            'total'      => $conflictos->count(),
+            'conflictos' => $conflictos,
+        ];
+    }
+
+    /**
+     * Datos para la visión general (top materias compartidas)
+     */
+    private function getVisionGeneral($institutoId)
+    {
+        $materiasCompartidas = $this->getMateriasCompartidas($institutoId);
+
+        $topMaterias = collect($materiasCompartidas['materias'])
+            ->sortByDesc('total_carreras')
+            ->take(5)
+            ->values();
+
+        return [
+            'topMaterias' => $topMaterias,
+        ];
+    }
 }
