@@ -1,0 +1,370 @@
+<?php
+
+namespace App\Dashboards;
+
+use App\Contracts\DashboardStrategy;
+use App\Models\User;
+use App\Models\Carrera;
+use App\Models\Comision;
+use App\Models\Docente;
+use App\Models\Instituto;
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class SecretariaDashboard implements DashboardStrategy
+{
+    public function render(User $user, Request $request): Response
+    {
+        // Obtener todos los institutos para el selector
+        $institutos = Instituto::orderBy('nombre')->get();
+        if ($institutos->isEmpty()) {
+            abort(404, 'No hay institutos registrados en el sistema');
+        }
+
+        // Obtener el instituto seleccionado o el primero por defecto (ahora "all")
+        $institutoId = $request->input('instituto_id', 'all');
+        
+        if ($institutoId === 'all') {
+            $instituto = (object)[
+                'id' => 'all',
+                'nombre' => 'Todos los Institutos',
+            ];
+        } else {
+            $instituto = Instituto::findOrFail($institutoId);
+        }
+
+        // Obtener todos los KPIs
+        $resumenEjecutivo = $this->getResumenEjecutivo($institutoId);
+        $distribucionDedicaciones = $this->getDistribucionDedicaciones($institutoId);
+        $docentesSobrecargados = $this->getDocentesSobrecargados($institutoId);
+        $materiasSinCobertura = $this->getMateriasSinCobertura($institutoId);
+        $estadisticasCarreras = $this->getEstadisticasCarreras($institutoId);
+        $evolucionHistorica = $this->getEvolucionHistorica($institutoId);
+
+        return Inertia::render('Gestion/DashboardSecretaria', [
+            'user' => $user,
+            'instituto' => $instituto,
+            'institutos' => $institutos, // Lista enviada a la vista
+            'resumenEjecutivo' => $resumenEjecutivo,
+            'distribucionDedicaciones' => $distribucionDedicaciones,
+            'docentesSobrecargados' => $docentesSobrecargados,
+            'materiasSinCobertura' => $materiasSinCobertura,
+            'estadisticasCarreras' => $estadisticasCarreras,
+            'evolucionHistorica' => $evolucionHistorica,
+        ]);
+    }
+
+    private function getResumenEjecutivo($institutoId)
+    {
+        $anioActual = date('Y');
+
+        // Total de carreras activas
+        $queryCarreras = Carrera::where('estado', true);
+        if ($institutoId !== 'all') {
+            $queryCarreras->where('instituto_id', $institutoId);
+        }
+        $totalCarreras = $queryCarreras->count();
+
+        // Total de docentes activos que dictan en el instituto
+        $queryDocentes = Docente::where('es_activo', true)->distinct();
+        if ($institutoId !== 'all') {
+            $queryDocentes->whereHas('dictas.comision.materia.planes.carrera', function ($q) use ($institutoId) {
+                $q->where('instituto_id', $institutoId);
+            });
+        } else {
+            $queryDocentes->whereHas('dictas');
+        }
+        $totalDocentes = $queryDocentes->count();
+
+        // Total de comisiones del año actual
+        $queryComisiones = Comision::where('anio', $anioActual);
+        if ($institutoId !== 'all') {
+            $queryComisiones->whereHas('materia.planes.carrera', function ($q) use ($institutoId) {
+                $q->where('instituto_id', $institutoId);
+            });
+        }
+        $totalComisiones = $queryComisiones->count();
+
+        // Comisiones con cobertura (con docente responsable: Titular, Asociado, o Adjunto)
+        $queryComisionesCobertura = Comision::where('anio', $anioActual)
+            ->whereHas('dictas', function ($q) {
+                $q->whereHas('cargo', function ($c) {
+                    $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
+                });
+            });
+        if ($institutoId !== 'all') {
+            $queryComisionesCobertura->whereHas('materia.planes.carrera', function ($q) use ($institutoId) {
+                $q->where('instituto_id', $institutoId);
+            });
+        }
+        $comisionesConCobertura = $queryComisionesCobertura->count();
+
+        // Calcular porcentaje de cobertura
+        $porcentajeCobertura = $totalComisiones > 0
+            ? round(($comisionesConCobertura / $totalComisiones) * 100, 1)
+            : 0;
+
+        // Determinar estado general (semáforo)
+        $estadoGeneral = 'green'; // Por defecto verde
+        if ($porcentajeCobertura < 70) {
+            $estadoGeneral = 'red';
+        } elseif ($porcentajeCobertura < 90) {
+            $estadoGeneral = 'yellow';
+        }
+
+        return [
+            'totalCarreras' => $totalCarreras,
+            'totalDocentes' => $totalDocentes,
+            'totalComisiones' => $totalComisiones,
+            'comisionesConCobertura' => $comisionesConCobertura,
+            'porcentajeCobertura' => $porcentajeCobertura,
+            'estadoGeneral' => $estadoGeneral,
+        ];
+    }
+
+    /**
+     * Distribución de dedicaciones
+     */
+    private function getDistribucionDedicaciones($institutoId)
+    {
+        $distribucionQuery = DB::table('docentes')
+            ->join('cargos', 'docentes.id', '=', 'cargos.docente_id')
+            ->join('dedicaciones', 'cargos.dedicacion_id', '=', 'dedicaciones.id')
+            ->join('dictas', 'cargos.id', '=', 'dictas.cargo_id')
+            ->join('comisiones', 'dictas.comision_id', '=', 'comisiones.id')
+            ->join('materias', 'comisiones.id_materia', '=', 'materias.id')
+            ->join('plan_materia', 'materias.id', '=', 'plan_materia.materia_id')
+            ->join('planes', 'plan_materia.plan_id', '=', 'planes.id')
+            ->join('carreras', 'planes.carrera_id', '=', 'carreras.id')
+            ->where('docentes.es_activo', true);
+
+        if ($institutoId !== 'all') {
+            $distribucionQuery->where('carreras.instituto_id', $institutoId);
+        }
+
+        $distribucion = $distribucionQuery->select('dedicaciones.nombre', DB::raw('COUNT(DISTINCT docentes.id) as cantidad'))
+            ->groupBy('dedicaciones.nombre')
+            ->get();
+
+        $total = $distribucion->sum('cantidad');
+
+        return $distribucion->map(function ($item) use ($total) {
+            return [
+                'nombre' => $item->nombre,
+                'cantidad' => $item->cantidad,
+                'porcentaje' => $total > 0 ? round(($item->cantidad / $total) * 100, 1) : 0,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Docentes con sobrecarga (exceden horas máximas de su dedicación)
+     */
+    private function getDocentesSobrecargados($institutoId)
+    {
+        $queryDocentes = Docente::where('es_activo', true)->with(['cargos.dedicacion']);
+
+        if ($institutoId !== 'all') {
+            $queryDocentes->whereHas('dictas.comision.materia.planes.carrera', function ($q) use ($institutoId) {
+                $q->where('instituto_id', $institutoId);
+            });
+        } else {
+            $queryDocentes->whereHas('dictas');
+        }
+
+        $docentes = $queryDocentes->get();
+
+        $sobrecargados = [];
+
+        foreach ($docentes as $docente) {
+            foreach ($docente->cargos as $cargo) {
+                if (!$cargo->dedicacion) {
+                    continue;
+                }
+
+                $horasAsignadas = $cargo->sum_horas_frente_aula;
+                $horasMaximas = $cargo->dedicacion->horas_frente_aula_max;
+
+                if ($horasAsignadas > $horasMaximas) {
+                    $sobrecargados[] = [
+                        'id' => $docente->id,
+                        'nombre' => $docente->nombre . ' ' . $docente->apellido,
+                        'dedicacion' => $cargo->dedicacion->nombre,
+                        'horasAsignadas' => $horasAsignadas,
+                        'horasMaximas' => $horasMaximas,
+                        'exceso' => $horasAsignadas - $horasMaximas,
+                        'porcentajeExceso' => $horasMaximas > 0
+                            ? round((($horasAsignadas - $horasMaximas) / $horasMaximas) * 100, 1)
+                            : 0,
+                    ];
+                }
+            }
+        }
+
+        return $sobrecargados;
+    }
+
+    /**
+     * Materias sin cobertura (comisiones sin docente responsable)
+     */
+    private function getMateriasSinCobertura($institutoId)
+    {
+        $anioActual = date('Y');
+
+        $query = Comision::where('anio', $anioActual)
+            ->whereDoesntHave('dictas', function ($q) {
+                $q->whereHas('cargo', function ($c) {
+                    $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
+                });
+            })
+            ->with('materia');
+
+        if ($institutoId !== 'all') {
+            $query->whereHas('materia.planes.carrera', function ($q) use ($institutoId) {
+                $q->where('instituto_id', $institutoId);
+            });
+        } else {
+            $query->whereHas('materia.planes.carrera');
+        }
+
+        $comisionesSinCobertura = $query->get();
+
+        return $comisionesSinCobertura->map(function ($comision) {
+            return [
+                'comisionId' => $comision->id,
+                'comisionCodigo' => $comision->codigo,
+                'comisionNombre' => $comision->nombre,
+                'materiaNombre' => $comision->materia->nombre,
+                'turno' => $comision->turno,
+                'sede' => $comision->sede,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Estadísticas por carrera
+     */
+    private function getEstadisticasCarreras($institutoId)
+    {
+        $anioActual = date('Y');
+        $queryCarreras = Carrera::where('estado', true)->with(['planActual.materias']);
+        
+        if ($institutoId !== 'all') {
+            $queryCarreras->where('instituto_id', $institutoId);
+        }
+        
+        $carreras = $queryCarreras->get();
+
+        $estadisticas = [];
+
+        foreach ($carreras as $carrera) {
+            if (!$carrera->planActual) {
+                continue;
+            }
+
+            $materiasIds = $carrera->planActual->materias->pluck('id');
+            $totalMaterias = $materiasIds->count();
+
+            // Comisiones activas de la carrera
+            $comisiones = Comision::whereIn('id_materia', $materiasIds)
+                ->where('anio', $anioActual)
+                ->get();
+
+            $totalComisiones = $comisiones->count();
+
+            // Comisiones con cobertura
+            $comisionesConCobertura = Comision::whereIn('id_materia', $materiasIds)
+                ->where('anio', $anioActual)
+                ->whereHas('dictas', function ($q) {
+                    $q->whereHas('cargo', function ($c) {
+                        $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
+                    });
+                })
+                ->count();
+
+            // Docentes únicos asignados a la carrera
+            $totalDocentes = Docente::whereHas('dictas.comision', function ($q) use ($materiasIds, $anioActual) {
+                $q->whereIn('id_materia', $materiasIds)
+                    ->where('anio', $anioActual);
+            })
+                ->where('es_activo', true)
+                ->distinct()
+                ->count();
+
+            $porcentajeCobertura = $totalComisiones > 0
+                ? round(($comisionesConCobertura / $totalComisiones) * 100, 1)
+                : 0;
+
+            $estadisticas[] = [
+                'carreraId' => $carrera->id,
+                'carreraNombre' => $carrera->nombre,
+                'totalMaterias' => $totalMaterias,
+                'totalComisiones' => $totalComisiones,
+                'comisionesConCobertura' => $comisionesConCobertura,
+                'porcentajeCobertura' => $porcentajeCobertura,
+                'totalDocentes' => $totalDocentes,
+            ];
+        }
+
+        return $estadisticas;
+    }
+
+    /**
+     * Evolución histórica (tendencias)
+     */
+    private function getEvolucionHistorica($institutoId)
+    {
+        $evolucionDocentesQuery = DB::table('docentes')
+            ->join('dictas', 'docentes.id', '=', 'dictas.docente_id')
+            ->join('comisiones', 'dictas.comision_id', '=', 'comisiones.id')
+            ->join('materias', 'comisiones.id_materia', '=', 'materias.id')
+            ->join('plan_materia', 'materias.id', '=', 'plan_materia.materia_id')
+            ->join('planes', 'plan_materia.plan_id', '=', 'planes.id')
+            ->join('carreras', 'planes.carrera_id', '=', 'carreras.id')
+            ->select(DB::raw('EXTRACT(YEAR FROM docentes.created_at) as anio'), DB::raw('COUNT(DISTINCT docentes.id) as cantidad'))
+            ->groupBy(DB::raw('EXTRACT(YEAR FROM docentes.created_at)'))
+            ->orderBy(DB::raw('EXTRACT(YEAR FROM docentes.created_at)'));
+
+        if ($institutoId !== 'all') {
+            $evolucionDocentesQuery->where('carreras.instituto_id', $institutoId);
+        }
+        
+        $evolucionDocentes = $evolucionDocentesQuery->get();
+
+        $evolucionComisionesQuery = DB::table('comisiones')
+            ->join('materias', 'comisiones.id_materia', '=', 'materias.id')
+            ->join('plan_materia', 'materias.id', '=', 'plan_materia.materia_id')
+            ->join('planes', 'plan_materia.plan_id', '=', 'planes.id')
+            ->join('carreras', 'planes.carrera_id', '=', 'carreras.id')
+            ->select('comisiones.anio', DB::raw('COUNT(*) as cantidad'))
+            ->groupBy('comisiones.anio')
+            ->orderBy('comisiones.anio');
+
+        if ($institutoId !== 'all') {
+            $evolucionComisionesQuery->where('carreras.instituto_id', $institutoId);
+        }
+        
+        $evolucionComisiones = $evolucionComisionesQuery->get();
+
+        $evolucionCarrerasQuery = DB::table('carreras')
+            ->select(DB::raw('EXTRACT(YEAR FROM created_at) as anio'), DB::raw('COUNT(*) as cantidad'))
+            ->groupBy(DB::raw('EXTRACT(YEAR FROM created_at)'))
+            ->orderBy(DB::raw('EXTRACT(YEAR FROM created_at)'));
+
+        if ($institutoId !== 'all') {
+            $evolucionCarrerasQuery->where('instituto_id', $institutoId);
+        }
+        
+        $evolucionCarreras = $evolucionCarrerasQuery->get();
+
+        return [
+            'docentes' => $evolucionDocentes->all(),
+            'comisiones' => $evolucionComisiones->all(),
+            'carreras' => $evolucionCarreras->all(),
+        ];
+    }
+}

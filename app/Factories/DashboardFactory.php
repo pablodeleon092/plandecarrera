@@ -13,12 +13,13 @@ class DashboardFactory
     public static function make(?string $cargo): DashboardStrategy
     {
         return match ($cargo) {
-            'Consejero'             => new ConsejeroDashboard(),
-            'Secretaría académica'  => new SecretariaDashboard(),
+            'Consejero' => new ConsejeroDashboard(),
+            'Secretaría académica', 'Administrativo de Secretaria Academica' => new SecretariaDashboard(),//agrego administrativo de secretaria academica ya que el rol "secretaria academica no esta, ver si eliminar "secretaria academica"
             'Director de instituto' => new DirectorDashboard(),
             'Coordinador académico' => new CoordinadorAcademicoDashboard(),
             'Coordinador de Carrera' => new CoordinadorDashboard(),
-            'Administrador'          => new DefaultDashboard(),
+            'Administrador' => new DefaultDashboard(),
+            default => new DefaultDashboard(),
         };
     }
 }
