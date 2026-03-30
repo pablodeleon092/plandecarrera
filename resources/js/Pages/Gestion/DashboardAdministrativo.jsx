@@ -57,9 +57,6 @@ export default function DashboardAdministrativo({
         >
             <Head title="Dashboard Administrativo" />
 
-            <div className="py-6">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
-
                     {/* KPIs Row - 4 tarjetas */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                         {/* % Materias Compartidas */}
@@ -511,8 +508,7 @@ export default function DashboardAdministrativo({
                         </div>
 
                     </div>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

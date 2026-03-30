@@ -34,9 +34,9 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
             
             // Datos operativos
             'datosIncompletos' => $this->getDocentesConDatosIncompletos($institutoId),
-            'comisionesActuales' => $this->getComisionesCuatrimestreActual($institutoId, $currentYear, $currentSemester),
+            'comisionesActuales' => $this->getComisionesCuatrimestreActual($institutoId, $currentYear, $currentSemester), #revisar este metodo con materiar anuales
             'docentesActivos' => $this->getDocentesActivos($institutoId),
-            'tareasPendientes' => $this->getTareasPendientes($institutoId, $currentYear, $currentSemester),
+            'tareasPendientes' => $this->getTareasPendientes($institutoId, $currentYear, $currentSemester), #revisar este metodo
             'cambiosRecientes' => $this->getCambiosRecientes($institutoId),
             
             // Análisis y KPIs
@@ -83,9 +83,11 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
 
     private function getComisionesCuatrimestreActual($institutoId, $year, $semester)
     {
+        $semesterString = $semester == 1 ? "1ro" : "2do";
+
         $comisiones = Comision::query()
             ->where('anio', $year)
-            ->where('cuatrimestre', $semester)
+            ->where('cuatrimestre', $semesterString)
             ->whereHas('materia.planes.carrera', fn($q) => $q->where('instituto_id', $institutoId))
             ->with([
                 'materia:id,nombre,codigo',
