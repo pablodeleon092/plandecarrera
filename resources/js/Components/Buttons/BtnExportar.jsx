@@ -4,26 +4,37 @@ import { PrinterIcon } from '@heroicons/react/24/outline';
 const BtnExportar = ({ tipo = "docentes", filters = [], className = "" }) => {
     
     const handleExportarPdf = () => {
-        // 1. Verificamos qué tiene la variable 'tipo' en este instante
         console.log("Tipo de reporte:", tipo); 
-        
-        if (typeof tipo !== 'string') {
-            console.error("ERROR: 'tipo' no es un string, es:", typeof tipo);
-        }
+        console.log("Filtros a procesar:", filters);
 
         const params = new URLSearchParams();
-        // ... tu lógica de filtros ...
 
-        // 2. Intentamos generar la URL
+
+        filters.forEach((filter, index) => {
+            if (typeof filter.value === 'object' && filter.value !== null) {
+                params.append(`filters[${index}][field]`, filter.field);
+                params.append(`filters[${index}][operator]`, filter.operator);
+                params.append(`filters[${index}][value][min]`, filter.value.min || '');
+                params.append(`filters[${index}][value][max]`, filter.value.max || '');
+            } else {
+                params.append(`filters[${index}][field]`, filter.field);
+                params.append(`filters[${index}][operator]`, filter.operator);
+                params.append(`filters[${index}][value]`, filter.value || '');
+            }
+        });
+
         try {
+
             const baseUrl = route('exportar.pdf', { tipo: tipo });
             const fullUrl = `${baseUrl}?${params.toString()}`;
-            console.log("URL Final:", fullUrl);
+            
+            console.log("URL Final generada:", fullUrl);
+            
+            // Redirección para descargar el PDF
             window.location.href = fullUrl;
         } catch (e) {
             console.error("Error en route():", e);
-            // Plan B: Si Ziggy sigue fallando, usa la ruta manual para probar
-            // window.location.href = `/exportar/${tipo}?${params.toString()}`;
+
         }
     };
 

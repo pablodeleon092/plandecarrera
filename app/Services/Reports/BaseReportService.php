@@ -23,7 +23,7 @@ abstract class BaseReportService implements ReportServiceInterface
         $output = storage_path('app/reports/pdf/reporte_' . time());
         
         $params = $this->parseFilters($request->input('filters', []));
-
+  
         $options = [
             'format' => ['pdf'],
             'locale' => 'es_AR',

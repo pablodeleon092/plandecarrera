@@ -47,30 +47,6 @@ export default function GestionPersonal ({ institutos, carreras, dedicaciones })
     };
 
 
-    const handleExportarPdf = (tipo = "docentes") => {
-        // 1. Creamos el objeto de búsqueda de la URL
-        const params = new URLSearchParams();
-
-        activeFilters.forEach((filter, index) => {
-            if (typeof filter.value === 'object' && filter.value !== null) {
-                params.append(`filters[${index}][field]`, filter.field);
-                params.append(`filters[${index}][operator]`, filter.operator);
-                params.append(`filters[${index}][value][min]`, filter.value.min || '');
-                params.append(`filters[${index}][value][max]`, filter.value.max || '');
-            } else {
-                params.append(`filters[${index}][field]`, filter.field);
-                params.append(`filters[${index}][operator]`, filter.operator);
-                params.append(`filters[${index}][value]`, filter.value || '');
-            }
-        });
-
-        // 3. Construimos la URL final
-        const baseUrl = route('exportar.pdf', { tipo: tipo });
-        const fullUrl = `${baseUrl}?${params.toString()}`;
-
-        // 4. Redireccionamos (esto disparará la descarga en el navegador)
-        window.location.href = fullUrl;
-    };
     
     return (
             <div className="p-4 bg-white border rounded shadow-sm">
