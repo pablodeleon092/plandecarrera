@@ -1,8 +1,8 @@
 // resources/js/Pages/Docentes/Edit.jsx
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import PrimaryButton from '@/Components/PrimaryButton';
-import DangerButton from '@/Components/DangerButton';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
+import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Edit({ auth, docente, flash }) {
     const { data, setData, put, processing, errors } = useForm({
@@ -38,8 +38,6 @@ export default function Edit({ auth, docente, flash }) {
                     {flash?.error}
                 </div>
             )}
-            <div className="py-12">
-                <div className="max-w-3xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
                             <form onSubmit={submit} className="space-y-6">
@@ -141,7 +139,11 @@ export default function Edit({ auth, docente, flash }) {
                                     <div className="flex justify-end space-x-4">
                                         <DangerButton
                                             as={Link}
-                                            href={route('docentes.index')}
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                window.history.back();
+                                            }}
                                         >
                                             Cancelar
                                         </DangerButton>
@@ -156,8 +158,7 @@ export default function Edit({ auth, docente, flash }) {
                             </form>
                         </div>
                     </div>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

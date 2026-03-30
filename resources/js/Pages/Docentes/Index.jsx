@@ -1,46 +1,16 @@
 // resources/js/Pages/Docentes/Index.jsx
 
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
-import TableFilters from '@/Components/TableFilters';
-import PaginatorButtons from '@/Components/PaginatorButtons';
-
-export default function Index({ auth, docentes, flash, filters: initialFilters = {} }) {
-    const [filters, setFilters] = useState({
-        search: initialFilters.search || '',
-        es_activo: initialFilters.es_activo || '',
-    });
-
-    const handleFilterChange = (key, value) => {
-        const newFilters = { ...filters, [key]: value };
-        setFilters(newFilters);
-        router.get(route('docentes.index'), newFilters, {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-        });
-    };
-
-    const filterConfig = [
-        {
-            key: 'search', label: 'Buscar', type: 'text', value: filters.search, placeholder: 'Buscar por nombre, apellido o legajo...'
-        },
-        {
-            key: 'es_activo', label: 'Estado', type: 'select', value: filters.es_activo,
-            options: [
-                { value: '1', label: 'Activo' },
-                { value: '0', label: 'Inactivo' }
-            ]
-        }
-    ];
+import GestionPersonal from '@/Components/Filters/GestionPersonal';
+import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 
 
-    const activeFilters = Object.fromEntries(
-        Object.entries(filters).filter(([key, value]) => value !== '' && value !== null)
-    );
+export default function Index({ auth, institutos, carreras, docentes, flash, dedicaciones}) {
+
 
     // Función que maneja la eliminación de un docente
     const handleDelete = (id, nombre, apellido) => {
@@ -71,8 +41,6 @@ export default function Index({ auth, docentes, flash, filters: initialFilters =
         >
             <Head title="Docentes" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     {flash?.success && (
                         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                             {flash.success}
@@ -91,16 +59,18 @@ export default function Index({ auth, docentes, flash, filters: initialFilters =
                     />
 
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
-                        <TableFilters
-                            filters={filterConfig}
-                            onChange={handleFilterChange}
+                        <GestionPersonal
+                            institutos = {institutos}
+                            carreras = {carreras}
+                            dedicaciones={dedicaciones}
                         />
                     </div>
 
                     <div className="bg-white rounded-lg shadow overflow-hidden">
                         <DataTable
                             columns={[
-                                { key: 'legajo', label: 'Legajo' },
+                                { key: 'legajo', 
+                                  label: 'Legajo' },
                                 { key: 'nombre_completo', label: 'Nombre Completo', render: (doc) => `${doc.apellido}, ${doc.nombre}` },
                                 { key: 'email', label: 'Email' },
                                 {
@@ -124,6 +94,29 @@ export default function Index({ auth, docentes, flash, filters: initialFilters =
                                                     </Link>
                                                 )).reduce((prev, curr) => [prev, ', ', curr]) : '—'
                                     )
+                                },
+                                {
+                                    key: 'materias',
+                                    label: 'Materias',
+                                    render: (doc) => {
+                                        if (!doc.dictas) return <span className="text-gray-400">Sin materias</span>;
+                                        const links = doc.dictas.map((dicta) => {
+                                            const materia = dicta.comision?.materia;
+                                            if (!materia) return null;
+                                            return (
+                                                <Link
+                                                    key={materia.id}
+                                                    href={route('materias.show', materia.id)} 
+                                                    className="text-indigo-600 hover:underline"
+                                                >
+                                                    {materia.nombre}
+                                                </Link>
+                                            );
+                                        }).filter(Boolean); 
+                                        return links.length > 0 
+                                            ? <div className="flex flex-col space-y-1">{links}</div>
+                                            : <span className="text-gray-400">Sin materias</span>;
+                                    }
                                 }
                             ]}
                             data={docentes.data}
@@ -142,7 +135,6 @@ export default function Index({ auth, docentes, flash, filters: initialFilters =
                         />
                     </div>
                     <PaginatorButtons meta={docentes.meta} paginator={docentes} routeName={'docentes.index'}
-                        routeParams={activeFilters}
                     />
 
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -163,8 +155,6 @@ export default function Index({ auth, docentes, flash, filters: initialFilters =
                             </p>
                         </div>
                     </div>
-                </div>
-            </div>
         </AuthenticatedLayout>
     );
 }

@@ -3,10 +3,10 @@ import { Head, useForm, router } from '@inertiajs/react';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import PrimaryButton from '@/Components/PrimaryButton';
-import DangerButton from '@/Components/DangerButton';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
+import DangerButton from '@/Components/Buttons/DangerButton';
 
-export default function Edit({ auth, plan, carrera, materiasEnPlan, materiasDisponibles,flash }) {
+export default function Edit({ auth, plan, carrera, materiasEnPlan, materiasDisponibles, flash }) {
     const [enPlan, setEnPlan] = useState(materiasEnPlan || []);
     const [disponibles, setDisponibles] = useState(materiasDisponibles || []);
 

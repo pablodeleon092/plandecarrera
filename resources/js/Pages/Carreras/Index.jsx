@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
 import TableFilters from '@/Components/TableFilters';
-import PaginatorButtons from '@/Components/PaginatorButtons';
+import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 
 export default function Index({ auth, carreras, filters: initialFilters }) {
     const [filters, setFilters] = useState({
@@ -97,8 +97,6 @@ export default function Index({ auth, carreras, filters: initialFilters }) {
         >
             <Head title="Carreras" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <ListHeader
                         title="Listado de Carreras"
                         buttonLabel="Agregar Carrera"
@@ -138,8 +136,7 @@ export default function Index({ auth, carreras, filters: initialFilters }) {
                         </div>
                         {/* Aquí puedes agregar más tarjetas de estadísticas si lo necesitas */}
                     </div>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

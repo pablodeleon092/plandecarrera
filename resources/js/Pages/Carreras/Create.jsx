@@ -4,8 +4,8 @@
 import React from 'react';
 import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PrimaryButton from '@/Components/PrimaryButton';
-import DangerButton from '@/Components/DangerButton';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
+import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Create({ auth, institutos }) {
 
@@ -33,8 +33,6 @@ export default function Create({ auth, institutos }) {
         >
             <Head title="Crear Carrera" />
 
-            <div className="py-12">
-                <div className="max-w-3xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div className="p-6 bg-white border-b border-gray-200">
 
@@ -132,8 +130,7 @@ export default function Create({ auth, institutos }) {
 
                         </div>
                     </div>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

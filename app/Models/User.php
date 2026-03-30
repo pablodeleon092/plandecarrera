@@ -63,4 +63,35 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Instituto::class);
     }
+
+    public function getInstitutosAutorizados()
+    {
+        // 1. Administrador (o usuario sin instituto asignado) -> Acceso a todos
+        if (!$this->instituto_id) {
+            // Retorna colección de todos los institutos
+            return Instituto::with('carreras.planActual')->get(['id', 'nombre']);
+        }
+
+        // 2. Coordinador de Carrera -> Tiene instituto PERO está limitado a ciertas carreras
+        if ($this->carreras()->exists()) {
+            
+            $carreraIds = $this->carreras()->pluck('carreras.id'); // Obtenemos IDs de las carreras
+
+            // Retornamos una colección con 1 solo instituto, pero filtramos sus carreras
+            return Instituto::where('id', $this->instituto_id)
+                ->select(['id', 'nombre'])
+                ->with(['carreras' => function ($query) use ($carreraIds) {
+                    $query->whereIn('carreras.id', $carreraIds)
+                          ->with('planActual');
+                }])
+                ->get();
+        }
+
+        // 3. Consejero / Consulta -> Tiene instituto y NO tiene carreras específicas -> Acceso a todas las de su instituto
+        return Instituto::where('id', $this->instituto_id)
+            ->select(['id', 'nombre'])
+            ->with('carreras.planActual')
+            ->get();
+    }
+
 }

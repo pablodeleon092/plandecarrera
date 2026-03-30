@@ -3,9 +3,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import MateriaInfo from './Partials/MateriaInfo';
 import MateriaComisiones from './Partials/MateriaComisiones';
-import PrimaryButton from '@/Components/PrimaryButton';
-import SecondaryButton from '@/Components/SecondaryButton';
-import DangerButton from '@/Components/DangerButton';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
+import SecondaryButton from '@/Components/Buttons/SecondaryButton';
+import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Show({ auth, materia, comisiones }) {
 
@@ -28,8 +28,6 @@ export default function Show({ auth, materia, comisiones }) {
         >
             <Head title={`Materia: ${materia.nombre}`} />
 
-            <div className="py-12">
-                <div className="max-w-5xl mx-auto sm:px-6 lg:px-8">
 
                     {/* Botón Volver */}
                     <div className="mb-4">
@@ -141,8 +139,7 @@ export default function Show({ auth, materia, comisiones }) {
                         </div>
                     </div>
 
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

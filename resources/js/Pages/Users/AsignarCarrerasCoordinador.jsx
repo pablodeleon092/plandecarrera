@@ -3,13 +3,13 @@ import { Head, useForm, router } from '@inertiajs/react';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import PrimaryButton from '@/Components/PrimaryButton';
-import DangerButton from '@/Components/DangerButton';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
+import DangerButton from '@/Components/Buttons/DangerButton';
 
 // Nota: Se asume que recibes las props: auth, coordinador, carrerasAsignadas, carrerasRestantes, flash.
 // Tu componente original usaba 'plan' y 'carrera', he asumido que necesitas 'coordinador' para la ruta PUT.
 export default function AsignarCarrerasCoordinador({ auth, coordinador, carrerasAsignadas, carrerasRestantes, flash }) {
-    
+
     // 1. RENOMBRAR ESTADOS
     const [carrerasCoordinador, setCarrerasCoordinador] = useState(carrerasAsignadas || []); // Carreras ya asignadas
     const [carrerasDisponibles, setCarrerasDisponibles] = useState(carrerasRestantes || []); // Carreras no asignadas
@@ -71,15 +71,15 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
 
         // 3. CAMBIAR RUTA PUT: PUT a la ruta de asignación del coordinador (ej: /coordinadores/{id}/carreras)
         // Se asume que tienes una ruta para actualizar las asignaciones de un coordinador.
-        router.patch(route('coordinadores.carreras.update', coordinador.id), { 
-                carreras_ids: carrerasCoordinador.map(c => c.id) 
-            }, {
-                // Opciones de Inertia van en el tercer argumento
-                preserveScroll: true,
-                preserveState: true,
-                onSuccess: () => console.log('Carreras asignadas actualizadas con éxito.'),
-                onError: (errors) => console.error('Error al guardar:', errors),
-            });
+        router.patch(route('coordinadores.carreras.update', coordinador.id), {
+            carreras_ids: carrerasCoordinador.map(c => c.id)
+        }, {
+            // Opciones de Inertia van en el tercer argumento
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => console.log('Carreras asignadas actualizadas con éxito.'),
+            onError: (errors) => console.error('Error al guardar:', errors),
+        });
     };
 
     // La lógica de desactivar carrera no aplica aquí, se elimina o se reemplaza por otra acción de coordinador si es necesario
@@ -98,14 +98,14 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
         >
             <Head title={`Asignar Carreras - ${coordinador.nombre} ${coordinador.apellido}`} />
 
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
                 <h2 className="text-2xl font-semibold mb-4 mt-4">Asignar Carreras a {coordinador.nombre} {coordinador.apellido}</h2>
                 {flash?.success && (
                     <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                         {flash?.success}
                     </div>
                 )}
-                
+
                 <DragDropContext onDragEnd={onDragEnd}>
                     <table className="w-full table-auto border-collapse mb-4">
                         <thead>
@@ -137,7 +137,7 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
                                         )}
                                     </Droppable>
                                 </td>
-                                
+
                                 {/* LISTA DE NO ASIGNADAS (carrerasDisponibles) */}
                                 <td className="align-top w-1/2 px-4 py-2">
                                     <Droppable droppableId="carrerasDisponibles">
@@ -172,7 +172,7 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
                     >
                         Desactivar Coordinador
                     </DangerButton>
-                    
+
                     {/* Botón Guardar Cambios */}
                     <PrimaryButton
                         onClick={guardarCambios}
@@ -181,7 +181,7 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
                         {isPutting ? 'Guardando...' : 'Guardar asignación'}
                     </PrimaryButton>
                 </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

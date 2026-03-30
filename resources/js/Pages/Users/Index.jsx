@@ -88,7 +88,7 @@ export default function Index({ auth, users }) {
             key: 'activo',
             label: 'Activo',
             render: (user) => (
-                <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.is_activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {user.is_activo ? 'Sí' : 'No'}
                 </span>
             )
@@ -113,12 +113,21 @@ export default function Index({ auth, users }) {
         }
     ]
 
+    const handleToggleStatus = (user) => {
+        router.patch(route('users.toggleStatus', user.id), {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Optional: Show toast or notification
+            }
+        });
+    };
+
     return (
         <AuthenticatedLayout
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Usuarios</h2>}
         >
             <Head title="Usuarios" />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
                 <ListHeader
                     title="Listado de Usuarios"
                     buttonLabel="Agregar Usuario"
@@ -134,6 +143,7 @@ export default function Index({ auth, users }) {
                 <DataTable
                     columns={columns}
                     data={filteredData}
+                    
                     onShow={(user) => router.visit(route('users.show', user.id))}
                     onEdit={canEditusers
                         ? (user) => router.visit(route('users.edit', user.id))
@@ -148,6 +158,8 @@ export default function Index({ auth, users }) {
                         }
                         : null
                     }
+                    onToggleStatus={canEditusers ? handleToggleStatus : null}
+                    statusKey="is_activo"
                     hover={true}
                     emptyMessage="No hay usuarios para mostrar."
                     emptyIcon={
@@ -157,7 +169,7 @@ export default function Index({ auth, users }) {
                     }
                     disableScroll={true}
                 />
-            </div>
+
         </AuthenticatedLayout>
     );
 }

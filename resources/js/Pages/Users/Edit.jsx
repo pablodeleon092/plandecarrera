@@ -4,8 +4,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
 import TextInput from '@/Components/TextInput';
-import PrimaryButton from '@/Components/PrimaryButton';
-import SecondaryButton from '@/Components/SecondaryButton';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
+import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 
 export default function Edit({ institutos, flash }) {
     const { props } = usePage();

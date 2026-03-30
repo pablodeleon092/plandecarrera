@@ -37,7 +37,7 @@ class RolesYPermisosSeeder extends Seeder
         $roles = [
             'Admin' => [
                 'consultar_usuario', 
-                'modificar_usuario',            // MANTENIDO
+                'modificar_usuario',           
                 'modificar_permisos', 
                 'consultar_carrera', 
                 'modificar_carrera', 
@@ -46,14 +46,14 @@ class RolesYPermisosSeeder extends Seeder
             ],
             'Admin_global' => [
                 'consultar_usuario', 
-                'modificar_usuario',            // MANTENIDO
+                'modificar_usuario',            
                 'consultar_carrera', 
                 'modificar_carrera', 
                 'consultar_docente', 
                 'modificar_docente'
             ],
             'Admin_instituto' => [
-                'consultar_usuario', 
+                //'consultar_usuario', 
                 // 'modificar_usuario',         // ❌ ELIMINADO
                 'consultar_carrera',
                 'modificar_carrera', 
@@ -61,8 +61,6 @@ class RolesYPermisosSeeder extends Seeder
                 'modificar_docente'
             ], 
             'Coord_carrera' => [
-                //'consultar_usuario', 
-                // 'modificar_usuario',         // ❌ ELIMINADO
                 'consultar_carrera', 
                 'modificar_carrera', 
                 'consultar_docente', 
@@ -71,7 +69,13 @@ class RolesYPermisosSeeder extends Seeder
             'Consulta_instituto' => [
                 'consultar_carrera', 
                 'consultar_docente'
-            ], 
+            ],
+            'Coordinador Academico' => [
+                'consultar_carrera',
+                'modificar_carrera',
+                'consultar_docente',
+                'modificar_docente'
+            ],
         ];
 
         foreach ($roles as $rol => $permisosRol) {

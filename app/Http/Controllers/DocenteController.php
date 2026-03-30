@@ -2,9 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Docente;
 use App\Models\Dedicacion;
+use App\Models\Materia;
+use App\Models\Instituto;
+use App\Models\Carrera;
+use App\Models\User;
+use App\Models\Docente;
+use App\Models\Dedicaciones;
+use App\Models\Dicta;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Services\ReportService;
+use App\Services\QueryFilter;
 use App\Http\Requests\StoreDocenteRequest;
 use Inertia\Inertia;
 
@@ -15,36 +24,37 @@ class DocenteController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Docente::query();
 
-        // Aplicar filtro de búsqueda
-        if ($request->has('search') && $request->input('search')) {
-            $search = $request->input('search');
-            // Limpiar la búsqueda de comas y espacios extra, y dividir en términos
-            $searchTerms = array_filter(explode(' ', str_replace(',', ' ', $search)));
+        $query = Docente::query()->with(['cargos.dedicacion']);
 
-            $query->where(function ($q) use ($searchTerms) {
-                foreach ($searchTerms as $term) {
-                    // Asegurarse de que CADA término de búsqueda exista en alguna de las columnas
-                    $q->where(fn($subQuery) => $subQuery->where('nombre', 'ilike', "%{$term}%")
-                        ->orWhere('apellido', 'ilike', "%{$term}%")
-                        ->orWhere('legajo', 'like', "%{$term}%"));
-                }
-            });
-        }
+        $queryFilter = new QueryFilter;
 
-        // Aplicar filtro de estado
-        if ($request->filled('es_activo')) {
-            // El valor de es_activo será '1' para activos o '0' para inactivos.
-            // Lo convertimos a booleano para la consulta.
-            $query->where('es_activo', $request->input('es_activo') == '1');
-        }
+        $filters = $request->all();
 
-        $docentes = $query->with('cargos')->orderBy('apellido')->paginate(15)->withQueryString();
+        $queryFilter->apply($query, $filters);
+
+        $docentes = $query->with([
+                'cargos',
+                'dictas.comision.materia' 
+        ])
+        ->orderBy('apellido')
+        ->paginate(15)
+        ->withQueryString();
+
+        $user = Auth::user();
+        $institutosDisponibles = $user->getInstitutosAutorizados();
+        
+        $carreras = $institutosDisponibles->flatMap(function ($instituto) {
+            return $instituto->carreras;
+        })->values();
+        
+        $dedicaciones = Dedicaciones::all();
 
         return Inertia::render('Docentes/Index', [
             'docentes' => $docentes,
-            'filters' => $request->only(['search', 'es_activo']),
+            'institutos' => $institutosDisponibles,
+            'carreras' => $carreras,
+            'dedicaciones' => $dedicaciones,
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),
@@ -63,7 +73,7 @@ class DocenteController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreDocenteRequest  $request)
+    public function store(StoreDocenteRequest $request)
     {
         Docente::create($request->validated());
         return redirect()->route('docentes.index')->with('success', 'Docente creado exitosamente.');
@@ -72,18 +82,13 @@ class DocenteController extends Controller
     /**
      * Display the specified resource.
      */
-  /**
-     * Display the specified resource.
-     */
     public function show(Docente $docente)
     {
-        // Cargar relaciones: Cargos (con dedicación) Y Comisiones (con materia)
         $docente->load(['cargos.dedicacion', 'comisiones.materia']);
 
         return Inertia::render('Docentes/Show', [
             'docente' => $docente,
-            // Pasamos las comisiones por separado para usarlas fácil en el frontend
-            'comisiones' => $docente->comisiones 
+            'comisiones' => $docente->comisiones
         ]);
     }
 
@@ -100,10 +105,9 @@ class DocenteController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreDocenteRequest  $request, Docente $docente)
+    public function update(StoreDocenteRequest $request, Docente $docente)
     {
         $docente->update($request->validated());
-
         return redirect()->route('docentes.index')->with('success', 'Docente actualizado exitosamente.');
     }
 
@@ -122,25 +126,13 @@ class DocenteController extends Controller
 
     /**
      * Show the form for creating a new cargo.
-     *
-     * @param Docente $docente
-     * @return \Inertia\Response
      */
     public function createCargo(Docente $docente)
     {
-        
         if ($docente->modalidad_desempeño === 'Desarrollo') {
-
-
             $dedicaciones = \App\Models\Dedicaciones::whereIn('nombre', ['Simple', 'SemiExclusiva(DP)'])->get();
-
-
         } elseif ($docente->modalidad_desempeño === 'Investigador') {
-
-
             $dedicaciones = \App\Models\Dedicaciones::whereIn('nombre', ['SemiExclusiva(DI)', 'Exclusiva'])->get();
-
-
         }
 
         return Inertia::render('Docentes/Cargos/Create', [
@@ -156,4 +148,28 @@ class DocenteController extends Controller
 
         return back();
     }
+    
+
+    public function exportar(Request $request, ReportService $reportService)
+    {
+        try {
+            
+            $path = $reportService->generarDocentesPdf($request);
+  
+            if (!$path || !file_exists($path)) {
+                return back()->with('error', 'Error: El motor Jasper no generó el archivo. Verifique la configuración de Java en el servidor.');
+            }
+
+     
+            return response()->download($path, 'mapa_de_carreras.pdf', [
+                'Content-Type' => 'application/pdf',
+            ])->deleteFileAfterSend(true); 
+            
+        } catch (\Exception $e) {
+            \Log::error("Error en reporte Jasper: " . $e->getMessage());
+            
+            return back()->with('error', 'Error en el reporte: ' . $e->getMessage());
+        }
+    }  
+    
 }

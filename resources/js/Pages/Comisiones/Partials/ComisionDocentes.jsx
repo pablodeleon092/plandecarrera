@@ -3,7 +3,7 @@ import React, { useState, useMemo } from "react";
 import { Link, router } from "@inertiajs/react";
 import TableFilters from "@/Components/TableFilters";
 import DataTable from "@/Components/DataTable";
-import DangerButton from "@/Components/DangerButton";
+import DangerButton from "@/Components/Buttons/DangerButton";
 
 export default function ComisionDocentes({ comision, docentes, allDocentes, filters: initialFilters = {} }) {
     const [filters, setFilters] = useState({

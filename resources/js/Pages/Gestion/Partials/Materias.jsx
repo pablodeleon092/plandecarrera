@@ -1,5 +1,5 @@
 import React from 'react';
-import PaginatorButtons from '@/Components/PaginatorButtons';
+import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 
 export default function Materias({ materias }) {
     return (
@@ -19,7 +19,7 @@ export default function Materias({ materias }) {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Horas Sem.</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comisiones</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cant. Docentes</th>
-                            
+
                             {/* Columnas de Docentes por Cargo */}
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titular</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Asociado</th>

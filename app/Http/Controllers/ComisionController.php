@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Comision;
+use App\Models\User;
 use App\Models\Materia;
 use Inertia\Inertia;
+use App\Models\Instituto;
+use App\Models\Carrera;
+use App\Services\QueryFilter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -23,7 +27,8 @@ class ComisionController extends Controller
         $query = Comision::query();
 
   
-        if ($user->hasAnyRole(['Admin', 'Admin_global'])) {
+        if ($user->hasAnyRole(['Admin', 'Admin_global','coord_academico'])) {
+            // Acceso completo a todas las comisiones
 
         } elseif ($user->hasAnyRole(['Admin_instituto', 'Consulta_instituto'])) {
             if ($user->instituto_id) {
@@ -44,46 +49,34 @@ class ComisionController extends Controller
             $query->whereRaw('1 = 0');
         }
 
+        $queryFilter = new QueryFilter;
 
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('codigo', 'like', "%$search%")
-                ->orWhereHas('materia', function ($mq) use ($search) {
-                    $mq->where('nombre', 'like', "%$search%");
-                });
-            });
-        }
+        $filters = $request->all();
 
-        if ($request->filled('modalidad')) {
-            $query->where('modalidad', $request->modalidad);
-        }
-
-        if ($request->filled('sede')) {
-            $query->where('sede', $request->sede);
-        }
-
-
+        $queryFilter->apply($query, $filters);
 
         $comisiones = $query
-            ->with('materia')
+            ->with(['materia', 'horarios'])
             ->orderBy('id', 'desc')
             ->paginate(15)
             ->withQueryString();
-
-
+            
+        $institutosDisponibles = $user->getInstitutosAutorizados();
+        
+        $carreras = $institutosDisponibles->flatMap(function ($instituto) {
+            return $instituto->carreras;
+        })->values();
 
         return Inertia::render('Comisiones/Index', [
             'comisiones' => $comisiones,
-            'filters' => $request->only(['search', 'modalidad', 'sede']),
-            'modalidades' => Comision::select('modalidad')->distinct()->pluck('modalidad'),
-            'sedes' => Comision::select('sede')->distinct()->pluck('sede'),
+            'carreras' => $carreras,
+            'institutos' => $institutosDisponibles
         ]);
     }
 
     public function show($id)
     {
-        $comision = Comision::with('materia')->findOrFail($id);
+        $comision = Comision::with('materia', 'horarios')->findOrFail($id);
         $docentes = $comision->dictas()->exists() 
             ? $comision->docentes_with_cargo
             : collect(); // colección vacía
@@ -110,7 +103,7 @@ class ComisionController extends Controller
     
     public function edit($id)
     {
-        $comision = Comision::with('materia')->findOrFail($id);
+        $comision = Comision::with('materia', 'horarios')->findOrFail($id);
         $materias = \App\Models\Materia::where('estado', true)->get()->map(function ($materia) {
             return [
                 'id' => $materia->id,
@@ -128,7 +121,7 @@ class ComisionController extends Controller
 
     public function update(Request $request, $id)
     {
-        $comision = Comision::with('materia')->findOrFail($id);
+        $comision = Comision::with('materia', 'horarios')->findOrFail($id);
         try {
             $validated = $request->validate([
                 'codigo' => [
@@ -248,6 +241,5 @@ class ComisionController extends Controller
         return redirect()->route('comisiones.index')
             ->with('success', 'Estado de la comisión actualizado exitosamente.');
     }
-
 
 }

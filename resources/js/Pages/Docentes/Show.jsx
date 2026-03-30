@@ -3,9 +3,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import DocenteInfo from './Partials/DocenteInfo';             // <--- Nuevo
 import DocenteComisiones from './Partials/DocenteComisiones'; // <--- Nuevo
-import PrimaryButton from '@/Components/PrimaryButton';
-import SecondaryButton from '@/Components/SecondaryButton';
-import DangerButton from '@/Components/DangerButton';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
+import SecondaryButton from '@/Components/Buttons/SecondaryButton';
+import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 'comisiones'
 
@@ -24,8 +24,6 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
         >
             <Head title={`Docente: ${docente.nombre} ${docente.apellido}`} />
 
-            <div className="py-12">
-                <div className="max-w-5xl mx-auto sm:px-6 lg:px-8">
 
                     {/* Botón Volver */}
                     <div className="mb-4">
@@ -39,9 +37,14 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                             className="flex items-center gap-2"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                />
                             </svg>
-                            Volver al Listado
+                            Volver
                         </SecondaryButton>
                     </div>
 
@@ -117,8 +120,7 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                             )}
                         </div>
                     </div>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

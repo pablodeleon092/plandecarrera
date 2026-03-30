@@ -1,6 +1,6 @@
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
@@ -27,7 +27,7 @@ export default function Register({ institutos }) {
 
     return (
         <GuestLayout>
-            <Head title="Create User"/>
+            <Head title="Create User" />
 
             <form onSubmit={submit}>
                 <div>
@@ -65,7 +65,7 @@ export default function Register({ institutos }) {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="dni" value="DNI"/>
+                    <InputLabel htmlFor="dni" value="DNI" />
 
                     <TextInput
                         id="dni"
@@ -99,7 +99,7 @@ export default function Register({ institutos }) {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="apellido" value="Apellido"/>
+                    <InputLabel htmlFor="apellido" value="Apellido" />
 
                     <TextInput
                         id="apellido"

@@ -4,55 +4,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
-import TableFilters from '@/Components/TableFilters';
-import PaginatorButtons from '@/Components/PaginatorButtons';
+import GestionMaterias from '@/Components/Filters/GestionMaterias';
+import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 
-export default function Index({ auth, materias, filters: initialFilters = {} }) {
-
-    const [filters, setFilters] = useState({
-        search: initialFilters.search || '',
-        regimen: initialFilters.regimen || '',
-        estado: initialFilters.estado || '',
-    });
-
-    const handleFilterChange = (key, value) => {
-        const newFilters = { ...filters, [key]: value };
-
-        setFilters(newFilters);
-
-        router.get(route('materias.index'), newFilters, {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-        });
-    };
-
-    const filterConfig = [
-        {
-            key: 'search', label: 'Buscar', type: 'text',
-            value: filters.search, placeholder: 'Buscar por nombre o código...'
-        },
-        {
-            key: 'regimen', label: 'Régimen', type: 'select',
-            value: filters.regimen,
-            options: [
-                { value: 'anual', label: 'Anual' },
-                { value: 'cuatrimestral', label: 'Cuatrimestral' },
-            ]
-        },
-        {
-            key: 'estado', label: 'Estado', type: 'select',
-            value: filters.estado,
-            options: [
-                { value: 'true', label: 'Activa' },
-                { value: 'false', label: 'Inactiva' },
-            ]
-        }
-    ];
-
-    const activeFilters = Object.fromEntries(
-        Object.entries(filters).filter(([_, value]) => value !== '' && value !== null)
-    );
+export default function Index({ auth, institutos, carreras, materias, flash }) {
 
     const handleDelete = (id) => {
         if (confirm('¿Estás seguro de eliminar esta materia?')) {
@@ -78,8 +33,16 @@ export default function Index({ auth, materias, filters: initialFilters = {} }) 
         >
             <Head title="Materias" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    {flash?.success && (
+                        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                            {flash.success}
+                        </div>
+                    )}
+                    {flash?.error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            {flash.error}
+                        </div>
+                    )}
 
                     {/* HEADER */}
                     <ListHeader
@@ -90,12 +53,11 @@ export default function Index({ auth, materias, filters: initialFilters = {} }) 
 
                     {/* FILTROS */}
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
-                        <TableFilters
-                            filters={filterConfig}
-                            onChange={handleFilterChange}
+                        <GestionMaterias
+                            institutos = {institutos}
+                            carreras = {carreras}
                         />
                     </div>
-
                     {/* TABLA */}
                     <div className="bg-white rounded-lg shadow overflow-hidden">
 
@@ -137,8 +99,8 @@ export default function Index({ auth, materias, filters: initialFilters = {} }) 
                                     label: 'Estado',
                                     render: (m) => (
                                         <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${m.estado
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-red-100 text-red-800'
+                                            ? 'bg-green-100 text-green-800'
+                                            : 'bg-red-100 text-red-800'
                                             }`}>
                                             {m.estado ? 'Activa' : 'Inactiva'}
                                         </span>
@@ -166,7 +128,6 @@ export default function Index({ auth, materias, filters: initialFilters = {} }) 
                         meta={materias.meta}
                         paginator={materias}
                         routeName="materias.index"
-                        routeParams={activeFilters}
                     />
 
                     {/* CARDS TOTALES */}
@@ -185,8 +146,6 @@ export default function Index({ auth, materias, filters: initialFilters = {} }) 
                         </div>
                     </div>
 
-                </div>
-            </div>
         </AuthenticatedLayout>
     );
 }

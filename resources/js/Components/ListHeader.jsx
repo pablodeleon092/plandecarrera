@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import PrimaryButton from '@/Components/PrimaryButton';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 
 export default function ListHeader({ title, buttonLabel, buttonRoute }) {
     return (

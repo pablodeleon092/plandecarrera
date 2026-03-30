@@ -51,11 +51,11 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         \Log::debug($request->all());
-        
+
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'dni' => 'required|integer|unique:'.User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
+            'dni' => 'required|integer|unique:' . User::class,
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
             'cargo' => 'required|string|max:255',
@@ -141,7 +141,7 @@ class UserController extends Controller
 
         return Inertia::render('Users/Edit', [
             'user' => $user,
-            'institutos' => Instituto::select('id','siglas')->get(),
+            'institutos' => Instituto::select('id', 'siglas')->get(),
             'flash' => ['success' => 'Usuario actualizado correctamente.'],
         ]);
     }
@@ -186,7 +186,7 @@ class UserController extends Controller
 
     public function updateCarrerasCoordinador(Request $request, User $user)
     {
- 
+
         $validated = $request->validate([
             'carreras_ids' => 'nullable|array',
             'carreras_ids.*' => 'exists:carreras,id', // Asume que la tabla es 'carreras'
@@ -218,5 +218,23 @@ class UserController extends Controller
         return $cargoRoleMap[$cargo] ?? 'user'; // Rol por defecto si no se encuentra el cargo
     }
 
+    public function toggleStatus(User $user)
+    {
+        $this->authorize('update', $user);
 
+        if (Auth::id() === $user->id) {
+            return back()->with('error', 'No puedes desactivar tu propio usuario.');
+        }
+
+        try {
+            $user->is_activo = !$user->is_activo;
+            $user->save();
+        } catch (\Exception $e) {
+            \Log::error('Error cambiando estado de usuario: ' . $e->getMessage());
+            return back()->with('error', 'Hubo un problema al cambiar el estado del usuario.');
+        }
+
+        $status = $user->is_activo ? 'activado' : 'desactivado';
+        return back()->with('success', "Usuario {$status} correctamente.");
+    }
 }

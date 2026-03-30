@@ -1,9 +1,9 @@
 import { Head, useForm, Link } from '@inertiajs/react';
 import { useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PrimaryButton from '@/Components/PrimaryButton';
-import SecondaryButton from '@/Components/SecondaryButton';
-import DangerButton from '@/Components/DangerButton';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
+import SecondaryButton from '@/Components/Buttons/SecondaryButton';
+import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Create({ auth }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -35,9 +35,6 @@ export default function Create({ auth }) {
             header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Crear Nueva Materia</h2>}
         >
             <Head title="Crear Materia" />
-
-            <div className="py-12">
-                <div className="mx-auto max-w-3xl sm:px-6 lg:px-8">
                     {/* Breadcrumb */}
                     <div className="mb-6">
                         <Link
@@ -247,8 +244,7 @@ export default function Create({ auth }) {
                             </PrimaryButton>
                         </div>
                     </form>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

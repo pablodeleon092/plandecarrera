@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import { Head, Link } from '@inertiajs/react';
 import ComisionInfo from './Partials/ComisionInfo';
 import ComisionDocentes from './Partials/ComisionDocentes';
-import SecondaryButton from '@/Components/SecondaryButton';
+import SecondaryButton from '@/Components/Buttons/SecondaryButton';
+import ComisionHorarios from './Partials/ComisionHorarios';
 
 export default function ShowComision({ auth, comision, flash, docentes, allDocentes }) {
 
@@ -35,9 +37,14 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                             className="flex items-center gap-2"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                />
                             </svg>
-                            Volver al Listado
+                            Volver
                         </SecondaryButton>
                     </div>
 
@@ -78,8 +85,14 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                     </div>
                                 </div>
 
-                                {/* No hay botones de editar/eliminar en tu versión original, así que los omitimos.
-                                    Si querés agregar, me avisás y los sumo. */}
+                                <div className="flex gap-2">
+                                    <PrimaryButton
+                                        as={Link}
+                                        href={route('comisiones.edit', comision.id)}
+                                    >
+                                        Editar comisión
+                                    </PrimaryButton>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -109,19 +122,35 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                 >
                                     Docentes
                                 </button>
+
+
+                                <button
+                                    onClick={() => setCurrentTab('horarios')}
+                                    className={`px-4 py-2 font-semibold transition border-b-2 ${
+                                        currentTab === 'horarios'
+                                            ? 'border-blue-600 text-blue-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Horarios
+                                </button>
                             </div>
                         </div>
 
                         {/* Contenido dinámico */}
                         <div className="p-8">
-                            {currentTab === 'informacion' ? (
+                            {currentTab === 'informacion' && (
                                 <ComisionInfo comision={comision} />
-                            ) : (
+                            )}
+                            {currentTab === 'docentes' && (
                                 <ComisionDocentes
                                     comision={comision}
                                     docentes={docentes}
                                     allDocentes={allDocentes}
                                 />
+                            )}
+                            {currentTab === 'horarios' && (
+                                <ComisionHorarios comision={comision} />
                             )}
                         </div>
                     </div>

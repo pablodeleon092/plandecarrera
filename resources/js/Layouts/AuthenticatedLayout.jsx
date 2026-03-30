@@ -237,7 +237,13 @@ export default function AuthenticatedLayout({ header, children }) {
                 </header>
             )}
 
-            <main>{children}</main>
+            <main>
+                <div className="py-12">
+                    <div className="mx-auto w-[95%]">
+                        {children}
+                    </div>
+                </div>
+            </main>
         </div>
     );
 }

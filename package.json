@@ -23,6 +23,8 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "react-beautiful-dnd": "^13.1.1"
+        "@heroicons/react": "^2.2.0",
+        "react-beautiful-dnd": "^13.1.1",
+        "react-google-charts": "^5.2.1"
     }
 }

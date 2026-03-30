@@ -12,8 +12,6 @@ class Materia extends Model
 
     protected $table = 'materias';
 
-
-
     protected $fillable = [
         'nombre',
         'codigo',
@@ -107,6 +105,13 @@ class Materia extends Model
         });
     }
 
+    public function scopeByCarrera($query, $carreraId)
+    {
+        return $query->whereHas('planes', function ($q) use ($carreraId) {
+            $q->where('carrera_id', $carreraId);
+        });
+    }
+
     /**
      * Scope para materias activas
      */
@@ -156,5 +161,15 @@ class Materia extends Model
     {
         return $this->estado === true;
     }
+
+    public function tieneDocenteUnico()
+    {
+        // Obtenemos todos los IDs de docentes únicos en todas las comisiones de esta materia
+        $docentesIds = $this->comisiones->flatMap->dictas->pluck('docente_id')->unique();
+        
+        // Si solo hay 1 docente para toda la materia (independientemente de las comisiones), hay riesgo
+        return $docentesIds->count() === 1;
+    }
+
 
 }

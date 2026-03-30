@@ -3,11 +3,11 @@ import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CarreraInfo from './Partials/CarreraInfo';
 import CarreraMaterias from './Partials/CarreraMaterias';
-import PrimaryButton from '@/Components/PrimaryButton';
-import SecondaryButton from '@/Components/SecondaryButton';
-import DangerButton from '@/Components/DangerButton';
+import PrimaryButton from '@/Components/Buttons/PrimaryButton';
+import SecondaryButton from '@/Components/Buttons/SecondaryButton';
+import DangerButton from '@/Components/Buttons/DangerButton';
 
-export default function Show({ auth, carrera, materias }) {
+export default function Show({ auth, carrera, planes }) {
     const [tab, setTab] = useState('info');
 
     const handleDelete = () => {
@@ -29,8 +29,6 @@ export default function Show({ auth, carrera, materias }) {
         >
             <Head title={`Carrera: ${carrera.nombre}`} />
 
-            <div className="py-12">
-                <div className="max-w-5xl mx-auto sm:px-6 lg:px-8">
 
                     {/* Botón Volver */}
                     <div className="mb-4">
@@ -70,13 +68,6 @@ export default function Show({ auth, carrera, materias }) {
 
                                 {/* Botones */}
                                 <div className="flex gap-3">
-                                    <PrimaryButton
-                                        as={Link}
-                                        href={route('carreras.edit', carrera.id)}
-                                    >
-                                        Editar
-                                    </PrimaryButton>
-
                                     <DangerButton
                                         onClick={handleDelete}
                                     >
@@ -123,13 +114,15 @@ export default function Show({ auth, carrera, materias }) {
                             {tab === 'info' ? (
                                 <CarreraInfo carrera={carrera} />
                             ) : (
-                                <CarreraMaterias carrera={carrera} materias={materias} />
+                                <CarreraMaterias 
+                                    carrera={carrera} 
+                                    planes={planes} 
+                                />
                             )}
                         </div>
 
                     </div>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }
