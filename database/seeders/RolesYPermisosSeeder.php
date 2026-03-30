@@ -53,8 +53,8 @@ class RolesYPermisosSeeder extends Seeder
                 'modificar_docente'
             ],
             'Admin_instituto' => [
-                'consultar_usuario', 
-
+                //'consultar_usuario', 
+                // 'modificar_usuario',         // ❌ ELIMINADO
                 'consultar_carrera',
                 'modificar_carrera', 
                 'consultar_docente', 

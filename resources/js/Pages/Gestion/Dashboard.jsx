@@ -89,7 +89,7 @@ export default function Dashboard({ user, institutos, materias, docentes, select
 
 
     // ----------------------------------------------------------------------
-    // 4. RENDERING
+    // 4.  RENDERING
     // ----------------------------------------------------------------------
 
     // Opciones para el selector de Carreras

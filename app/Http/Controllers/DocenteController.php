@@ -82,17 +82,12 @@ class DocenteController extends Controller
     /**
      * Display the specified resource.
      */
-    /**
-     * Display the specified resource.
-     */
     public function show(Docente $docente)
     {
-        // Cargar relaciones: Cargos (con dedicación) Y Comisiones (con materia)
         $docente->load(['cargos.dedicacion', 'comisiones.materia']);
 
         return Inertia::render('Docentes/Show', [
             'docente' => $docente,
-            // Pasamos las comisiones por separado para usarlas fácil en el frontend
             'comisiones' => $docente->comisiones
         ]);
     }
@@ -113,7 +108,6 @@ class DocenteController extends Controller
     public function update(StoreDocenteRequest $request, Docente $docente)
     {
         $docente->update($request->validated());
-
         return redirect()->route('docentes.index')->with('success', 'Docente actualizado exitosamente.');
     }
 
@@ -132,25 +126,13 @@ class DocenteController extends Controller
 
     /**
      * Show the form for creating a new cargo.
-     *
-     * @param Docente $docente
-     * @return \Inertia\Response
      */
     public function createCargo(Docente $docente)
     {
-
         if ($docente->modalidad_desempeño === 'Desarrollo') {
-
-
             $dedicaciones = \App\Models\Dedicaciones::whereIn('nombre', ['Simple', 'SemiExclusiva(DP)'])->get();
-
-
         } elseif ($docente->modalidad_desempeño === 'Investigador') {
-
-
             $dedicaciones = \App\Models\Dedicaciones::whereIn('nombre', ['SemiExclusiva(DI)', 'Exclusiva'])->get();
-
-
         }
 
         return Inertia::render('Docentes/Cargos/Create', [
