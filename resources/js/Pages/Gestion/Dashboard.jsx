@@ -110,8 +110,6 @@ export default function Dashboard({ user, institutos, materias, docentes, select
         >
             <Head title="Dashboard" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg p-6">
 
                         {/* SELECTORES DE FILTRO (Permanecen en el Dashboard) */}
@@ -215,8 +213,7 @@ export default function Dashboard({ user, institutos, materias, docentes, select
                             view: currentView
                         }}
                     />
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

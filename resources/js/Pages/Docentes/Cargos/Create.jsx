@@ -32,9 +32,6 @@ export default function Create({ auth, docente, dedicaciones, flash }) {
                     {flash.error}
                 </div>
             )}
-
-            <div className="py-12">
-                <div className="max-w-4xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <form onSubmit={submit} className="p-6 space-y-6">
                             {/* Campo oculto con el ID del docente */}
@@ -106,8 +103,6 @@ export default function Create({ auth, docente, dedicaciones, flash }) {
                             </div>
                         </form>
                     </div>
-                </div>
-            </div>
         </AuthenticatedLayout>
     );
 }

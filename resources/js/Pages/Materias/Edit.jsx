@@ -34,9 +34,6 @@ export default function Edit({ auth, materia }) {
             header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Editar Materia</h2>}
         >
             <Head title="Editar Materia" />
-
-            <div className="py-12">
-                <div className="mx-auto max-w-3xl sm:px-6 lg:px-8">
                     <div className="mb-4">
                         <SecondaryButton
                             as={Link}
@@ -245,8 +242,7 @@ export default function Edit({ auth, materia }) {
                             </PrimaryButton>
                         </div>
                     </div>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

@@ -127,7 +127,7 @@ export default function Index({ auth, users }) {
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Usuarios</h2>}
         >
             <Head title="Usuarios" />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
                 <ListHeader
                     title="Listado de Usuarios"
                     buttonLabel="Agregar Usuario"
@@ -169,7 +169,7 @@ export default function Index({ auth, users }) {
                     }
                     disableScroll={true}
                 />
-            </div>
+
         </AuthenticatedLayout>
     );
 }

@@ -40,8 +40,6 @@ export default function Edit({ auth, materias, comision, flash }) {
                 </div>
             )}
 
-            <div className="py-12">
-                <div className="max-w-4xl mx-auto sm:px-6 lg:px-8">
                     <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <form onSubmit={submit} className="p-6 space-y-6">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -222,8 +220,7 @@ export default function Edit({ auth, materias, comision, flash }) {
                             </div>
                         </form>
                     </div>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

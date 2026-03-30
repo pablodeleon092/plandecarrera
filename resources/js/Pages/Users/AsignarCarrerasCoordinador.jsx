@@ -98,7 +98,7 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
         >
             <Head title={`Asignar Carreras - ${coordinador.nombre} ${coordinador.apellido}`} />
 
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
                 <h2 className="text-2xl font-semibold mb-4 mt-4">Asignar Carreras a {coordinador.nombre} {coordinador.apellido}</h2>
                 {flash?.success && (
                     <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -181,7 +181,7 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
                         {isPutting ? 'Guardando...' : 'Guardar asignación'}
                     </PrimaryButton>
                 </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

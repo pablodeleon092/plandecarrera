@@ -29,8 +29,6 @@ export default function Show({ auth, carrera, planes }) {
         >
             <Head title={`Carrera: ${carrera.nombre}`} />
 
-            <div className="py-12">
-                <div className="max-w-5xl mx-auto sm:px-6 lg:px-8">
 
                     {/* Botón Volver */}
                     <div className="mb-4">
@@ -124,8 +122,7 @@ export default function Show({ auth, carrera, planes }) {
                         </div>
 
                     </div>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

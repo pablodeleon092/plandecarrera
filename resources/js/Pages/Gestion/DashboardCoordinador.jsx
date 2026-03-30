@@ -165,9 +165,6 @@ export default function DashboardCoordinador({
         >
             <Head title="Dashboard Coordinador" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-
             {/* KPI CARDS */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 {/* KPI Cobertura */}
@@ -381,8 +378,6 @@ export default function DashboardCoordinador({
                             ))}
                         </div>
                     )}
-                </div>
-            </div>
         </AuthenticatedLayout>
     );
 }

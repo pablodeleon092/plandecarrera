@@ -53,8 +53,6 @@ export default function DashboardConsejero({
         >
             <Head title="Dashboard Consejero" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
                     {/* HEADER CON ESTADO GENERAL */}
                     <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -329,8 +327,6 @@ export default function DashboardConsejero({
                             </div>
                         </div>
                     )}
-                </div>
-            </div>
         </AuthenticatedLayout>
     );
 }

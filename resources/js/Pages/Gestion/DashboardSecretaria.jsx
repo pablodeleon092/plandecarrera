@@ -64,8 +64,7 @@ export default function DashboardSecretaria({
         >
             <Head title="Dashboard Secretaría" />
 
-            <div className="py-12">
-                <div className="mx-auto w-[95%]">
+
 
                     {/* HEADER CON ESTADO GENERAL */}
                     <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -356,8 +355,6 @@ export default function DashboardSecretaria({
                             </div>
                         </div>
                     )}
-                </div>
-            </div>
         </AuthenticatedLayout>
     );
 }

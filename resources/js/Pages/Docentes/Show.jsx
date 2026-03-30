@@ -24,8 +24,6 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
         >
             <Head title={`Docente: ${docente.nombre} ${docente.apellido}`} />
 
-            <div className="py-12">
-                <div className="max-w-5xl mx-auto sm:px-6 lg:px-8">
 
                     {/* Botón Volver */}
                     <div className="mb-4">
@@ -122,8 +120,7 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                             )}
                         </div>
                     </div>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

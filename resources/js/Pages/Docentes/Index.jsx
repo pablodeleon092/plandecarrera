@@ -41,8 +41,6 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
         >
             <Head title="Docentes" />
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     {flash?.success && (
                         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                             {flash.success}
@@ -157,8 +155,6 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                             </p>
                         </div>
                     </div>
-                </div>
-            </div>
         </AuthenticatedLayout>
     );
 }

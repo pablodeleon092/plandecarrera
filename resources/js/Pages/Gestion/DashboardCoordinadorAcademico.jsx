@@ -22,9 +22,6 @@ export default function DashboardCoordinadorAcademico({
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard: {stats.institutoNombre}</h2>}
         >
             <Head title="Coordinación Académica" />
-
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                     
                     {/* KPIs Globales */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -103,8 +100,6 @@ export default function DashboardCoordinadorAcademico({
                         )}
                     </div>
 
-                </div>
-            </div>
         </AuthenticatedLayout>
     );
 }

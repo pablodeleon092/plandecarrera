@@ -28,8 +28,6 @@ export default function Show({ auth, materia, comisiones }) {
         >
             <Head title={`Materia: ${materia.nombre}`} />
 
-            <div className="py-12">
-                <div className="max-w-5xl mx-auto sm:px-6 lg:px-8">
 
                     {/* Botón Volver */}
                     <div className="mb-4">
@@ -141,8 +139,7 @@ export default function Show({ auth, materia, comisiones }) {
                         </div>
                     </div>
 
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }

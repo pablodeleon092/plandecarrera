@@ -18,10 +18,10 @@ class DashboardController extends Controller
     public function home(Request $request)
     {
         $user = Auth::user();
-        
+
         // Resolvemos la estrategia según el cargo
         $strategy = DashboardFactory::make($user->cargo);
-        
+
         // Ejecutamos el renderizado de esa estrategia
         return $strategy->render($user, $request);
     }

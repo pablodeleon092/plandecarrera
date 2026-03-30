@@ -94,10 +94,6 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
                     {flash.error}
                 </div>
             )}
-
-
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <ListHeader
                         title="Listado de Comisiones"
                     />
@@ -136,8 +132,7 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
                             <p className="text-2xl font-bold text-gray-900">{comisiones.meta?.total || comisiones.data.length}</p>
                         </div>
                     </div>
-                </div>
-            </div>
+
         </AuthenticatedLayout>
     );
 }
