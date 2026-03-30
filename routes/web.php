@@ -9,6 +9,7 @@ use App\Http\Controllers\MateriaController;
 use App\Http\Controllers\ComisionController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -47,7 +48,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rutas para la gestión de Docentes
-    Route::get('/docentes/exportar', [DocenteController::class, 'exportar'])->name('docentes.exportar');
+    //Route::get('/docentes/exportar', [DocenteController::class, 'exportar'])->name('docentes.exportar');
+    Route::get('/exportar/{tipo}', [ReportController::class, 'exportar'])->name('exportar.pdf');
     Route::resource('docentes', DocenteController::class);
     Route::resource('cargos', CargoController::class);
     Route::get('docentes/{docente}/cargo/create', [DocenteController::class, 'createCargo'])->name('docentes.cargo.create');

@@ -23,8 +23,6 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
             header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Docente: {docente.nombre} {docente.apellido}</h2>}
         >
             <Head title={`Docente: ${docente.nombre} ${docente.apellido}`} />
-
-
                     {/* Botón Volver */}
                     <div className="mb-4">
                         <SecondaryButton

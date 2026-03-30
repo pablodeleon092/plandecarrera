@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { router } from '@inertiajs/react';
 import DynamicFilters from '@/Components/Filters/DynamicFilters';
 import { PrinterIcon } from '@heroicons/react/24/outline';
+import BtnExportar from '@/Components/Buttons/BtnExportar'; // Ajusta la ruta
 
 export default function GestionPersonal ({ institutos, carreras, dedicaciones }) {
     // Definimos qué campos pueden ser filtrados
@@ -46,7 +47,7 @@ export default function GestionPersonal ({ institutos, carreras, dedicaciones })
     };
 
 
-    const handleExportarPdf = () => {
+    const handleExportarPdf = (tipo = "docentes") => {
         // 1. Creamos el objeto de búsqueda de la URL
         const params = new URLSearchParams();
 
@@ -64,7 +65,7 @@ export default function GestionPersonal ({ institutos, carreras, dedicaciones })
         });
 
         // 3. Construimos la URL final
-        const baseUrl = route('docentes.exportar');
+        const baseUrl = route('exportar.pdf', { tipo: tipo });
         const fullUrl = `${baseUrl}?${params.toString()}`;
 
         // 4. Redireccionamos (esto disparará la descarga en el navegador)
@@ -88,16 +89,7 @@ export default function GestionPersonal ({ institutos, carreras, dedicaciones })
                         Aplicar Filtros
                     </button>
                 </div>
-                        <button
-                            onClick={handleExportarPdf}
-                            className="inline-flex items-center px-4 py-2 bg-red-600 border 
-                            border-transparent rounded-md font-semibold 
-                            text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:border-red-900 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150"
-                            title="Exportar lista filtrada a PDF"
-                        >
-                            <PrinterIcon className="w-4 h-4" />
-                            Exportar PDF
-                        </button>
+                    <BtnExportar tipo="docentes" filters={activeFilters} />
             </div>
         </div>
     );

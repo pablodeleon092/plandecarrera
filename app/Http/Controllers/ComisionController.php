@@ -242,4 +242,6 @@ class ComisionController extends Controller
             ->with('success', 'Estado de la comisión actualizado exitosamente.');
     }
 
+
+
 }

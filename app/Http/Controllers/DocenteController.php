@@ -148,28 +148,5 @@ class DocenteController extends Controller
 
         return back();
     }
-    
-
-    public function exportar(Request $request, ReportService $reportService)
-    {
-        try {
-            
-            $path = $reportService->generarDocentesPdf($request);
-  
-            if (!$path || !file_exists($path)) {
-                return back()->with('error', 'Error: El motor Jasper no generó el archivo. Verifique la configuración de Java en el servidor.');
-            }
-
-     
-            return response()->download($path, 'mapa_de_carreras.pdf', [
-                'Content-Type' => 'application/pdf',
-            ])->deleteFileAfterSend(true); 
-            
-        } catch (\Exception $e) {
-            \Log::error("Error en reporte Jasper: " . $e->getMessage());
-            
-            return back()->with('error', 'Error en el reporte: ' . $e->getMessage());
-        }
-    }  
-    
+        
 }
