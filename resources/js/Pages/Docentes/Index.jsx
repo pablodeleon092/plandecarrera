@@ -7,6 +7,7 @@ import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
 import GestionPersonal from '@/Components/Filters/GestionPersonal';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
+import KPICard from '@/Components/Dashboard/KPICard';
 
 
 export default function Index({ auth, institutos, carreras, docentes, flash, dedicaciones}) {
@@ -138,22 +139,21 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                     />
 
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Total Docentes</p>
-                            <p className="text-2xl font-bold text-gray-900">{totalDocentes}</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Docentes Activos</p>
-                            <p className="text-2xl font-bold text-green-600">
-                                {docentesActivos}
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Docentes Inactivos</p>
-                            <p className="text-2xl font-bold text-red-600">
-                                {docentesInactivos}
-                            </p>
-                        </div>
+                        <KPICard
+                            title="Total Docentes"
+                            value={totalDocentes}
+                            status="neutral"
+                        />
+                        <KPICard
+                            title="Docentes Activos"
+                            value={docentesActivos}
+                            status="success"
+                        />
+                        <KPICard
+                            title="Docentes Inactivos"
+                            value={docentesInactivos}
+                            status="danger"
+                        />
                     </div>
         </AuthenticatedLayout>
     );

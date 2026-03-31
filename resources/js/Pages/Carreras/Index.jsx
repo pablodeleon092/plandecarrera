@@ -1,10 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
 import TableFilters from '@/Components/TableFilters';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
+import KPICard from '@/Components/Dashboard/KPICard';
 
 export default function Index({ auth, carreras, filters: initialFilters }) {
     const [filters, setFilters] = useState({
@@ -90,6 +91,10 @@ export default function Index({ auth, carreras, filters: initialFilters }) {
             { preserveScroll: true });
     };
 
+    // Calcular totales para las tarjetas de resumen
+    const totalCarreras = carreras.meta?.total || carreras.data.length;
+    const carrerasActivas = useMemo(() => carreras.data.filter(c => c.estado).length, [carreras.data]);
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -129,12 +134,17 @@ export default function Index({ auth, carreras, filters: initialFilters }) {
 
                     <PaginatorButtons meta={carreras?.meta} paginator={carreras} routeName={'carreras.index'} />
 
-                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Total Carreras</p>
-                            <p className="text-2xl font-bold text-gray-900">{carreras.meta?.total || carreras.data.length}</p>
-                        </div>
-                        {/* Aquí puedes agregar más tarjetas de estadísticas si lo necesitas */}
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <KPICard
+                            title="Total Carreras"
+                            value={totalCarreras}
+                            status="neutral"
+                        />
+                        <KPICard
+                            title="Carreras Activas"
+                            value={carrerasActivas}
+                            status="success"
+                        />
                     </div>
 
         </AuthenticatedLayout>

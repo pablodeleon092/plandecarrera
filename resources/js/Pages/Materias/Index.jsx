@@ -6,6 +6,7 @@ import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
 import GestionMaterias from '@/Components/Filters/GestionMaterias';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
+import KPICard from '@/Components/Dashboard/KPICard';
 
 export default function Index({ auth, institutos, carreras, materias, flash }) {
 
@@ -132,18 +133,21 @@ export default function Index({ auth, institutos, carreras, materias, flash }) {
 
                     {/* CARDS TOTALES */}
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Total Materias</p>
-                            <p className="text-2xl font-bold text-gray-900">{totalMaterias}</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Materias Activas</p>
-                            <p className="text-2xl font-bold text-green-600">{materiasActivas}</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Materias Cuatrimestrales</p>
-                            <p className="text-2xl font-bold text-blue-600">{materiasCuatrimestrales}</p>
-                        </div>
+                        <KPICard
+                            title="Total Materias"
+                            value={totalMaterias}
+                            status="neutral"
+                        />
+                        <KPICard
+                            title="Materias Activas"
+                            value={materiasActivas}
+                            status="success"
+                        />
+                        <KPICard
+                            title="Materias Cuatrimestrales"
+                            value={materiasCuatrimestrales}
+                            status="warning"
+                        />
                     </div>
 
         </AuthenticatedLayout>
