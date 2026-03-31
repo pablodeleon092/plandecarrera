@@ -1,10 +1,8 @@
+import Button from '@/Components/Button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Create({ auth, materias, materia, flash }) {
-
 
     const { data, setData, post, processing, errors } = useForm({
         codigo: '',
@@ -19,8 +17,6 @@ export default function Create({ auth, materias, materia, flash }) {
         horas_totales: 0,
         id_materia: materia.id || '',
     });
-
-
 
     const submit = (e) => {
         e.preventDefault();
@@ -193,7 +189,7 @@ export default function Create({ auth, materias, materia, flash }) {
                             </div>
 
                             <div className="flex justify-end space-x-4">
-                                <DangerButton
+                                <Button variant="danger"
                                     as={Link}
                                     href="#"
                                     onClick={(e) => {
@@ -202,13 +198,13 @@ export default function Create({ auth, materias, materia, flash }) {
                                     }}
                                 >
                                     Cancelar
-                                </DangerButton>
-                                <PrimaryButton
+                                </Button>
+                                <Button variant="primary"
                                     type="submit"
                                     disabled={processing}
                                 >
                                     {processing ? 'Guardando...' : 'Crear Comisión'}
-                                </PrimaryButton>
+                                </Button>
                             </div>
                         </form>
                     </div>

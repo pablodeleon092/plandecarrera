@@ -1,8 +1,5 @@
+import IconButton from '@/Components/IconButton';
 import { Link } from '@inertiajs/react';
-import ToggleStatusButton from './Buttons/ToggleStatusButton';
-import ShowButton from './Buttons/ShowButton';
-import EditButton from './Buttons/EditButton';
-import DeleteButton from './Buttons/DeleteButton';
 
 export default function DataTable({
     columns = [],
@@ -31,11 +28,11 @@ export default function DataTable({
     // Componente simplificado que usa los botones modulares
     const ActionButtons = ({ item }) => (
         <div className="flex items-center justify-end gap-3">
-            <ShowButton item={item} onShow={onShow} />
-            <EditButton item={item} onEdit={onEdit} />
-            <DeleteButton item={item} onDelete={onDelete} />
+            <IconButton action="show" item={item} onShow={onShow} />
+            <IconButton action="edit" item={item} onEdit={onEdit} />
+            <IconButton action="delete" item={item} onDelete={onDelete} />
             {onToggleStatus && (
-                <ToggleStatusButton
+                <IconButton action="toggle"
                     isActive={!!item[statusKey]}
                     onClick={() => onToggleStatus(item)}
                 />
@@ -47,32 +44,39 @@ export default function DataTable({
     const headerPaddingClass = dense ? 'px-3 py-2' : 'px-6 py-3';
 
     return (
+<<<<<<< Updated upstream
         <div className={`bg-white rounded-lg shadow overflow-hidden ${containerClassName}`}>
             <div className={'overflow-x-auto'}>
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
+=======
+        <div className={`datatable-container ${containerClassName}`}>
+            <div className={disableScroll ? '' : 'overflow-x-auto'}>
+                <table className="datatable-table">
+                    <thead className="datatable-thead">
+>>>>>>> Stashed changes
                         <tr>
                             {columns.map((col, index) => (
                                 <th
                                     key={index}
-                                    className={`${headerPaddingClass} text-left text-xs font-medium text-gray-500 uppercase tracking-wider`}
+                                    className={`${headerPaddingClass} datatable-th`}
                                 >
                                     {col.label}
                                 </th>
                             ))}
                             {actions && (onShow || onEdit || onDelete || onToggleStatus) && (
-                                <th className={`${headerPaddingClass} text-right text-xs font-medium text-gray-500 uppercase tracking-wider`}>
+                                <th className={`${headerPaddingClass} datatable-th text-right`}>
                                     Acciones
                                 </th>
                             )}
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="datatable-tbody">
                         {data.length === 0 ? (
                             <tr>
                                 <td
                                     colSpan={columns.length + (actions && (onShow || onEdit || onDelete || onToggleStatus) ? 1 : 0)}
-                                    className="px-6 py-8 text-center text-gray-500"
+                                    className="datatable-empty"
                                 >
                                     <div className="flex flex-col items-center">
                                         <EmptyIcon />

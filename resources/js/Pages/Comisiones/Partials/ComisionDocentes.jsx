@@ -1,9 +1,9 @@
+import Button from '@/Components/Button';
 // Updated ComisionDocentes.jsx using DataTable
 import React, { useState, useMemo } from "react";
 import { Link, router } from "@inertiajs/react";
 import TableFilters from "@/Components/TableFilters";
 import DataTable from "@/Components/DataTable";
-import DangerButton from "@/Components/Buttons/DangerButton";
 
 export default function ComisionDocentes({ comision, docentes, allDocentes, filters: initialFilters = {} }) {
     const [filters, setFilters] = useState({
@@ -55,7 +55,7 @@ export default function ComisionDocentes({ comision, docentes, allDocentes, filt
                         Ver
                     </Link>
 
-                    <DangerButton
+                    <Button variant="danger"
                         onClick={() => {
                             if (confirm("¿Eliminar docente de esta comisión?")) {
                                 router.delete(route("dictas.destroy", d.dicta_id));
@@ -64,7 +64,7 @@ export default function ComisionDocentes({ comision, docentes, allDocentes, filt
                         className="px-3 py-1 text-xs"
                     >
                         Eliminar
-                    </DangerButton>
+                    </Button>
                 </div>
             ),
         },

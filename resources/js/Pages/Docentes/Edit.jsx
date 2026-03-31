@@ -1,8 +1,7 @@
+import Button from '@/Components/Button';
 // resources/js/Pages/Docentes/Edit.jsx
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Edit({ auth, docente, flash }) {
     const { data, setData, put, processing, errors } = useForm({
@@ -128,7 +127,6 @@ export default function Edit({ auth, docente, flash }) {
                                     </div>
                                 </div>
 
-
                                 <div className="flex items-center justify-between space-x-3">
                                     <Link
                                         href={route('docentes.cargo.create', docente.id)}
@@ -137,7 +135,7 @@ export default function Edit({ auth, docente, flash }) {
                                         Agregar Cargo
                                     </Link>
                                     <div className="flex justify-end space-x-4">
-                                        <DangerButton
+                                        <Button variant="danger"
                                             as={Link}
                                             href="#"
                                             onClick={(e) => {
@@ -146,13 +144,13 @@ export default function Edit({ auth, docente, flash }) {
                                             }}
                                         >
                                             Cancelar
-                                        </DangerButton>
-                                        <PrimaryButton
+                                        </Button>
+                                        <Button variant="primary"
                                             type="submit"
                                             disabled={processing}
                                         >
                                             {processing ? 'Guardando...' : 'Guardar Cambios'}
-                                        </PrimaryButton>
+                                        </Button>
                                     </div>
                                 </div>
                             </form>

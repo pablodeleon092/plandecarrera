@@ -1,10 +1,9 @@
+import Button from '@/Components/Button';
 import React, { useState, useEffect } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 // Nota: Se asume que recibes las props: auth, coordinador, carrerasAsignadas, carrerasRestantes, flash.
 export default function AsignarCarrerasCoordinador({ auth, coordinador, carrerasAsignadas, carrerasRestantes, flash }) {
@@ -89,7 +88,6 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
         // ... Lógica para desactivar el coordinador si aplica ...
     };
 
-
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -164,21 +162,21 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
 
                 <div className="flex justify-end items-center mt-6">
                     {/* Botón de desactivación, si aplica a un coordinador */}
-                    <DangerButton
+                    <Button variant="danger"
                         onClick={desactivarCoordinador}
                         disabled={isPutting || isDeactivating}
                         className="mr-4" // Añadir margen derecho
                     >
                         Desactivar Coordinador
-                    </DangerButton>
+                    </Button>
 
                     {/* Botón Guardar Cambios */}
-                    <PrimaryButton
+                    <Button variant="primary"
                         onClick={guardarCambios}
                         disabled={isPutting || isDeactivating}
                     >
                         {isPutting ? 'Guardando...' : 'Guardar asignación'}
-                    </PrimaryButton>
+                    </Button>
                 </div>
 
         </AuthenticatedLayout>

@@ -1,8 +1,6 @@
+import Button from '@/Components/Button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Create({ auth }) {
 
@@ -137,18 +135,18 @@ export default function Create({ auth }) {
                             </div>
 
                             <div className="flex justify-end space-x-4">
-                                <DangerButton
+                                <Button variant="danger"
                                     as={Link}
                                     href={route('docentes.index')}
                                 >
                                     Cancelar
-                                </DangerButton>
-                                <PrimaryButton
+                                </Button>
+                                <Button variant="primary"
                                     type="submit"
                                     disabled={processing}
                                 >
                                     {processing ? 'Guardando...' : 'Guardar Docente'}
-                                </PrimaryButton>
+                                </Button>
                             </div>
                         </form>
                     </div>

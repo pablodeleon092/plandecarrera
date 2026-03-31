@@ -1,6 +1,7 @@
+import Button from '@/Components/Button';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
+
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
@@ -160,7 +161,6 @@ export default function Register({ institutos }) {
                     <InputError message={errors.instituto_id} className="mt-2" />
                 </div>
 
-
                 <div className="mt-4">
                     <InputLabel htmlFor="password" value="Password" />
 
@@ -204,9 +204,9 @@ export default function Register({ institutos }) {
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
+                    <Button variant="primary" className="ms-4" disabled={processing}>
                         Register
-                    </PrimaryButton>
+                    </Button>
                 </div>
             </form>
         </GuestLayout>

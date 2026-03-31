@@ -1,11 +1,9 @@
+import Button from '@/Components/Button';
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CarreraInfo from './Partials/CarreraInfo';
 import CarreraMaterias from './Partials/CarreraMaterias';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Show({ auth, carrera, planes }) {
     const [tab, setTab] = useState('info');
@@ -32,7 +30,7 @@ export default function Show({ auth, carrera, planes }) {
 
                     {/* Botón Volver */}
                     <div className="mb-4">
-                        <SecondaryButton
+                        <Button variant="secondary"
                             as={Link}
                             href="#"
                             onClick={(e) => {
@@ -50,7 +48,7 @@ export default function Show({ auth, carrera, planes }) {
                                 />
                             </svg>
                             Volver al Listado
-                        </SecondaryButton>
+                        </Button>
                     </div>
 
                     {/* ENCABEZADO estilo Materia/Docente */}
@@ -68,11 +66,22 @@ export default function Show({ auth, carrera, planes }) {
 
                                 {/* Botones */}
                                 <div className="flex gap-3">
+<<<<<<< Updated upstream
                                     <DangerButton
+=======
+                                    <Button variant="primary"
+                                        as={Link}
+                                        href={route('carreras.edit', carrera.id)}
+                                    >
+                                        Editar
+                                    </Button>
+
+                                    <Button variant="danger"
+>>>>>>> Stashed changes
                                         onClick={handleDelete}
                                     >
                                         Eliminar
-                                    </DangerButton>
+                                    </Button>
                                 </div>
 
                             </div>

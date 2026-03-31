@@ -1,11 +1,10 @@
+import Button from '@/Components/Button';
 import React from 'react';
 import { Head, useForm, usePage, Link } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
 import TextInput from '@/Components/TextInput';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 
 export default function Edit({ institutos, flash }) {
     const { props } = usePage();
@@ -203,23 +202,22 @@ export default function Edit({ institutos, flash }) {
 
                     {/* Botón */}
                     <div className="md:col-span-3 flex justify-between mt-4">
-                        <PrimaryButton
+                        <Button variant="primary"
                             type="submit"
                             disabled={processing}
                         >
                             {processing ? 'Guardando...' : 'Actualizar'}
-                        </PrimaryButton>
+                        </Button>
 
                         {coordinador && (
                             <Link
                                 href={route('coordinadores.carreras.edit', user.id)}
                             >
-                                <PrimaryButton as="span">
+                                <Button variant="primary" as="span">
                                     Agregar Carreras
-                                </PrimaryButton>
+                                </Button>
                             </Link>
                         )}
-
 
                     </div>
                 </form>
@@ -232,9 +230,9 @@ export default function Edit({ institutos, flash }) {
                             window.history.back();
                         }}
                     >
-                        <SecondaryButton>
+                        <Button variant="secondary">
                             Volver
-                        </SecondaryButton>
+                        </Button>
                     </Link>
                 </div>
 

@@ -1,8 +1,7 @@
+import Button from '@/Components/Button';
 import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 
 export default function Show({ user }) {
     const { auth } = usePage().props;
@@ -87,14 +86,18 @@ export default function Show({ user }) {
                         </dl>
                     </div>
                 </div>
-                <Link
-                    href={route('users.index')}
-                >
-                    <SecondaryButton>
+                <div className="mt-4 flex justify-end">
+                    <Button variant="info" type="button" onClick={() => window.history.back()}>
                         Volver
+<<<<<<< Updated upstream
                     </SecondaryButton>
                 </Link>
 
+=======
+                    </Button>
+                </div>
+            </div>
+>>>>>>> Stashed changes
         </AuthenticatedLayout >
     );
 }

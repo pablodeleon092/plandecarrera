@@ -1,12 +1,9 @@
+import Button from '@/Components/Button';
 import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function EditDicta({ auth, flash, dicta, funcionesAulicas, cargos }) {
-
 
     const comision = dicta.comision;
     const docente = dicta.docente
@@ -180,7 +177,7 @@ export default function EditDicta({ auth, flash, dicta, funcionesAulicas, cargos
                         </div>
 
                         <div className="flex justify-end items-center pt-4 space-x-4">
-                            <DangerButton
+                            <Button variant="danger"
                                 as={Link}
                                 href="#"
                                 onClick={(e) => {
@@ -189,13 +186,13 @@ export default function EditDicta({ auth, flash, dicta, funcionesAulicas, cargos
                                 }}
                             >
                                 Cancelar
-                            </DangerButton>
-                            <PrimaryButton
+                            </Button>
+                            <Button variant="primary"
                                 type="submit"
                                 disabled={processing}
                             >
                                 {processing ? 'Actualizando...' : 'Actualizar Asignación'}
-                            </PrimaryButton>
+                            </Button>
                         </div>
                     </form>
                 </div>

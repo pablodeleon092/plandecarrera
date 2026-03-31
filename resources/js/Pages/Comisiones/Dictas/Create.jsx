@@ -1,9 +1,7 @@
+import Button from '@/Components/Button';
 import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function CreateDicta({ auth, comision, flash, docente, funcionesAulicas }) {
     const { data, setData, post, errors } = useForm({
@@ -138,7 +136,7 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
                         </div>
 
                         <div className="flex justify-between items-center">
-                            <DangerButton
+                            <Button variant="danger"
                                 as={Link}
                                 href="#"
                                 onClick={(e) => {
@@ -147,12 +145,12 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
                                 }}
                             >
                                 Cancelar
-                            </DangerButton>
-                            <PrimaryButton
+                            </Button>
+                            <Button variant="primary"
                                 type="submit"
                             >
                                 Guardar
-                            </PrimaryButton>
+                            </Button>
                         </div>
                     </form>
                 </div>

@@ -1,10 +1,9 @@
+import Button from '@/Components/Button';
 import React, { useState, useEffect } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Edit({ auth, plan, carrera, materiasEnPlan, materiasDisponibles, flash }) {
     const [enPlan, setEnPlan] = useState(materiasEnPlan || []);
@@ -103,7 +102,7 @@ export default function Edit({ auth, plan, carrera, materiasEnPlan, materiasDisp
                                 <td className="align-top px-4 py-2">
                                     <Droppable droppableId="enPlan">
                                         {(provided) => (
-                                            <div ref={provided.innerRef} {...provided.droppableProps} className="border p-4 min-h-[200px]">
+                                            <div ref={provided.innerRef} {...provided.droppableProps} className="border p-4 min-h-[200px] max-h-[60vh] overflow-y-auto rounded-md">
                                                 {enPlan.length === 0 && <p className="text-sm text-gray-500">No hay materias en el plan.</p>}
                                                 {enPlan.map((materia, index) => (
                                                     <Draggable key={materia.id} draggableId={`enPlan-${materia.id}`} index={index}>
@@ -122,7 +121,7 @@ export default function Edit({ auth, plan, carrera, materiasEnPlan, materiasDisp
                                 <td className="align-top px-4 py-2">
                                     <Droppable droppableId="disponibles">
                                         {(provided) => (
-                                            <div ref={provided.innerRef} {...provided.droppableProps} className="border p-4 min-h-[200px]">
+                                            <div ref={provided.innerRef} {...provided.droppableProps} className="border p-4 min-h-[200px] max-h-[60vh] overflow-y-auto rounded-md">
                                                 {disponibles.length === 0 && <p className="text-sm text-gray-500">No hay materias disponibles.</p>}
                                                 {disponibles.map((materia, index) => (
                                                     <Draggable key={materia.id} draggableId={`disponibles-${materia.id}`} index={index}>
@@ -144,18 +143,18 @@ export default function Edit({ auth, plan, carrera, materiasEnPlan, materiasDisp
                 </DragDropContext>
 
                 <div className="flex justify-between items-center mt-6">
-                    <DangerButton
+                    <Button variant="danger"
                         onClick={desactivarCarrera}
                         disabled={isPutting || isDeactivating}
                     >
                         Desactivar Carrera
-                    </DangerButton>
-                    <PrimaryButton
+                    </Button>
+                    <Button variant="primary"
                         onClick={guardarCambios}
                         disabled={isPutting || isDeactivating}
                     >
                         Guardar cambios
-                    </PrimaryButton>
+                    </Button>
                 </div>
             </div>
         </AuthenticatedLayout>

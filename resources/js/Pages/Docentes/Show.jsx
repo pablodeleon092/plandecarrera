@@ -1,11 +1,9 @@
+import Button from '@/Components/Button';
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import DocenteInfo from './Partials/DocenteInfo';             // <--- Nuevo
 import DocenteComisiones from './Partials/DocenteComisiones'; // <--- Nuevo
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 'comisiones'
 
@@ -25,7 +23,7 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
             <Head title={`Docente: ${docente.nombre} ${docente.apellido}`} />
                     {/* Botón Volver */}
                     <div className="mb-4">
-                        <SecondaryButton
+                        <Button variant="secondary"
                             as={Link}
                             href="#"
                             onClick={(e) => {
@@ -42,8 +40,13 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                                     d="M10 19l-7-7m0 0l7-7m-7 7h18"
                                 />
                             </svg>
+<<<<<<< Updated upstream
                             Volver
                         </SecondaryButton>
+=======
+                            Volver al Listado
+                        </Button>
+>>>>>>> Stashed changes
                     </div>
 
                     {/* ENCABEZADO (Tu diseño original) */}
@@ -67,17 +70,17 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
-                                    <PrimaryButton
+                                    <Button variant="primary"
                                         as={Link}
                                         href={route('docentes.edit', docente.id)}
                                     >
                                         Editar
-                                    </PrimaryButton>
-                                    <DangerButton
+                                    </Button>
+                                    <Button variant="danger"
                                         onClick={handleDelete}
                                     >
                                         Eliminar
-                                    </DangerButton>
+                                    </Button>
                                 </div>
                             </div>
                         </div>

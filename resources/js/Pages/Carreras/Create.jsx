@@ -1,11 +1,10 @@
+import Button from '@/Components/Button';
 
 // resources/js/Pages/Carreras/Create.jsx
 
 import React from 'react';
 import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Create({ auth, institutos }) {
 
@@ -111,18 +110,18 @@ export default function Create({ auth, institutos }) {
                                 {/* BOTONES */}
                                 <div className="flex items-center justify-end mt-6">
                                     <div className="flex justify-end space-x-4">
-                                        <DangerButton
+                                        <Button variant="danger"
                                             as={Link}
                                             href={route('carreras.index')}
                                         >
                                             Cancelar
-                                        </DangerButton>
-                                        <PrimaryButton
+                                        </Button>
+                                        <Button variant="primary"
                                             type="submit"
                                             disabled={processing}
                                         >
                                             {processing ? 'Guardando...' : 'Guardar Carrera'}
-                                        </PrimaryButton>
+                                        </Button>
                                     </div>
                                 </div>
 

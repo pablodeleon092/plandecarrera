@@ -1,11 +1,9 @@
+import Button from '@/Components/Button';
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import MateriaInfo from './Partials/MateriaInfo';
 import MateriaComisiones from './Partials/MateriaComisiones';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Show({ auth, materia, comisiones }) {
 
@@ -31,7 +29,7 @@ export default function Show({ auth, materia, comisiones }) {
 
                     {/* Botón Volver */}
                     <div className="mb-4">
-                        <SecondaryButton
+                        <Button variant="secondary"
                             as={Link}
                             href="#"
                             onClick={(e) => {
@@ -49,7 +47,7 @@ export default function Show({ auth, materia, comisiones }) {
                                 />
                             </svg>
                             Volver
-                        </SecondaryButton>
+                        </Button>
                     </div>
 
                     {/* ENCABEZADO estilo Docente */}
@@ -77,19 +75,19 @@ export default function Show({ auth, materia, comisiones }) {
 
                                 {/* Botones */}
                                 <div className="flex gap-3">
-                                    <PrimaryButton
+                                    <Button variant="primary"
                                         as={Link}
                                         href={route('materias.edit', materia.id)}
                                     >
                                         Editar
-                                    </PrimaryButton>
+                                    </Button>
 
                                     {/* Solo si querés eliminar materias */}
-                                    <DangerButton
+                                    <Button variant="danger"
                                         onClick={handleDelete}
                                     >
                                         Eliminar
-                                    </DangerButton>
+                                    </Button>
                                 </div>
                             </div>
 

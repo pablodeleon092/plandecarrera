@@ -1,9 +1,7 @@
+import Button from '@/Components/Button';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 export default function Create({ auth }) {
     const { data, setData, post, processing, errors } = useForm({
@@ -220,14 +218,14 @@ export default function Create({ auth }) {
 
                         {/* Botones */}
                         <div className="flex gap-4 pt-6 border-t">
-                            <DangerButton
+                            <Button variant="danger"
                                 as={Link}
                                 href="/materias"
                                 className="flex-1 justify-center"
                             >
                                 Cancelar
-                            </DangerButton>
-                            <PrimaryButton
+                            </Button>
+                            <Button variant="primary"
                                 type="submit"
                                 disabled={processing}
                                 className="flex-1 justify-center"
@@ -241,7 +239,7 @@ export default function Create({ auth }) {
                                         Guardando...
                                     </span>
                                 ) : 'Crear Materia'}
-                            </PrimaryButton>
+                            </Button>
                         </div>
                     </form>
 

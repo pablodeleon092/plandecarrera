@@ -1,9 +1,13 @@
+import Button from '@/Components/Button';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+<<<<<<< Updated upstream
 import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 import DangerButton from '@/Components/Buttons/DangerButton';
 import SecondaryButton from '@/Components/Buttons/SecondaryButton';
+=======
+>>>>>>> Stashed changes
 
 export default function Edit({ auth, materia }) {
     const { data, setData, put, processing, errors } = useForm({
@@ -213,7 +217,7 @@ export default function Edit({ auth, materia }) {
                         </div>
 
                         <div className="flex gap-4 pt-6 border-t">
-                            <DangerButton
+                            <Button variant="danger"
                                 as={Link}
                                 href="#"
                                 onClick={(e) => {
@@ -223,8 +227,8 @@ export default function Edit({ auth, materia }) {
                                 className="flex-1 justify-center"
                             >
                                 Cancelar
-                            </DangerButton>
-                            <PrimaryButton
+                            </Button>
+                            <Button variant="primary"
                                 type="button"
                                 onClick={handleSubmit}
                                 disabled={processing}
@@ -239,7 +243,7 @@ export default function Edit({ auth, materia }) {
                                         Actualizando...
                                     </span>
                                 ) : 'Actualizar Materia'}
-                            </PrimaryButton>
+                            </Button>
                         </div>
                     </div>
 
