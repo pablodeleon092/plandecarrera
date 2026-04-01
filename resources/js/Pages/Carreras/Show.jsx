@@ -66,9 +66,6 @@ export default function Show({ auth, carrera, planes }) {
 
                                 {/* Botones */}
                                 <div className="flex gap-3">
-<<<<<<< Updated upstream
-                                    <DangerButton
-=======
                                     <Button variant="primary"
                                         as={Link}
                                         href={route('carreras.edit', carrera.id)}
@@ -77,7 +74,6 @@ export default function Show({ auth, carrera, planes }) {
                                     </Button>
 
                                     <Button variant="danger"
->>>>>>> Stashed changes
                                         onClick={handleDelete}
                                     >
                                         Eliminar

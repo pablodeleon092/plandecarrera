@@ -9,7 +9,6 @@ const BtnExportar = ({ tipo = "docentes", filters = [], className = "" }) => {
 
         const params = new URLSearchParams();
 
-
         filters.forEach((filter, index) => {
             if (typeof filter.value === 'object' && filter.value !== null) {
                 params.append(`filters[${index}][field]`, filter.field);
