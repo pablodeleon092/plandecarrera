@@ -3,6 +3,7 @@ namespace App\Factories;
 
 use App\Services\Reports\DocenteReportService;
 use App\Services\Reports\MateriaReportService;
+use App\Services\Reports\ComisionReportService;
 use App\Contracts\ReportServiceInterface;
 use Exception;
 
