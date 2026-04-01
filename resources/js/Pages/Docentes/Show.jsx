@@ -40,13 +40,8 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                                     d="M10 19l-7-7m0 0l7-7m-7 7h18"
                                 />
                             </svg>
-<<<<<<< Updated upstream
-                            Volver
-                        </SecondaryButton>
-=======
                             Volver al Listado
                         </Button>
->>>>>>> Stashed changes
                     </div>
 
                     {/* ENCABEZADO (Tu diseño original) */}

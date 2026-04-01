@@ -1,15 +1,11 @@
 import Button from '@/Components/Button';
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
+
 import { Head, Link } from '@inertiajs/react';
 import ComisionInfo from './Partials/ComisionInfo';
 import ComisionDocentes from './Partials/ComisionDocentes';
-<<<<<<< Updated upstream
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import ComisionHorarios from './Partials/ComisionHorarios';
-=======
->>>>>>> Stashed changes
 
 export default function ShowComision({ auth, comision, flash, docentes, allDocentes }) {
 
@@ -48,13 +44,8 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                     d="M10 19l-7-7m0 0l7-7m-7 7h18"
                                 />
                             </svg>
-<<<<<<< Updated upstream
-                            Volver
-                        </SecondaryButton>
-=======
                             Volver al Listado
                         </Button>
->>>>>>> Stashed changes
                     </div>
 
                     {/* Flash Messages */}
@@ -95,12 +86,12 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                 </div>
 
                                 <div className="flex gap-2">
-                                    <PrimaryButton
+                                   <Button variant="primary"
                                         as={Link}
                                         href={route('comisiones.edit', comision.id)}
                                     >
                                         Editar comisión
-                                    </PrimaryButton>
+                                    </Button>
                                 </div>
                             </div>
                         </div>

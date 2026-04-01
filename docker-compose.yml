@@ -32,12 +32,12 @@ services:
       POSTGRES_USER: laravel
       POSTGRES_PASSWORD: secret
       TZ: America/Argentina/Buenos_Aires
-    command: postgres -c log_timezone='America/Argentina/Buenos_Aires' -c TimeZone='America/Argentina/Buenos_Aires'
+    command: postgres -c log_timezone='UTC' -c TimeZone='UTC'
     ports:
       - "5432:5432"
     volumes:
       - dbdata:/var/lib/postgresql/data
-      - /etc/localtime:/etc/localtime:ro
+      #- /etc/localtime:/etc/localtime:ro
     networks:
       - laravel
 

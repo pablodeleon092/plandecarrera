@@ -44,17 +44,10 @@ export default function DataTable({
     const headerPaddingClass = dense ? 'px-3 py-2' : 'px-6 py-3';
 
     return (
-<<<<<<< Updated upstream
-        <div className={`bg-white rounded-lg shadow overflow-hidden ${containerClassName}`}>
-            <div className={'overflow-x-auto'}>
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-=======
         <div className={`datatable-container ${containerClassName}`}>
             <div className={disableScroll ? '' : 'overflow-x-auto'}>
                 <table className="datatable-table">
                     <thead className="datatable-thead">
->>>>>>> Stashed changes
                         <tr>
                             {columns.map((col, index) => (
                                 <th
