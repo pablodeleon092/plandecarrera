@@ -24,7 +24,9 @@ class DocenteController extends Controller
      */
     public function index(Request $request)
     {
+        $user = Auth::user();
 
+        $this->authorize('viewAny', Docente::Class);
         $query = Docente::query()->with(['cargos.dedicacion']);
 
         $queryFilter = new QueryFilter;
@@ -41,7 +43,6 @@ class DocenteController extends Controller
         ->paginate(15)
         ->withQueryString();
 
-        $user = Auth::user();
         $institutosDisponibles = $user->getInstitutosAutorizados();
         
         $carreras = $institutosDisponibles->flatMap(function ($instituto) {
@@ -67,6 +68,7 @@ class DocenteController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Docente::Class);
         return Inertia::render('Docentes/Create');
     }
 
@@ -97,6 +99,7 @@ class DocenteController extends Controller
      */
     public function edit(Docente $docente)
     {
+        $this->authorize('update', Docente::Class);
         return Inertia::render('Docentes/Edit', [
             'docente' => $docente->load('cargos'),
         ]);
@@ -116,6 +119,7 @@ class DocenteController extends Controller
      */
     public function destroy(Docente $docente)
     {
+        $this->authorize('modificar_docente', Docente::Class);
         try {
             $docente->delete();
             return redirect()->route('docentes.index')->with('success', 'Docente eliminado exitosamente.');
@@ -129,6 +133,7 @@ class DocenteController extends Controller
      */
     public function createCargo(Docente $docente)
     {
+        $this->authorize('create', Docente::Class);
         if ($docente->modalidad_desempeño === 'Desarrollo') {
             $dedicaciones = \App\Models\Dedicaciones::whereIn('nombre', ['Simple', 'SemiExclusiva(DP)'])->get();
         } elseif ($docente->modalidad_desempeño === 'Investigador') {

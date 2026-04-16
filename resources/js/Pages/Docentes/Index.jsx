@@ -8,10 +8,10 @@ import DataTable from '@/Components/DataTable';
 import GestionPersonal from '@/Components/Filters/GestionPersonal';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 import KPICard from '@/Components/Dashboard/KPICard';
-
+import { usePermissions } from '@/Hooks/usePermissions';
 
 export default function Index({ auth, institutos, carreras, docentes, flash, dedicaciones}) {
-
+    const { canCreateDocente, canDeleteDocente } = usePermissions();
 
     // Función que maneja la eliminación de un docente
     const handleDelete = (id, nombre, apellido) => {
@@ -53,11 +53,13 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                         </div>
                     )}
 
-                    <ListHeader
-                        title="Listado de Docentes"
-                        buttonLabel="Agregar Docente"
-                        buttonRoute={route('docentes.create')}
-                    />
+                    { canCreateDocente && (
+                        <ListHeader
+                            title="Listado de Docentes"
+                            buttonLabel="Agregar Docente"
+                            buttonRoute={route('docentes.create')}
+                        />  
+                    )}
 
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
                         <GestionPersonal

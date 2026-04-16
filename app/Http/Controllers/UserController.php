@@ -18,7 +18,6 @@ use Inertia\Response;
 class UserController extends Controller
 {
 
-
     /**
      * Display the registration view.
      */
@@ -208,11 +207,11 @@ class UserController extends Controller
         $cargoRoleMap = [
             'Administrador' => 'Admin',
             'Administrativo de Secretaria Academica' => 'Admin_global',
-            'Administrativo de instituto' => 'Admin_instituto',
-            'Coordinador de Carrera' => 'Coord_carrera',
-            'Director de instituto' => 'Consulta_instituto',
-            'Coordinador Academico' => 'Consulta_instituto',
-            'Consejero' => 'Consulta_instituto',
+            'Administrativo de instituto' => 'Admin_instituto', 
+            'Coordinador de Carrera' => 'Coord_carrera', 
+            'Director de instituto' => 'Consulta_instituto', 
+            'Coordinador Academico' => 'Consulta_instituto', 
+            'Consejero' => 'Consulta_instituto', 
         ];
 
         return $cargoRoleMap[$cargo] ?? 'user'; // Rol por defecto si no se encuentra el cargo

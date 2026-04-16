@@ -4,14 +4,12 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { usePermissions } from '@/Hooks/usePermissions';
 
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
     const { auth } = usePage().props;
-
-
-    const canViewUsers =
-        auth?.user?.permissions?.includes('consultar_usuario');
+    const { canViewUsers } = usePermissions();
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
