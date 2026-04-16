@@ -19,13 +19,23 @@ class RolesYPermisosSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permisos = [
-            'consultar_usuario',
-            'modificar_usuario',
-            'modificar_permisos',
-            'consultar_carrera',
-            'modificar_carrera',
-            'consultar_docente',
-            'modificar_docente',
+                'crear_usuario',
+                'consultar_usuario', 
+                'modificar_usuario',           
+                'modificar_permisos',
+                'crear_carrera', 
+                'consultar_carrera', 
+                'modificar_carrera',
+                'crear_docente', 
+                'consultar_docente', 
+                'modificar_docente',
+                'crear_materia',
+                'consultar_materia',
+                'modificar_materia',
+                'modificar_docente',
+                'crear_comision',
+                'consultar_comision',
+                'modificar_comision'   
         ];
 
         foreach ($permisos as $permiso) {
@@ -36,13 +46,23 @@ class RolesYPermisosSeeder extends Seeder
         // Se ha retirado 'modificar_usuario' de 'Admin_instituto' y 'Coord_carrera'.
         $roles = [
             'Admin' => [
+                'crear_usuario',
                 'consultar_usuario', 
                 'modificar_usuario',           
-                'modificar_permisos', 
+                'modificar_permisos',
+                'crear_carrera', 
                 'consultar_carrera', 
-                'modificar_carrera', 
+                'modificar_carrera',
+                'crear_docente', 
                 'consultar_docente', 
-                'modificar_docente'
+                'modificar_docente',
+                'crear_materia',
+                'consultar_materia',
+                'modificar_materia',
+                'modificar_docente',
+                'crear_comision',
+                'consultar_comision',
+                'modificar_comision'                
             ],
             'Admin_global' => [
                 'consultar_usuario', 
