@@ -116,7 +116,7 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                             )}
                         </div>
                     </div>
-
+                            
         </AuthenticatedLayout>
     );
 }

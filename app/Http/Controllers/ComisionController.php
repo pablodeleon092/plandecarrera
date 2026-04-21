@@ -18,11 +18,8 @@ class ComisionController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Comision::class);
         $user = Auth::user();
-
-        try {
-            $this->authorize('index', Comision::class);
-        } catch (\Throwable $e) {}
 
         $query = Comision::query();
 
@@ -77,6 +74,7 @@ class ComisionController extends Controller
     public function show($id)
     {
         $comision = Comision::with('materia', 'horarios')->findOrFail($id);
+        $this->authorize('view', $comision); 
         $docentes = $comision->dictas()->exists() 
             ? $comision->docentes_with_cargo
             : collect(); // colección vacía
@@ -91,7 +89,7 @@ class ComisionController extends Controller
 
     public function create(Request $request)
     {
-
+        $this->authorize('create', Comision::class);
         $materiaId = $request->old('id_materia') ?? $request->query('materia_id');
       
         $materia = Materia::findOrFail($materiaId);
@@ -104,6 +102,7 @@ class ComisionController extends Controller
     public function edit($id)
     {
         $comision = Comision::with('materia', 'horarios')->findOrFail($id);
+        $this->authorize('update', $comision);
         $materias = \App\Models\Materia::where('estado', true)->get()->map(function ($materia) {
             return [
                 'id' => $materia->id,
@@ -122,6 +121,7 @@ class ComisionController extends Controller
     public function update(Request $request, $id)
     {
         $comision = Comision::with('materia', 'horarios')->findOrFail($id);
+        $this->authorize('update', $comision);
         try {
             $validated = $request->validate([
                 'codigo' => [
@@ -174,6 +174,7 @@ class ComisionController extends Controller
 
     
     public function store(Request $request) {
+        $this->authorize('create', Comision::class);
         try {
             $validated = $request->validate([
                 'codigo' => 'required|string|max:50|unique:comisiones,codigo',
@@ -208,8 +209,6 @@ class ComisionController extends Controller
                 return redirect()->back()->withErrors(['horas_teoricas' => 'La suma de horas teóricas y prácticas no puede ser menor que las horas totales de la materia.'])->withInput();
             }
 
-
-
             Comision::create($validated);
 
             return redirect()->route('comisiones.index')->with('success', 'Comisión creada exitosamente.');
@@ -226,6 +225,7 @@ class ComisionController extends Controller
     {
         try {
             $comision = Comision::findOrFail($id);
+            $this->authorize('delete', $comision);
             $comision->delete();
             return redirect()->route('comisiones.index')->with('success', 'Comision eliminada.');
         } catch (\Exception $e) {
@@ -235,6 +235,7 @@ class ComisionController extends Controller
 
     public function toggleStatus(Comision $comision)
     {
+        $this->authorize('restore', $comision);
         $comision->estado = !$comision->estado;
         $comision->save();
 

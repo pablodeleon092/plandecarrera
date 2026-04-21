@@ -77,6 +77,7 @@ class DocenteController extends Controller
      */
     public function store(StoreDocenteRequest $request)
     {
+        $this->authorize('create', Docente::Class);
         Docente::create($request->validated());
         return redirect()->route('docentes.index')->with('success', 'Docente creado exitosamente.');
     }
@@ -86,6 +87,7 @@ class DocenteController extends Controller
      */
     public function show(Docente $docente)
     {
+        $this->authorize('viewAny', Docente::Class);
         $docente->load(['cargos.dedicacion', 'comisiones.materia']);
 
         return Inertia::render('Docentes/Show', [
@@ -99,7 +101,7 @@ class DocenteController extends Controller
      */
     public function edit(Docente $docente)
     {
-        $this->authorize('update', Docente::Class);
+        $this->authorize('update', $docente);
         return Inertia::render('Docentes/Edit', [
             'docente' => $docente->load('cargos'),
         ]);
@@ -110,6 +112,7 @@ class DocenteController extends Controller
      */
     public function update(StoreDocenteRequest $request, Docente $docente)
     {
+        $this->authorize('update', $docente);
         $docente->update($request->validated());
         return redirect()->route('docentes.index')->with('success', 'Docente actualizado exitosamente.');
     }
@@ -119,7 +122,7 @@ class DocenteController extends Controller
      */
     public function destroy(Docente $docente)
     {
-        $this->authorize('modificar_docente', Docente::Class);
+        $this->authorize('update', Docente::Class);
         try {
             $docente->delete();
             return redirect()->route('docentes.index')->with('success', 'Docente eliminado exitosamente.');
@@ -133,7 +136,7 @@ class DocenteController extends Controller
      */
     public function createCargo(Docente $docente)
     {
-        $this->authorize('create', Docente::Class);
+        $this->authorize('update', $docente);
         if ($docente->modalidad_desempeño === 'Desarrollo') {
             $dedicaciones = \App\Models\Dedicaciones::whereIn('nombre', ['Simple', 'SemiExclusiva(DP)'])->get();
         } elseif ($docente->modalidad_desempeño === 'Investigador') {
@@ -148,6 +151,7 @@ class DocenteController extends Controller
 
     public function toggleStatus(Docente $docente)
     {
+        $this->authorize('restore', Docente::Class);
         $docente->es_activo = !$docente->es_activo;
         $docente->save();
 

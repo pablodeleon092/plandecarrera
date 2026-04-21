@@ -20,9 +20,9 @@ class UserPolicy
     /**
      * Si el usuario puede llegar al show de User
      */
-    public function show(User $user, User $model): bool
+    public function show(User $user): bool
     {
-        return ($user->hasRole('Admin')) or ($user->can('consultar_usuario') and $user->id === $model->id);
+        return ($user->can('consultar_usuario') or $user->id === $model->id);
 
     }
 
@@ -31,15 +31,16 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return ($user->hasRole('Admin')) or ($user->can('modificar_usuario'));
+        return ($user->hasRole('Admin')) or ($user->can('crear_usuario'));
     }
 
     /**
      * Si el usuario puede actualizar informacion de otros usuarios
      */
-    public function update(User $user, User $model): bool
+    public function update(User $user): bool
     {
         return ($user->can('modificar_usuario'));
     }
+
 
 }

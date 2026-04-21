@@ -16,6 +16,7 @@ class MateriaController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Materia::Class);
         $user = Auth::user();
 
         $query = Materia::query();
@@ -77,11 +78,13 @@ class MateriaController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Materia::Class);
         return Inertia::render('Materias/Create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Materia::Class);
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'codigo' => 'required|string|max:50|unique:materias,codigo',
@@ -135,6 +138,7 @@ class MateriaController extends Controller
 
     public function show(Materia $materia)
     {
+        $this->authorize('view', $materia);
         return Inertia::render('Materias/Show', [
             'materia' => $materia,
             'comisiones' => $materia->comisiones()->get(),
@@ -143,6 +147,7 @@ class MateriaController extends Controller
 
     public function edit(Materia $materia)
     {
+        $this->authorize('update', $materia);
         return Inertia::render('Materias/Edit', [
             'materia' => $materia
         ]);
@@ -150,6 +155,7 @@ class MateriaController extends Controller
 
     public function update(Request $request, Materia $materia)
     {
+        $this->authorize('update', $materia);
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'codigo' => 'required|string|max:50|unique:materias,codigo,' . $materia->id,
@@ -179,6 +185,7 @@ class MateriaController extends Controller
 
     public function destroy(Materia $materia)
     {
+        $this->authorize('delete', $materia);
         try {
             $materia->delete();
             
@@ -192,6 +199,7 @@ class MateriaController extends Controller
 
     public function toggleStatus(Materia $materia)
     {
+        $this->authorize('restore', Materia::Class);
         $materia->estado = !$materia->estado;
         $materia->save();
 

@@ -19,7 +19,7 @@ class DocentePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Docente $docente): bool
+    public function view(User $user): bool
     {
         return false;
     }
@@ -29,7 +29,7 @@ class DocentePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('modificar_docente');
+        return $user->can('crear_docente');
     }
 
     /**
@@ -37,13 +37,13 @@ class DocentePolicy
      */
     public function update(User $user, Docente $docente): bool
     {
-        return $user->can('modificar_docente');
+        return $user->can('modificar_docente') && $docente->es_activo;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Docente $docente): bool
+    public function delete(User $user): bool
     {
         return $user->can('modificar_docente');
     }
@@ -51,15 +51,15 @@ class DocentePolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Docente $docente): bool
+    public function restore(User $user): bool
     {
-        return false;
+        return $user->can('restore_docente');
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Docente $docente): bool
+    public function forceDelete(User $user): bool
     {
         return false;
     }

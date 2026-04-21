@@ -87,6 +87,7 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $this->authorize('update', User::class);
         if (!Auth::user()->can('modificar_usuario')) {
             abort(403, 'No tienes permiso para modificar usuarios.');
         }
@@ -101,6 +102,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
+        $this->authorize('show', User::class);
         $user->load('instituto');
         return inertia('Users/Show', [
             'user' => $user,
