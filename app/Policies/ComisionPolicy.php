@@ -76,7 +76,7 @@ class ComisionPolicy
     public function delete(User $user, Comision $comision): bool
     {
 
-        if (!$user->can('eliminar_comision')) {
+        if (!$user->can('restore_comision')) {
             return false;
         }
 

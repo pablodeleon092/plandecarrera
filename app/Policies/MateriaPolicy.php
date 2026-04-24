@@ -59,7 +59,7 @@ class MateriaPolicy
     public function update(User $user, Materia $materia): bool
     {
 
-        if (!$user->can('modificar_materia') || !$materia->activa) {
+        if (!$user->can('modificar_materia') || !$materia->estado) {
             return false;
         }
 
@@ -73,7 +73,7 @@ class MateriaPolicy
     public function delete(User $user, Materia $materia): bool
     {
 
-        if (!$user->can('eliminar_materia')) {
+        if (!$user->can('restore_materia')) {
             return false;
         }
 
@@ -94,7 +94,7 @@ class MateriaPolicy
 
     private function userPerteneceAMateria(User $user, Materia $materia): bool
     {
-        
+
         if (!$user->instituto_id) {
             return true;
         }

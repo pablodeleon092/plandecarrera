@@ -2,12 +2,6 @@ import Button from '@/Components/Button';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-<<<<<<< Updated upstream
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-=======
->>>>>>> Stashed changes
 
 export default function Edit({ auth, materia }) {
     const { data, setData, put, processing, errors } = useForm({
@@ -39,7 +33,7 @@ export default function Edit({ auth, materia }) {
         >
             <Head title="Editar Materia" />
                     <div className="mb-4">
-                        <SecondaryButton
+                        <Button variant="secondary"
                             as={Link}
                             href="#"
                             onClick={(e) => {
@@ -57,7 +51,7 @@ export default function Edit({ auth, materia }) {
                                 />
                             </svg>
                             Volver
-                        </SecondaryButton>
+                        </Button>
                     </div>
 
                     <div className="mb-8">

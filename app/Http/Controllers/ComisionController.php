@@ -241,7 +241,7 @@ class ComisionController extends Controller
 
             Comision::create($validated);
 
-            return redirect()->route('comisiones.index')->with('success', 'Comisión creada exitosamente.');
+            return redirect()->route('materias.show', $materia->id)->with('success', 'Comisión creada exitosamente.');
 
         }   catch (\Throwable $e) {
                 return redirect()->route('comisiones.create')
@@ -255,11 +255,13 @@ class ComisionController extends Controller
     {
         try {
             $comision = Comision::findOrFail($id);
+            $materia = $comision->materia;
             $this->authorize('delete', $comision);
             $comision->delete();
-            return redirect()->route('comisiones.index')->with('success', 'Comision eliminada.');
+            return redirect()->route('materias.show', $materia->id)->with('success', 'Comision eliminada.');
         } catch (\Exception $e) {
-            return redirect()->route('comisiones.index')->with('error', 'No se puede eliminar la comision.');
+  
+            return redirect()->route('materias.show', $materia->id)->with('error', 'No se puede eliminar la comision.' . $e->getMessage());
         }
     }
 

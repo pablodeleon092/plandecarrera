@@ -62,7 +62,7 @@ class CarreraPolicy
      */
     public function delete(User $user, Carrera $carrera): bool
     {
-        if (!$user->can('eliminar_carrera')) {
+        if (!$user->can('restore_carrera')) {
             return false;
         }
 
