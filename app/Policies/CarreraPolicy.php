@@ -28,7 +28,7 @@ class CarreraPolicy
         if (!$user->instituto_id) {
             return true;
         } else {
-            return $user->instituo_id == $carrera->instituto_id;
+            return $user->instituto_id == $carrera->instituto_id;
         }
     }
 
