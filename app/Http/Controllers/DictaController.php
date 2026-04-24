@@ -25,7 +25,7 @@ class DictaController extends Controller
 
         // Obtener la comisión
         $comision = Comision::with('materia')->findOrFail($request->comision_id);
-
+        $this->authorize('update', $comision);
 
         $docente = \App\Models\Docente::with('cargos')->findOrFail($request->docente_id);
 
@@ -102,7 +102,7 @@ class DictaController extends Controller
     {
 
         $dicta->load(['comision', 'docente']);
-
+        $this->authorize('update', $dicta->comision);
         $cargos = $dicta->docente->cargos;
         
         $funcionesAulicas = FuncionAulica::all();
@@ -178,18 +178,9 @@ class DictaController extends Controller
     {
         $dicta = \App\Models\Dicta::findOrFail($id);
         $comisionId = $dicta->comision_id;
-
+        $this->authorize('update', $dicta->comision);
         try {
             DB::transaction(function () use ($dicta) {
-                
-                // 1. Ejecutar el recalculo del cargo/docente ANTES de la eliminación
-                // El servicio NormativaAsignacion recalcula basándose en las Dictas restantes.
-                // Para el cálculo correcto, el servicio debe manejar la eliminación del registro.
-                // NOTA IMPORTANTE: En el nuevo diseño, la eliminación DEBE ir primero
-                
-                // **FLUJO RECOMENDADO PARA ELIMINACIÓN CON RECALCULO TOTAL:**
-                
-                // 1. Cargar referencias para el recalculo
                 $docente = $dicta->docente;
                 $cargo = $dicta->cargo;
 
