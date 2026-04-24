@@ -2,51 +2,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState, useEffect, useMemo } from 'react';
 import ListHeader from '@/Components/ListHeader';
+import GestionCarreras from '@/Components/Filters/GestionCarreras';
 import DataTable from '@/Components/DataTable';
 import TableFilters from '@/Components/TableFilters';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 import KPICard from '@/Components/Dashboard/KPICard';
 
-export default function Index({ auth, carreras, filters: initialFilters }) {
-    const [filters, setFilters] = useState({
-        search: initialFilters.search || '',
-        estado: initialFilters.estado ?? '',
-    });
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            router.get(route('carreras.index'), filters, {
-                preserveState: true,
-                replace: true,
-            });
-        }, 300);
-
-        return () => clearTimeout(timeout);
-    }, [filters]);
-
-    const handleFilterChange = (key, value) => {
-        setFilters(prev => ({ ...prev, [key]: value }));
-    };
-
-    const filterConfig = [
-        {
-            key: 'search',
-            label: 'Buscar',
-            type: 'text',
-            value: filters.search,
-            placeholder: 'Buscar por nombre, instituto...'
-        },
-        {
-            key: 'estado',
-            label: 'Estado',
-            type: 'select',
-            value: filters.estado,
-            options: [
-                { value: 'true', label: 'Activa' },
-                { value: 'false', label: 'Inactiva' }
-            ]
-        }
-    ];
+export default function Index({ auth, carreras, institutos, filters }) {
 
     const columns = [
         {
@@ -108,9 +70,8 @@ export default function Index({ auth, carreras, filters: initialFilters }) {
                         buttonRoute={route('carreras.create')}
                     />
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
-                        <TableFilters
-                            filters={filterConfig}
-                            onChange={handleFilterChange}
+                        <GestionCarreras
+                            institutos = {institutos}
                         />
                     </div>
 

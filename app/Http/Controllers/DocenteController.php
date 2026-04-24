@@ -38,10 +38,38 @@ class DocenteController extends Controller
         $docentes = $query->with([
                 'cargos',
                 'dictas.comision.materia' 
-        ])
-        ->orderBy('apellido')
-        ->paginate(15)
-        ->withQueryString();
+            ])
+            ->orderBy('apellido')
+            ->paginate(15)
+            ->withQueryString()
+            ->through(fn ($docente) => [
+                'id'                  => $docente->id,
+                'legajo'              => $docente->legajo,
+                'nombre'              => $docente->nombre,
+                'apellido'            => $docente->apellido,
+                'nombre_completo'     => "{$docente->apellido}, {$docente->nombre}",
+                'modalidad_desempeño' => $docente->modalidad_desempeño,
+                'carga_horaria'       => $docente->carga_horaria,
+                'es_activo'              => (bool) $docente->es_activo, // Usamos 'estado' para que DataTable lo reconozca
+                'telefono'            => $docente->telefono,
+                'email'               => $docente->email,
+
+                // Mapeo de Cargos
+                'cargos' => $docente->cargos->map(fn ($cargo) => [
+                    'id'     => $cargo->id,
+                    'nombre' => $cargo->nombre, // Asumiendo que 'nombre' es la columna en cargos
+                ]),
+                'materias' => $docente->dictas->map(fn ($dicta) => [
+                    'id' => $dicta->comision?->materia?->id,
+                    'nombre'  => $dicta->comision?->materia?->nombre,
+                ])->filter(fn($m) => $m['nombre'] != null)->values(),
+
+                'can' => [
+                    'view'   => $user->can('consultar_docente', $docente),
+                    'update' => $user->can('modificar_docente', $docente),
+                    'delete' => $user->can('restore_docente', $docente),
+                ]
+            ]);
 
         $institutosDisponibles = $user->getInstitutosAutorizados();
         
@@ -55,6 +83,7 @@ class DocenteController extends Controller
             'docentes' => $docentes,
             'institutos' => $institutosDisponibles,
             'carreras' => $carreras,
+            'filters' => $request->all(),
             'dedicaciones' => $dedicaciones,
             'flash' => [
                 'success' => session('success'),
@@ -122,7 +151,7 @@ class DocenteController extends Controller
      */
     public function destroy(Docente $docente)
     {
-        $this->authorize('update', Docente::Class);
+        $this->authorize('update', $docente);
         try {
             $docente->delete();
             return redirect()->route('docentes.index')->with('success', 'Docente eliminado exitosamente.');

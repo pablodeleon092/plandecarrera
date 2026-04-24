@@ -55,9 +55,24 @@ class MateriaController extends Controller
 
         $queryFilter->apply($query, $filters);    
 
-        $materias = $query->orderBy('id', 'desc')
+        $materias = $query->orderBy('cuatrimestre', 'asc')
             ->paginate(15)
-            ->withQueryString();
+            ->withQueryString()
+            ->through(fn ($materia) => [
+                'id'              => $materia->id,
+                'nombre'          => $materia->nombre,
+                'codigo'          => $materia->codigo,
+                'estado'          => (bool) $materia->estado,
+                'regimen'         => $materia->regimen,
+                'cuatrimestre'    => $materia->cuatrimestre,
+                'horas_semanales' => $materia->horas_semanales,
+                'horas_totales'   => $materia->horas_totales,
+                'can' => [
+                    'view'   => $user->can('consultar_materia', $materia),
+                    'update' => $user->can('modificar_materia', $materia),
+                    'delete' => $user->can('restore_materia', $materia),
+                ]
+            ]);
 
         $institutosDisponibles = $user->getInstitutosAutorizados();
         
@@ -69,6 +84,7 @@ class MateriaController extends Controller
             'materias' => $materias,
             'institutos' => $institutosDisponibles,
             'carreras' => $carreras,
+            'filters' => $request->all(),
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),

@@ -57,7 +57,5 @@ class Carrera extends Model
             ->orderBy('anio_fin', 'asc')
             ->orderBy('anio_comienzo', 'asc');
     }
-
-
     
 }

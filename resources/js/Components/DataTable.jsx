@@ -26,19 +26,40 @@ export default function DataTable({
     );
 
     // Componente simplificado que usa los botones modulares
-    const ActionButtons = ({ item }) => (
-        <div className="flex items-center justify-end gap-3">
-            <IconButton action="show" item={item} onShow={onShow} />
-            <IconButton action="edit" item={item} onEdit={onEdit} />
-            <IconButton action="delete" item={item} onDelete={onDelete} />
-            {onToggleStatus && (
-                <IconButton action="toggle"
-                    isActive={!!item[statusKey]}
-                    onClick={() => onToggleStatus(item)}
-                />
-            )}
-        </div>
-    );
+    const ActionButtons = ({ item }) => {
+        // Si el item no trae objeto 'can', por defecto permitimos (para no romper otros modelos)
+        // Pero si lo trae, respetamos lo que diga el servidor.
+        const permissions = item.can || { view: true, update: true, delete: true, toggle: true };
+
+        return (
+            <div className="flex items-center justify-end gap-3">
+                {onShow && permissions.view && (
+                    <IconButton action="show" item={item} onShow={onShow} />
+                )}
+                
+                {onEdit && permissions.update && (
+                    <IconButton action="edit" item={item} onEdit={onEdit} />
+                )}
+                
+                {onDelete && permissions.delete && (
+                    <IconButton action="delete" item={item} onDelete={onDelete} />
+                )}
+                
+                {onToggleStatus && permissions.update && (
+                    <IconButton 
+                        action="toggle"
+                        isActive={!!item[statusKey]}
+                        onClick={() => onToggleStatus(item)}
+                    />
+                )}
+            </div>
+        );
+    };
+
+    const hasAnyAction = (item) => {
+        const p = item.can || { view: true, update: true, delete: true };
+        return (onShow && p.view) || (onEdit && p.update) || (onDelete && p.delete) || (onToggleStatus && p.update);
+    };
 
     const paddingClass = dense ? 'px-3 py-2' : 'px-6 py-4';
     const headerPaddingClass = dense ? 'px-3 py-2' : 'px-6 py-3';
@@ -57,7 +78,7 @@ export default function DataTable({
                                     {col.label}
                                 </th>
                             ))}
-                            {actions && (onShow || onEdit || onDelete || onToggleStatus) && (
+                            {actions && data.some(item => hasAnyAction(item)) && (
                                 <th className={`${headerPaddingClass} datatable-th text-right`}>
                                     Acciones
                                 </th>
@@ -89,11 +110,11 @@ export default function DataTable({
                                             {col.render ? col.render(item) : item[col.key]}
                                         </td>
                                     ))}
-                                    {actions && (onShow || onEdit || onDelete || onToggleStatus) && (
+                                    {actions && hasAnyAction(item) ? (
                                         <td className={`${paddingClass} whitespace-nowrap text-right text-sm font-medium`}>
                                             <ActionButtons item={item} />
                                         </td>
-                                    )}
+                                    ) : actions && <td className={paddingClass}></td>}
                                 </tr>
                             ))
                         )}

@@ -6,7 +6,7 @@ import DataTable from '@/Components/DataTable';
 import GestionComisiones from '@/Components/Filters/GestionComisiones';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 
-export default function Index({ auth, comisiones, carreras, institutos, flash}) {
+export default function Index({ auth, comisiones, carreras, institutos, filters, flash}) {
 
 
     const handleToggleStatus = (comision) => {
@@ -124,7 +124,11 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
                         />
                     </div>
 
-                    <PaginatorButtons meta={comisiones?.meta} paginator={comisiones} routeName={'comisiones.index'}/>
+                    <PaginatorButtons 
+                    meta={comisiones?.meta} 
+                    paginator={comisiones} 
+                    routeParams = {filters}
+                    routeName={'comisiones.index'}/>
 
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="bg-white rounded-lg shadow p-4">

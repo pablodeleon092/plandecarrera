@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Comision;
+use App\Models\Materia;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 

@@ -53,10 +53,39 @@ class ComisionController extends Controller
         $queryFilter->apply($query, $filters);
 
         $comisiones = $query
-            ->with(['materia', 'horarios'])
+            ->with(['materia', 'horarios']) // Eager loading para evitar N+1
             ->orderBy('id', 'desc')
             ->paginate(15)
-            ->withQueryString();
+            ->withQueryString()
+            ->through(fn ($comision) => [
+                'id'              => $comision->id,
+                'codigo'          => $comision->codigo,
+                'nombre'          => $comision->nombre,
+                'turno'           => $comision->turno,
+                'modalidad'       => $comision->modalidad,
+                'sede'            => $comision->sede,
+                'anio'            => $comision->anio,
+                'cuatrimestre'    => $comision->cuatrimestre,
+                'estado'          => (bool) $comision->estado,
+                'horas_totales'   => $comision->horas_totales,
+                // Relación con Materia (para mostrar el nombre en la tabla)
+                'materia' => $comision->materia ? [
+                    'id'     => $comision->materia->id,
+                    'nombre' => $comision->materia->nombre,
+                ] : null,
+                'horarios' => $comision->horarios->map(fn ($horario) => [
+                        'id'          => $horario->id,
+                        'dia_semana'  => $horario->dia_semana,
+                        'hora_inicio' => $horario->hora_inicio,
+                        'hora_fin'    => $horario->hora_fin,
+                    ]),
+                // Permisos específicos del modelo Comisión
+                'can' => [
+                    'view'   => $user->can('consultar_comision', $comision),
+                    'update' => $user->can('modificar_comision', $comision),
+                    'delete' => $user->can('restore_comision', $comision),
+                ]
+            ]);
             
         $institutosDisponibles = $user->getInstitutosAutorizados();
         
@@ -67,7 +96,8 @@ class ComisionController extends Controller
         return Inertia::render('Comisiones/Index', [
             'comisiones' => $comisiones,
             'carreras' => $carreras,
-            'institutos' => $institutosDisponibles
+            'institutos' => $institutosDisponibles,
+            'filters' => $request->all()
         ]);
     }
 
