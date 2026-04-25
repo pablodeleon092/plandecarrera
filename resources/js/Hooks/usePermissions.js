@@ -14,7 +14,8 @@ export function usePermissions() {
         canViewCarreras: permissions.includes('modificar_carrera'),
         canEditCarreras: permissions.includes('modificar_carrera'),
         canCreateDocente: permissions.includes('modificar_docente'),
-        canDeleteDocente: permissions.includes('eliminar_docente'),
+        canEditDocente: permissions.includes('modificar_docente'),
+        canDeleteDocente: permissions.includes('modificar_docente'),
         isAdmin: auth?.user?.role === 'admin', 
     };
 }

@@ -4,8 +4,10 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import DocenteInfo from './Partials/DocenteInfo';             // <--- Nuevo
 import DocenteComisiones from './Partials/DocenteComisiones'; // <--- Nuevo
+import { usePermissions } from '@/Hooks/usePermissions';
 
 export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 'comisiones'
+    const { canEditDocente, canDeleteDocente } = usePermissions();
 
     const [currentTab, setCurrentTab] = useState('informacion');
 
@@ -65,17 +67,21 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
-                                    <Button variant="primary"
-                                        as={Link}
-                                        href={route('docentes.edit', docente.id)}
-                                    >
-                                        Editar
-                                    </Button>
-                                    <Button variant="danger"
-                                        onClick={handleDelete}
-                                    >
-                                        Eliminar
-                                    </Button>
+                                    {canEditDocente && (
+                                        <Button variant="primary"
+                                            as={Link}
+                                            href={route('docentes.edit', docente.id)}
+                                        >
+                                            Editar
+                                        </Button>
+                                    )}
+                                    {canDeleteDocente && (
+                                        <Button variant="danger"
+                                            onClick={handleDelete}
+                                        >
+                                            Eliminar
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         </div>
