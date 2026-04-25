@@ -2,12 +2,6 @@ import Button from '@/Components/Button';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-<<<<<<< Updated upstream
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-=======
->>>>>>> Stashed changes
 
 export default function Edit({ auth, materia }) {
     const { data, setData, put, processing, errors } = useForm({

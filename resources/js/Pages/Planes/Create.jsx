@@ -2,8 +2,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import TableFilters from "@/Components/TableFilters";
 import DataTable from "@/Components/DataTable";
 
@@ -13,7 +11,7 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
     const [filters, setFilters] = useState({
             search: initialFilters.search || "",
         });
-    
+
     const [enPlan, setEnPlan] = useState([]);
     const [disponibles, setDisponibles] = useState(materiasDisponibles || []);
     const [seleccionadasPrevias, setSeleccionadasPrevias] = useState(
@@ -35,7 +33,7 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
     const irAlPasoDos = () => {
         const conservadas = materiasEnPlanAnterior.filter(m => seleccionadasPrevias.includes(m.id));
         const noConservadas = materiasEnPlanAnterior.filter(m => !seleccionadasPrevias.includes(m.id));
-        
+
         setEnPlan(conservadas);
         // Las que no quiso conservar se suman a las disponibles para agregar después
         setDisponibles([...materiasDisponibles, ...noConservadas]);
@@ -43,7 +41,7 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
     };
 
     const handleCheckboxChange = (id) => {
-        setSeleccionadasPrevias(prev => 
+        setSeleccionadasPrevias(prev =>
             prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
         );
     };
@@ -71,16 +69,16 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
             const codigo = d.codigo?.toLowerCase() || "";
             return nombre.includes(query) || codigo.includes(query);
         });
-    }, [filters.search, materiasDisponibles]);    
+    }, [filters.search, materiasDisponibles]);
 
     const columns = [
         { key: "nombre", label: "Nombre"},
         { key: "codigo", label: "Codigo" }, // Corregido de 'cargo' a 'codigo'
-        { 
-            key: "acciones", 
-            label: "Acciones", 
+        {
+            key: "acciones",
+            label: "Acciones",
             render: (materia) => (
-                <button 
+                <button
                     onClick={() => {
                         setEnPlan(prev => prev.filter(m => m.id !== materia.id));
                         setDisponibles(prev => [...prev, materia]);
@@ -102,7 +100,7 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
 
     // 3. Quitar de la lista de disponibles (para que no aparezca en el buscador)
     setDisponibles(prev => prev.filter(m => m.id !== materia.id));
-    
+
     // 4. Limpiar el buscador (opcional, reseteando el filtro)
     setFilters(prev => ({ ...prev, search: "" }));
     };
@@ -115,18 +113,18 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
             <Head title="Nuevo Plan"/>
 
             <div className="container mx-auto px-4 py-8 max-w-5xl">
-                
+
                 {/* PASO 1: Conservar Materias */}
                 {step === 1 && (
                     <div className="bg-white p-6 rounded-lg shadow">
                         <h3 className="text-lg font-medium mb-4">Paso 1: Materias del plan anterior</h3>
                         <p className="text-gray-600 mb-6">Selecciona las materias que deseas mantener en el nuevo plan:</p>
-                        
+
                         <div className="space-y-2 max-h-96 overflow-y-auto border p-4 rounded mb-6">
                             {materiasEnPlanAnterior.map(materia => (
                                 <label key={materia.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                                    <input 
-                                        type="checkbox" 
+                                    <input
+                                        type="checkbox"
                                         className="rounded border-gray-300 text-indigo-600"
                                         checked={seleccionadasPrevias.includes(materia.id)}
                                         onChange={() => handleCheckboxChange(materia.id)}
@@ -159,8 +157,8 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
                         <div className="grid grid-cols-2 gap-4 mb-6">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Año de Comienzo</label>
-                                <input 
-                                    type="date" 
+                                <input
+                                    type="date"
                                     value={data.anio_comienzo}
                                     onChange={e => setData('anio_comienzo', e.target.value)}
                                     className="mt-1 block w-full rounded-md border-gray-300"
@@ -171,10 +169,10 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
                     <div>
                         <h3 className="text-xl font-bold mb-4">Materias en el nuevo plan</h3>
                         {/* Usamos 'enPlan' en lugar de 'materiasEnPlanAnterior' para que se actualice en vivo */}
-                        <DataTable 
-                            columns={columns} 
-                            data={enPlan} 
-                            emptyMessage="Aún no has agregado materias al plan." 
+                        <DataTable
+                            columns={columns}
+                            data={enPlan}
+                            emptyMessage="Aún no has agregado materias al plan."
                         />
                     </div>
 
@@ -205,8 +203,8 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
                         )}
                     </div>
                         <div className="mt-8 flex justify-end">
-                            <PrimaryButton 
-                                onClick={() => post(route('planes.store'))} 
+                            <PrimaryButton
+                                onClick={() => post(route('planes.store'))}
                                 disabled={processing || enPlan.length === 0}
                             >
                                 {processing ? 'Guardando...' : 'Crear Plan Definitivo'}

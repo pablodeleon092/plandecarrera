@@ -1,8 +1,5 @@
 import React, { useState } from "react";
 import DataTable from "@/Components/DataTable";
-import SecondaryButton from "@/Components/Buttons/SecondaryButton";
-import PrimaryButton from "@/Components/Buttons/PrimaryButton";
-import DangerButton from "@/Components/Buttons/DangerButton";
 import { useForm, Link, router } from "@inertiajs/react";
 
 export default function CarreraMaterias({ carrera, planes }) {
@@ -26,13 +23,13 @@ export default function CarreraMaterias({ carrera, planes }) {
     };
 
     const columnasPlanes = [
-        { 
-            key: "anio_comienzo", 
+        {
+            key: "anio_comienzo",
             label: "Fecha Inicio",
             render: (p) => new Date(p.anio_comienzo).toLocaleDateString('es-AR')
         },
-        { 
-            key: "anio_fin", 
+        {
+            key: "anio_fin",
             label: "Fecha Fin",
             render: (p) => p.anio_fin ? new Date(p.anio_fin).toLocaleDateString('es-AR') : <span className="text-green-600 font-semibold">Vigente</span>
         },
@@ -45,7 +42,7 @@ export default function CarreraMaterias({ carrera, planes }) {
                 </SecondaryButton>
             ),
         },
-        
+
     ];
 
     // Columnas para la tabla de Materias (la que ya tenías)
@@ -84,10 +81,10 @@ export default function CarreraMaterias({ carrera, planes }) {
                 >
                 Agregar Plan de Estudio
                 </PrimaryButton>
-                <DataTable 
-                    columns={columnasPlanes} 
-                    data={planes} 
-                    emptyMessage="No hay planes registrados." 
+                <DataTable
+                    columns={columnasPlanes}
+                    data={planes}
+                    emptyMessage="No hay planes registrados."
                     onDelete={(plan) => handleDelete(plan.id)}
                     />
             </div>
@@ -97,7 +94,7 @@ export default function CarreraMaterias({ carrera, planes }) {
             {/* SECCIÓN 2: Detalle y Formulario de Baja */}
             {planSeleccionado && (
                 <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm animate-in fade-in zoom-in-95 duration-300">
-                    
+
                     {/* Encabezado con botones de acción */}
                     <div className="flex justify-between items-start mb-6">
                         <div>
@@ -127,12 +124,12 @@ export default function CarreraMaterias({ carrera, planes }) {
                             <p className="text-sm text-gray-600 mb-4">
                                 Selecciona la fecha en la que este plan dejará de tener validez para la carrera.
                             </p>
-                            
+
                             <form onSubmit={confirmarBaja} className="flex flex-col sm:flex-row items-end gap-4">
                                 <div className="flex-1">
                                     <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de finalización</label>
-                                    <input 
-                                        type="date" 
+                                    <input
+                                        type="date"
                                         value={data.anio_fin}
                                         onChange={e => setData('anio_fin', e.target.value)}
                                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
