@@ -8,10 +8,10 @@ import DataTable from '@/Components/DataTable';
 import GestionPersonal from '@/Components/Filters/GestionPersonal';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 import KPICard from '@/Components/Dashboard/KPICard';
+import { usePermissions } from '@/Hooks/usePermissions';
 
-
-export default function Index({ auth, institutos, carreras, docentes, flash, dedicaciones}) {
-
+export default function Index({ auth, institutos, carreras, docentes, flash, filters, dedicaciones}) {
+    const { canCreateDocente, canDeleteDocente } = usePermissions();
 
     // Función que maneja la eliminación de un docente
     const handleDelete = (id, nombre, apellido) => {
@@ -53,11 +53,13 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                         </div>
                     )}
 
-                    <ListHeader
-                        title="Listado de Docentes"
-                        buttonLabel="Agregar Docente"
-                        buttonRoute={route('docentes.create')}
-                    />
+                    { canCreateDocente && (
+                        <ListHeader
+                            title="Listado de Docentes"
+                            buttonLabel="Agregar Docente"
+                            buttonRoute={route('docentes.create')}
+                        />  
+                    )}
 
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
                         <GestionPersonal
@@ -100,9 +102,8 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                                     key: 'materias',
                                     label: 'Materias',
                                     render: (doc) => {
-                                        if (!doc.dictas) return <span className="text-gray-400">Sin materias</span>;
-                                        const links = doc.dictas.map((dicta) => {
-                                            const materia = dicta.comision?.materia;
+                                        if (!doc.materias) return <span className="text-gray-400">Sin materias</span>;
+                                        const links = doc.materias.map((materia) => {
                                             if (!materia) return null;
                                             return (
                                                 <Link
@@ -135,9 +136,12 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                             }
                         />
                     </div>
-                    <PaginatorButtons meta={docentes.meta} paginator={docentes} routeName={'docentes.index'}
+                    <PaginatorButtons 
+                        meta={docentes.meta} 
+                        paginator={docentes}  
+                        routeParams = {filters}
+                        routeName={'docentes.index'}
                     />
-
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                         <KPICard
                             title="Total Docentes"

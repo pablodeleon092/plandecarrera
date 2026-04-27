@@ -21,6 +21,7 @@ class CargoController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('update', $docente);
         $validated = $request->validate([
             'cargo' => 'required|string|max:255',
             'dedicacion_id' => 'required|exists:dedicaciones,id',
@@ -44,8 +45,8 @@ class CargoController extends Controller
 
     public function destroy(Cargo $cargo)
     {
+        $this->authorize('update', $docente);
         $cargo->delete();
-
         return redirect()
             ->route('docentes.index')
             ->with('success', '¡El Cargo ha sido eliminado exitosamente!');    

@@ -19,7 +19,7 @@ class PlanController extends Controller
     {
         // Obtenemos las materias que ya están en el plan
         $carrera = Carrera::findOrFail($carrera);
-
+        $this->authorize('update', $carrera);
         $plan_anterior = $carrera->planActual;
 
         $materiasEnPlanActual = $plan_anterior->materias;
@@ -69,7 +69,7 @@ class PlanController extends Controller
     {
         // Obtenemos las materias que ya están en el plan
         $carrera = $plan->carrera()->get();
-
+        $this->authorize('update', $carrera);
         $materiasEnPlan = $plan->materias()->get();
 
         // Obtenemos los IDs de las materias que ya están en el plan
@@ -88,6 +88,8 @@ class PlanController extends Controller
     }
 
     public function desactivar(Request $request, Plan $plan) {
+        $carrera = $plan->carrera;
+        $this->authorize('update', $carrera);
         $request->validate(['anio_fin' => 'required|date']);
         $plan->update(['anio_fin' => $request->anio_fin]);
         return back()->with('success', 'Plan finalizado correctamente.');
@@ -95,12 +97,9 @@ class PlanController extends Controller
     
     public function destroy(Plan $plan)
     {
+        $carrera = $plan->carrera;
+        $this->authorize('update', $carrera);
         try {
-            // 1. Eliminamos las relaciones en la tabla intermedia (pivote)
-            // Esto es necesario si no tienes "onDelete('cascade')" en tu migración
-            $plan->materias()->detach();
-
-            // 2. Eliminamos el registro del plan
             $plan->delete();
 
             return back()->with('success', 'El plan y sus asignaciones han sido eliminados permanentemente.');

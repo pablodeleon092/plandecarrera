@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import Button from '@/Components/Button';
 import TableFilters from "@/Components/TableFilters";
 import DataTable from "@/Components/DataTable";
 
@@ -78,15 +79,14 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
             key: "acciones",
             label: "Acciones",
             render: (materia) => (
-                <button
+                <Button variant="danger" 
                     onClick={() => {
                         setEnPlan(prev => prev.filter(m => m.id !== materia.id));
                         setDisponibles(prev => [...prev, materia]);
                     }}
-                    className="text-red-600 hover:text-red-800"
                 >
                     Quitar
-                </button>
+                </Button>
             )
         }
     ];
@@ -135,9 +135,9 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
                         </div>
 
                         <div className="flex justify-end">
-                            <PrimaryButton onClick={irAlPasoDos}>
+                            <Button variant="primary"  onClick={irAlPasoDos}>
                                 Continuar a configuración de materias
-                            </PrimaryButton>
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -148,9 +148,9 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-lg font-medium">Paso 2: Organizar materias del nuevo plan</h3>
                             {materiasEnPlanAnterior.length > 0 && (
-                                <SecondaryButton onClick={() => setStep(1)}>
+                                <Button variant="secondary" onClick={() => setStep(1)}>
                                     Volver atrás
-                                </SecondaryButton>
+                                </Button>
                             )}
                         </div>
 
@@ -203,12 +203,12 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
                         )}
                     </div>
                         <div className="mt-8 flex justify-end">
-                            <PrimaryButton
-                                onClick={() => post(route('planes.store'))}
+                            <Button variant="primary" 
+                                onClick={() => post(route('planes.store'))} 
                                 disabled={processing || enPlan.length === 0}
                             >
                                 {processing ? 'Guardando...' : 'Crear Plan Definitivo'}
-                            </PrimaryButton>
+                            </Button>
                         </div>
                     </div>
                 )}

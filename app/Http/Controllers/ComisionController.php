@@ -18,11 +18,8 @@ class ComisionController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Comision::class);
         $user = Auth::user();
-
-        try {
-            $this->authorize('index', Comision::class);
-        } catch (\Throwable $e) {}
 
         $query = Comision::query();
 
@@ -56,10 +53,39 @@ class ComisionController extends Controller
         $queryFilter->apply($query, $filters);
 
         $comisiones = $query
-            ->with(['materia', 'horarios'])
+            ->with(['materia', 'horarios']) // Eager loading para evitar N+1
             ->orderBy('id', 'desc')
             ->paginate(15)
-            ->withQueryString();
+            ->withQueryString()
+            ->through(fn ($comision) => [
+                'id'              => $comision->id,
+                'codigo'          => $comision->codigo,
+                'nombre'          => $comision->nombre,
+                'turno'           => $comision->turno,
+                'modalidad'       => $comision->modalidad,
+                'sede'            => $comision->sede,
+                'anio'            => $comision->anio,
+                'cuatrimestre'    => $comision->cuatrimestre,
+                'estado'          => (bool) $comision->estado,
+                'horas_totales'   => $comision->horas_totales,
+                // Relación con Materia (para mostrar el nombre en la tabla)
+                'materia' => $comision->materia ? [
+                    'id'     => $comision->materia->id,
+                    'nombre' => $comision->materia->nombre,
+                ] : null,
+                'horarios' => $comision->horarios->map(fn ($horario) => [
+                        'id'          => $horario->id,
+                        'dia_semana'  => $horario->dia_semana,
+                        'hora_inicio' => $horario->hora_inicio,
+                        'hora_fin'    => $horario->hora_fin,
+                    ]),
+                // Permisos específicos del modelo Comisión
+                'can' => [
+                    'view'   => $user->can('consultar_comision', $comision),
+                    'update' => $user->can('modificar_comision', $comision),
+                    'delete' => $user->can('restore_comision', $comision),
+                ]
+            ]);
             
         $institutosDisponibles = $user->getInstitutosAutorizados();
         
@@ -70,13 +96,15 @@ class ComisionController extends Controller
         return Inertia::render('Comisiones/Index', [
             'comisiones' => $comisiones,
             'carreras' => $carreras,
-            'institutos' => $institutosDisponibles
+            'institutos' => $institutosDisponibles,
+            'filters' => $request->all()
         ]);
     }
 
     public function show($id)
     {
         $comision = Comision::with('materia', 'horarios')->findOrFail($id);
+        $this->authorize('view', $comision); 
         $docentes = $comision->dictas()->exists() 
             ? $comision->docentes_with_cargo
             : collect(); // colección vacía
@@ -91,7 +119,7 @@ class ComisionController extends Controller
 
     public function create(Request $request)
     {
-
+        $this->authorize('create', Comision::class);
         $materiaId = $request->old('id_materia') ?? $request->query('materia_id');
       
         $materia = Materia::findOrFail($materiaId);
@@ -104,6 +132,7 @@ class ComisionController extends Controller
     public function edit($id)
     {
         $comision = Comision::with('materia', 'horarios')->findOrFail($id);
+        $this->authorize('update', $comision);
         $materias = \App\Models\Materia::where('estado', true)->get()->map(function ($materia) {
             return [
                 'id' => $materia->id,
@@ -122,6 +151,7 @@ class ComisionController extends Controller
     public function update(Request $request, $id)
     {
         $comision = Comision::with('materia', 'horarios')->findOrFail($id);
+        $this->authorize('update', $comision);
         try {
             $validated = $request->validate([
                 'codigo' => [
@@ -174,6 +204,7 @@ class ComisionController extends Controller
 
     
     public function store(Request $request) {
+        $this->authorize('create', Comision::class);
         try {
             $validated = $request->validate([
                 'codigo' => 'required|string|max:50|unique:comisiones,codigo',
@@ -208,11 +239,9 @@ class ComisionController extends Controller
                 return redirect()->back()->withErrors(['horas_teoricas' => 'La suma de horas teóricas y prácticas no puede ser menor que las horas totales de la materia.'])->withInput();
             }
 
-
-
             Comision::create($validated);
 
-            return redirect()->route('comisiones.index')->with('success', 'Comisión creada exitosamente.');
+            return redirect()->route('materias.show', $materia->id)->with('success', 'Comisión creada exitosamente.');
 
         }   catch (\Throwable $e) {
                 return redirect()->route('comisiones.create')
@@ -226,15 +255,19 @@ class ComisionController extends Controller
     {
         try {
             $comision = Comision::findOrFail($id);
+            $materia = $comision->materia;
+            $this->authorize('delete', $comision);
             $comision->delete();
-            return redirect()->route('comisiones.index')->with('success', 'Comision eliminada.');
+            return redirect()->route('materias.show', $materia->id)->with('success', 'Comision eliminada.');
         } catch (\Exception $e) {
-            return redirect()->route('comisiones.index')->with('error', 'No se puede eliminar la comision.');
+  
+            return redirect()->route('materias.show', $materia->id)->with('error', 'No se puede eliminar la comision.' . $e->getMessage());
         }
     }
 
     public function toggleStatus(Comision $comision)
     {
+        $this->authorize('restore', $comision);
         $comision->estado = !$comision->estado;
         $comision->save();
 

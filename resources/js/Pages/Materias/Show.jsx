@@ -5,7 +5,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import MateriaInfo from './Partials/MateriaInfo';
 import MateriaComisiones from './Partials/MateriaComisiones';
 
-export default function Show({ auth, materia, comisiones }) {
+export default function Show({ auth, materia, flash, comisiones }) {
 
     const [currentTab, setCurrentTab] = useState('informacion');
 
@@ -49,6 +49,18 @@ export default function Show({ auth, materia, comisiones }) {
                             Volver
                         </Button>
                     </div>
+                    {/* Flash Messages */}
+                    {flash?.success && (
+                        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                            {flash.success}
+                        </div>
+                    )}
+
+                    {flash?.error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            {flash.error}
+                        </div>
+                    )}
 
                     {/* ENCABEZADO estilo Docente */}
                     <div className="bg-white rounded-t-lg shadow-lg overflow-hidden">

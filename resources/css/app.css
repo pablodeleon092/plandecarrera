@@ -77,6 +77,13 @@
     .input-checkbox {
         @apply rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500;
     }
+
+    select:disabled {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+    border-color: #e5e7eb;
+    }
     
     /* Dropdown */
     .dropdown-content-container {

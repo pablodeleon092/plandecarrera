@@ -24,7 +24,9 @@ class DocenteController extends Controller
      */
     public function index(Request $request)
     {
+        $user = Auth::user();
 
+        $this->authorize('viewAny', Docente::Class);
         $query = Docente::query()->with(['cargos.dedicacion']);
 
         $queryFilter = new QueryFilter;
@@ -36,12 +38,39 @@ class DocenteController extends Controller
         $docentes = $query->with([
                 'cargos',
                 'dictas.comision.materia' 
-        ])
-        ->orderBy('apellido')
-        ->paginate(15)
-        ->withQueryString();
+            ])
+            ->orderBy('apellido')
+            ->paginate(15)
+            ->withQueryString()
+            ->through(fn ($docente) => [
+                'id'                  => $docente->id,
+                'legajo'              => $docente->legajo,
+                'nombre'              => $docente->nombre,
+                'apellido'            => $docente->apellido,
+                'nombre_completo'     => "{$docente->apellido}, {$docente->nombre}",
+                'modalidad_desempeño' => $docente->modalidad_desempeño,
+                'carga_horaria'       => $docente->carga_horaria,
+                'es_activo'              => (bool) $docente->es_activo, // Usamos 'estado' para que DataTable lo reconozca
+                'telefono'            => $docente->telefono,
+                'email'               => $docente->email,
 
-        $user = Auth::user();
+                // Mapeo de Cargos
+                'cargos' => $docente->cargos->map(fn ($cargo) => [
+                    'id'     => $cargo->id,
+                    'nombre' => $cargo->nombre, // Asumiendo que 'nombre' es la columna en cargos
+                ]),
+                'materias' => $docente->dictas->map(fn ($dicta) => [
+                    'id' => $dicta->comision?->materia?->id,
+                    'nombre'  => $dicta->comision?->materia?->nombre,
+                ])->filter(fn($m) => $m['nombre'] != null)->values(),
+
+                'can' => [
+                    'view'   => $user->can('consultar_docente', $docente),
+                    'update' => $user->can('modificar_docente', $docente),
+                    'delete' => $user->can('restore_docente', $docente),
+                ]
+            ]);
+
         $institutosDisponibles = $user->getInstitutosAutorizados();
         
         $carreras = $institutosDisponibles->flatMap(function ($instituto) {
@@ -54,6 +83,7 @@ class DocenteController extends Controller
             'docentes' => $docentes,
             'institutos' => $institutosDisponibles,
             'carreras' => $carreras,
+            'filters' => $request->all(),
             'dedicaciones' => $dedicaciones,
             'flash' => [
                 'success' => session('success'),
@@ -67,6 +97,7 @@ class DocenteController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Docente::Class);
         return Inertia::render('Docentes/Create');
     }
 
@@ -75,6 +106,7 @@ class DocenteController extends Controller
      */
     public function store(StoreDocenteRequest $request)
     {
+        $this->authorize('create', Docente::Class);
         Docente::create($request->validated());
         return redirect()->route('docentes.index')->with('success', 'Docente creado exitosamente.');
     }
@@ -84,6 +116,7 @@ class DocenteController extends Controller
      */
     public function show(Docente $docente)
     {
+        $this->authorize('viewAny', Docente::Class);
         $docente->load(['cargos.dedicacion', 'comisiones.materia']);
 
         return Inertia::render('Docentes/Show', [
@@ -97,6 +130,7 @@ class DocenteController extends Controller
      */
     public function edit(Docente $docente)
     {
+        $this->authorize('update', $docente);
         return Inertia::render('Docentes/Edit', [
             'docente' => $docente->load('cargos'),
         ]);
@@ -107,6 +141,7 @@ class DocenteController extends Controller
      */
     public function update(StoreDocenteRequest $request, Docente $docente)
     {
+        $this->authorize('update', $docente);
         $docente->update($request->validated());
         return redirect()->route('docentes.index')->with('success', 'Docente actualizado exitosamente.');
     }
@@ -116,6 +151,7 @@ class DocenteController extends Controller
      */
     public function destroy(Docente $docente)
     {
+        $this->authorize('update', $docente);
         try {
             $docente->delete();
             return redirect()->route('docentes.index')->with('success', 'Docente eliminado exitosamente.');
@@ -129,6 +165,7 @@ class DocenteController extends Controller
      */
     public function createCargo(Docente $docente)
     {
+        $this->authorize('update', $docente);
         if ($docente->modalidad_desempeño === 'Desarrollo') {
             $dedicaciones = \App\Models\Dedicaciones::whereIn('nombre', ['Simple', 'SemiExclusiva(DP)'])->get();
         } elseif ($docente->modalidad_desempeño === 'Investigador') {
@@ -143,6 +180,7 @@ class DocenteController extends Controller
 
     public function toggleStatus(Docente $docente)
     {
+        $this->authorize('restore', Docente::Class);
         $docente->es_activo = !$docente->es_activo;
         $docente->save();
 

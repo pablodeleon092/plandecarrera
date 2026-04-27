@@ -33,7 +33,7 @@ export default function Edit({ auth, materia }) {
         >
             <Head title="Editar Materia" />
                     <div className="mb-4">
-                        <SecondaryButton
+                        <Button variant="secondary"
                             as={Link}
                             href="#"
                             onClick={(e) => {
@@ -51,7 +51,7 @@ export default function Edit({ auth, materia }) {
                                 />
                             </svg>
                             Volver
-                        </SecondaryButton>
+                        </Button>
                     </div>
 
                     <div className="mb-8">

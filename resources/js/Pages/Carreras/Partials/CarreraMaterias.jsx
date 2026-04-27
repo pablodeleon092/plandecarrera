@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import DataTable from "@/Components/DataTable";
+import Button from '@/Components/Button';
 import { useForm, Link, router } from "@inertiajs/react";
 
 export default function CarreraMaterias({ carrera, planes }) {
@@ -37,9 +38,9 @@ export default function CarreraMaterias({ carrera, planes }) {
             key: "acciones",
             label: "Acciones",
             render: (p) => (
-                <SecondaryButton onClick={() => { setPlanSeleccionado(p); setMostrandoBaja(false); }}>
+                <Button variant="info" onClick={() => { setPlanSeleccionado(p); setMostrandoBaja(false); }}>
                     Ver Materias
-                </SecondaryButton>
+                </Button>
             ),
         },
 
@@ -74,17 +75,18 @@ export default function CarreraMaterias({ carrera, planes }) {
             <div>
                 <h3 className="text-2xl font-bold mb-5">Planes de Estudio — {carrera.nombre}</h3>
 
-                <PrimaryButton
+                <Button
+                variant="primary"
                 className="mb-5"
                 as={Link}
                 href={route('planes.create', carrera.id)}
                 >
                 Agregar Plan de Estudio
-                </PrimaryButton>
-                <DataTable
-                    columns={columnasPlanes}
-                    data={planes}
-                    emptyMessage="No hay planes registrados."
+                </Button>
+                <DataTable 
+                    columns={columnasPlanes} 
+                    data={planes} 
+                    emptyMessage="No hay planes registrados." 
                     onDelete={(plan) => handleDelete(plan.id)}
                     />
             </div>
@@ -107,9 +109,9 @@ export default function CarreraMaterias({ carrera, planes }) {
                         </div>
                         <div className="flex space-x-2">
                             {!mostrandoBaja && (
-                                <DangerButton onClick={() => setMostrandoBaja(true)}>
+                                <Button variant="danger" onClick={() => setMostrandoBaja(true)}>
                                     Dar de Baja Plan
-                                </DangerButton>
+                                </Button>
                             )}
                             <button onClick={() => { setPlanSeleccionado(null); setMostrandoBaja(false); }} className="px-3 py-2 text-gray-400 hover:text-gray-600 text-sm">
                                 Cerrar
@@ -138,8 +140,8 @@ export default function CarreraMaterias({ carrera, planes }) {
                                     {errors.anio_fin && <p className="text-red-500 text-xs mt-1">{errors.anio_fin}</p>}
                                 </div>
                                 <div className="flex gap-2">
-                                    <SecondaryButton onClick={() => setMostrandoBaja(false)}>Cancelar</SecondaryButton>
-                                    <DangerButton type="submit" disabled={processing}>Confirmar Baja</DangerButton>
+                                    <Button variant="secondary" onClick={() => setMostrandoBaja(false)}>Cancelar</Button>
+                                    <Button variant="danger" type="submit" disabled={processing}>Confirmar Baja</Button>
                                 </div>
                             </form>
                         </div>

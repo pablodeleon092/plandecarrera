@@ -18,7 +18,6 @@ use Inertia\Response;
 class UserController extends Controller
 {
 
-
     /**
      * Display the registration view.
      */
@@ -88,6 +87,7 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $this->authorize('update', User::class);
         if (!Auth::user()->can('modificar_usuario')) {
             abort(403, 'No tienes permiso para modificar usuarios.');
         }
@@ -102,6 +102,7 @@ class UserController extends Controller
 
     public function show(User $user)
     {
+        $this->authorize('show', User::class);
         $user->load('instituto');
         return inertia('Users/Show', [
             'user' => $user,
@@ -208,11 +209,11 @@ class UserController extends Controller
         $cargoRoleMap = [
             'Administrador' => 'Admin',
             'Administrativo de Secretaria Academica' => 'Admin_global',
-            'Administrativo de instituto' => 'Admin_instituto',
-            'Coordinador de Carrera' => 'Coord_carrera',
-            'Director de instituto' => 'Consulta_instituto',
-            'Coordinador Academico' => 'Consulta_instituto',
-            'Consejero' => 'Consulta_instituto',
+            'Administrativo de instituto' => 'Admin_instituto', 
+            'Coordinador de Carrera' => 'Coord_carrera', 
+            'Director de instituto' => 'Consulta_instituto', 
+            'Coordinador Academico' => 'Consulta_instituto', 
+            'Consejero' => 'Consulta_instituto', 
         ];
 
         return $cargoRoleMap[$cargo] ?? 'user'; // Rol por defecto si no se encuentra el cargo

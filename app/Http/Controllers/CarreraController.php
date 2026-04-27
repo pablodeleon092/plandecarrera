@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Carrera;
+use App\Services\QueryFilter;
 use App\Models\Instituto;
 use App\Models\Materia;
 use App\Models\Plan;
@@ -14,44 +15,78 @@ use Illuminate\Validation\Rule;
 
 class CarreraController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        // 1. Autorización básica para ver el listado
+        $this->authorize('viewAny', Carrera::class);
         $user = Auth::user();
-        $filters = request()->only(['search', 'estado']);
 
-        $carreras = Carrera::with('instituto')
-            ->when(
-                $user->hasAnyRole(['Admin_instituto', 'Consulta_instituto']) && $user->instituto_id,
-                function ($query) use ($user) {
-                    $query->where('instituto_id', $user->instituto_id);
-                }
-            )
-            ->when($filters['search'] ?? null, function ($query, $search) {
-                $query->where(function ($query) use ($search) {
-                    $query->where('nombre', 'like', '%' . $search . '%')
-                        ->orWhereHas('instituto', function ($query) use ($search) {
-                            $query->where('siglas', 'like', '%' . $search . '%');
-                        });
-                });
-            })
-            ->when(isset($filters['estado']) && $filters['estado'] !== '', function ($query) use ($filters) {
-                $query->where('estado', $filters['estado'] === 'true');
-            })
-            ->orderBy('id', 'desc')
+        $query = Carrera::query();
+  
+        // 2. Aplicación de alcances (Scopes) según Rol
+        if ($user->hasAnyRole(['Admin', 'Admin_global', 'coord_academico'])) {
+            // Acceso completo
+        } elseif ($user->hasAnyRole(['Admin_instituto', 'Consulta_instituto'])) {
+            if ($user->instituto_id) {
+                $carreraIds = $user->instituto->carreras()->pluck('id')->toArray();
+                $query->whereIn('id', $carreraIds);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        } elseif ($user->hasRole('Coord_carrera')) {
+            $carreraIds = $user->carreras()->pluck('id')->toArray();
+            if (!empty($carreraIds)) {
+                $query->whereIn('id', $carreraIds);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        } else {
+            $query->whereRaw('1 = 0');
+        }
+
+        // 3. Filtros de búsqueda
+        $queryFilter = new QueryFilter;
+        $filters = $request->all();
+        $queryFilter->apply($query, $filters);
+
+        // 4. Paginación y Transformación (Aquí inyectamos los permisos)
+        $carreras = $query
+            ->with('instituto') // <--- Carga la relación aquí
+            ->orderBy('nombre', 'asc')
             ->paginate(15)
-            ->withQueryString();
-
-        $institutos = Instituto::select('id', 'siglas')->get();
+            ->withQueryString()
+            ->through(fn ($carrera) => [
+                'id' => $carrera->id,
+                'nombre' => $carrera->nombre,
+                'instituto_id' => $carrera->instituto_id,
+                // Incluimos el objeto instituto con los campos necesarios
+                'instituto' => $carrera->instituto ? [
+                    'id' => $carrera->instituto->id,
+                    'nombre' => $carrera->instituto->nombre,
+                    'siglas' => $carrera->instituto->siglas,
+                ] : null,
+                'modalidad' => $carrera->modalidad, // Corregido el typo 'modaliad'
+                'sede' => $carrera->sede,
+                'estado' => $carrera->estado,
+                'can' => [
+                    'view'   => $user->can('consultar_carrera', $carrera),
+                    'update' => $user->can('modificar_carrera', $carrera),
+                    'delete' => $user->can('restore_carrera', $carrera),
+                ]
+            ]);
+            
+        $institutos = $user->getInstitutosAutorizados();
 
         return Inertia::render('Carreras/Index', [
-            'carreras' => $carreras,
+            'carreras'   => $carreras,
             'institutos' => $institutos,
-            'filters' => $filters,
+            'filters'    => $filters,
         ]);
     }
 
     public function create()
     {
+        $this->authorize('create', Carrera::class);
         return Inertia::render('Carreras/Create', [
             'institutos' => Instituto::select('id', 'siglas')->get()
         ]);
@@ -59,6 +94,7 @@ class CarreraController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Carrera::class);
         try {
             $validated = $request->validate([
                 'nombre' => 'required|string|max:255|unique:carreras',
@@ -87,6 +123,7 @@ class CarreraController extends Controller
 
     public function show(Carrera $carrera)
     {
+        $this->authorize('view', $carrera);
         $carrera->load([
             'instituto',
             'planes.materias',
@@ -108,6 +145,7 @@ class CarreraController extends Controller
 
     public function toggleStatus(Carrera $carrera)
     {
+        $this->authorize('restore', $carrera);
         $carrera->estado = !$carrera->estado;
         $carrera->save();
 
@@ -119,6 +157,7 @@ class CarreraController extends Controller
 
     public function edit(Carrera $carrera)
     {
+        $this->authorize('update', $carrera);
         $plan = $carrera->planActual()->first();
 
         if (!$plan) {
@@ -143,6 +182,7 @@ class CarreraController extends Controller
 
     public function update(Request $request, Carrera $carrera)
     {
+        $this->authorize('update', $carrera);
         $validated = $request->validate([
             'materias' => 'present|array',
             'materias.*' => 'integer|exists:materias,id',
