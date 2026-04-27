@@ -34,7 +34,7 @@ class CarreraController extends Controller
                 $query->whereRaw('1 = 0');
             }
         } elseif ($user->hasRole('Coord_carrera')) {
-            $carreraIds = $user->carreras()->pluck('id')->toArray();
+            $carreraIds = $user->carreras()->pluck('carrera_id')->toArray();
             if (!empty($carreraIds)) {
                 $query->whereIn('id', $carreraIds);
             } else {
