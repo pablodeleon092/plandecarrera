@@ -19,27 +19,27 @@ class RolesYPermisosSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permisos = [
-                'crear_usuario',
-                'consultar_usuario', 
-                'modificar_usuario',
-                'restore_usuario',   
-                'modificar_permisos',
-                'crear_carrera', 
-                'consultar_carrera', 
-                'modificar_carrera',
-                'restore_carrera',
-                'crear_docente', 
-                'consultar_docente', 
-                'modificar_docente',
-                'restore_docente',
-                'crear_materia',
-                'consultar_materia',
-                'modificar_materia',
-                'restore_materia',
-                'crear_comision',
-                'consultar_comision',
-                'modificar_comision',
-                'restore_comision'   
+            'crear_usuario',
+            'consultar_usuario',
+            'modificar_usuario',
+            'restore_usuario',
+            'modificar_permisos',
+            'crear_carrera',
+            'consultar_carrera',
+            'modificar_carrera',
+            'restore_carrera',
+            'crear_docente',
+            'consultar_docente',
+            'modificar_docente',
+            'restore_docente',
+            'crear_materia',
+            'consultar_materia',
+            'modificar_materia',
+            'restore_materia',
+            'crear_comision',
+            'consultar_comision',
+            'modificar_comision',
+            'restore_comision'
         ];
 
         foreach ($permisos as $permiso) {
@@ -49,16 +49,16 @@ class RolesYPermisosSeeder extends Seeder
         $roles = [
             'Admin' => [
                 'crear_usuario',
-                'consultar_usuario', 
+                'consultar_usuario',
                 'modificar_usuario',
-                'restore_usuario',       
+                'restore_usuario',
                 'modificar_permisos',
-                'crear_carrera', 
-                'consultar_carrera', 
+                'crear_carrera',
+                'consultar_carrera',
                 'modificar_carrera',
                 'restore_carrera',
-                'crear_docente', 
-                'consultar_docente', 
+                'crear_docente',
+                'consultar_docente',
                 'modificar_docente',
                 'restore_docente',
                 'crear_materia',
@@ -68,19 +68,19 @@ class RolesYPermisosSeeder extends Seeder
                 'crear_comision',
                 'consultar_comision',
                 'modificar_comision',
-                'restore_comision'                 
+                'restore_comision'
             ],
             'Admin_global' => [
-                'consultar_usuario', 
+                'consultar_usuario',
                 'modificar_usuario',
-                'restore_usuario',          
+                'restore_usuario',
                 'modificar_permisos',
-                'crear_carrera', 
-                'consultar_carrera', 
+                'crear_carrera',
+                'consultar_carrera',
                 'modificar_carrera',
                 'restore_carrera',
-                'crear_docente', 
-                'consultar_docente', 
+                'crear_docente',
+                'consultar_docente',
                 'modificar_docente',
                 'restore_docente',
                 'crear_materia',
@@ -90,36 +90,39 @@ class RolesYPermisosSeeder extends Seeder
                 'crear_comision',
                 'consultar_comision',
                 'modificar_comision',
-                'restore_comision'   
+                'restore_comision'
             ],
-            'Admin_instituto' => [         
-                'crear_carrera', 
-                'consultar_carrera', 
+            'Admin_instituto' => [
+                'crear_carrera',
+                'consultar_carrera',
                 'modificar_carrera',
-                'crear_docente', 
-                'consultar_docente', 
+                'restore_carrera',
+                'crear_docente',
+                'consultar_docente',
                 'modificar_docente',
+                'restore_docente',
                 'crear_materia',
                 'consultar_materia',
                 'modificar_materia',
-                'modificar_docente',
+                'restore_materia',
                 'crear_comision',
                 'consultar_comision',
-                'modificar_comision' 
-            ], 
+                'modificar_comision',
+                'restore_comision'
+            ],
             'Coord_carrera' => [
-                'consultar_carrera', 
+                'consultar_carrera',
                 'modificar_carrera',
                 'consultar_materia',
                 'modificar_materia',
                 'consultar_docente',
                 'crear_comision',
                 'consultar_comision',
-                'modificar_comision' 
-            ], 
+                'modificar_comision'
+            ],
             'Consulta_instituto' => [
-                'consultar_carrera',  
-                'consultar_docente', 
+                'consultar_carrera',
+                'consultar_docente',
                 'consultar_materia',
                 'consultar_comision',
             ],
@@ -149,7 +152,7 @@ class RolesYPermisosSeeder extends Seeder
 
     }
 
-    
+
 
 
 

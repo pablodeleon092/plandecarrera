@@ -100,12 +100,15 @@ class MateriaController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorize('create', Materia::Class);
+        $user = auth()->user();
+        $this->authorize('create', Materia::class);
+
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'codigo' => 'required|string|max:50|unique:materias,codigo',
             'estado' => 'boolean',
             'regimen' => 'required|in:anual,cuatrimestral',
+            'carrera_id' => 'required|exists:carreras,id',
             'cuatrimestre' => [
                 'nullable',
                 'integer',
@@ -129,6 +132,13 @@ class MateriaController extends Controller
             'horas_semanales.required' => 'Las horas semanales son obligatorias',
             'horas_semanales.max' => 'Las horas semanales no pueden exceder 40'
         ]);
+
+        // SEGURIDAD: Verificar que la carrera pertenezca al instituto del usuario
+        $carrera = \App\Models\Carrera::findOrFail($validated['carrera_id']);
+        if ($user->instituto_id && $carrera->instituto_id != $user->instituto_id) {
+            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+            return redirect()->back()->with('error', "Como director del {$institutoNombre}, no puedes crear materias en una carrera de otro instituto.");
+        }
 
         // Si es anual, cuatrimestre debe ser null
         if ($validated['regimen'] === 'anual') {
@@ -171,7 +181,16 @@ class MateriaController extends Controller
 
     public function update(Request $request, Materia $materia)
     {
-        $this->authorize('update', $materia);
+        $user = auth()->user();
+        if ($user->cannot('update', $materia)) {
+            $rolesFriendly = [
+                'Admin_instituto' => 'Director de instituto',
+                'Coord_carrera' => 'Coordinador de carrera',
+            ];
+            $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
+            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes editar materias de tu propio instituto.");
+        }
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'codigo' => 'required|string|max:50|unique:materias,codigo,' . $materia->id,
@@ -201,7 +220,16 @@ class MateriaController extends Controller
 
     public function destroy(Materia $materia)
     {
-        $this->authorize('delete', $materia);
+        $user = auth()->user();
+        if ($user->cannot('delete', $materia)) {
+            $rolesFriendly = [
+                'Admin_instituto' => 'Director de instituto',
+                'Coord_carrera' => 'Coordinador de carrera',
+            ];
+            $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
+            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes eliminar materias de tu propio instituto.");
+        }
         try {
             $materia->delete();
             

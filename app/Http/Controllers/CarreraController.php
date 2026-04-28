@@ -103,6 +103,13 @@ class CarreraController extends Controller
                 'instituto_id' => 'required|integer|exists:institutos,id',
             ]);
 
+            // SEGURIDAD: Verificar que el instituto_id sea el del usuario
+            $user = auth()->user();
+            if ($user->instituto_id && $validated['instituto_id'] != $user->instituto_id) {
+                $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+                return redirect()->back()->with('error', "Como director del {$institutoNombre}, no puedes crear carreras en otro instituto.");
+            }
+
             Carrera::create([
                 'nombre' => $validated['nombre'],
                 'instituto_id' => $validated['instituto_id'],
@@ -145,7 +152,16 @@ class CarreraController extends Controller
 
     public function toggleStatus(Carrera $carrera)
     {
-        $this->authorize('restore', $carrera);
+        $user = auth()->user();
+        if ($user->cannot('restore', $carrera)) {
+            $rolesFriendly = [
+                'Admin_instituto' => 'Director de instituto',
+                'Coord_carrera' => 'Coordinador de carrera',
+            ];
+            $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
+            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes editar carreras de tu propio instituto.");
+        }
         $carrera->estado = !$carrera->estado;
         $carrera->save();
 
@@ -157,7 +173,16 @@ class CarreraController extends Controller
 
     public function edit(Carrera $carrera)
     {
-        $this->authorize('update', $carrera);
+        $user = auth()->user();
+        if ($user->cannot('update', $carrera)) {
+            $rolesFriendly = [
+                'Admin_instituto' => 'Director de instituto',
+                'Coord_carrera' => 'Coordinador de carrera',
+            ];
+            $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
+            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes editar carreras de tu propio instituto.");
+        }
         $plan = $carrera->planActual()->first();
 
         if (!$plan) {
@@ -182,7 +207,16 @@ class CarreraController extends Controller
 
     public function update(Request $request, Carrera $carrera)
     {
-        $this->authorize('update', $carrera);
+        $user = auth()->user();
+        if ($user->cannot('update', $carrera)) {
+            $rolesFriendly = [
+                'Admin_instituto' => 'Director de instituto',
+                'Coord_carrera' => 'Coordinador de carrera',
+            ];
+            $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
+            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes editar carreras de tu propio instituto.");
+        }
         $validated = $request->validate([
             'materias' => 'present|array',
             'materias.*' => 'integer|exists:materias,id',

@@ -45,7 +45,12 @@ class CarrerasICPASeeder2 extends Seeder
             ],
         ];
 
-        DB::table('carreras')->insert($carreras);
+        foreach ($carreras as $carrera) {
+            DB::table('carreras')->updateOrInsert(
+                ['nombre' => $carrera['nombre'], 'instituto_id' => $carrera['instituto_id']],
+                $carrera
+            );
+        }
     }
 }
 

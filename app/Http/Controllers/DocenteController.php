@@ -141,7 +141,13 @@ class DocenteController extends Controller
      */
     public function update(StoreDocenteRequest $request, Docente $docente)
     {
-        $this->authorize('update', $docente);
+        $user = auth()->user();
+        if ($user->cannot('update', $docente)) {
+            $rol = str_replace('_', ' ', $user->getRoleNames()->first() ?? 'usuario');
+            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes editar docentes de tu propio instituto.");
+        }
+        
         $docente->update($request->validated());
         return redirect()->route('docentes.index')->with('success', 'Docente actualizado exitosamente.');
     }
@@ -151,7 +157,12 @@ class DocenteController extends Controller
      */
     public function destroy(Docente $docente)
     {
-        $this->authorize('update', $docente);
+        $user = auth()->user();
+        if ($user->cannot('delete', $docente)) {
+            $rol = str_replace('_', ' ', $user->getRoleNames()->first() ?? 'usuario');
+            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes eliminar docentes de tu propio instituto.");
+        }
         try {
             $docente->delete();
             return redirect()->route('docentes.index')->with('success', 'Docente eliminado exitosamente.');
@@ -180,7 +191,7 @@ class DocenteController extends Controller
 
     public function toggleStatus(Docente $docente)
     {
-        $this->authorize('restore', Docente::Class);
+        $this->authorize('restore', $docente);
         $docente->es_activo = !$docente->es_activo;
         $docente->save();
 

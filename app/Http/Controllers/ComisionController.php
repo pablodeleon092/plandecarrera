@@ -151,7 +151,17 @@ class ComisionController extends Controller
     public function update(Request $request, $id)
     {
         $comision = Comision::with('materia', 'horarios')->findOrFail($id);
-        $this->authorize('update', $comision);
+        
+        $user = auth()->user();
+        if ($user->cannot('update', $comision)) {
+            $rolesFriendly = [
+                'Admin_instituto' => 'Director de instituto',
+                'Coord_carrera' => 'Coordinador de carrera',
+            ];
+            $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
+            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes editar comisiones de tu propio instituto.");
+        }
         try {
             $validated = $request->validate([
                 'codigo' => [
@@ -230,7 +240,14 @@ class ComisionController extends Controller
                 'id_materia.required' => 'Debe seleccionar una materia válida',
             ]);
 
+            // SEGURIDAD: Verificar que la materia pertenezca al instituto del usuario
             $materia = \App\Models\Materia::findOrFail($validated['id_materia']);
+            $user = auth()->user();
+            if ($user->instituto_id && $materia->carrera->instituto_id != $user->instituto_id) {
+                $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+                return redirect()->back()->with('error', "Como director del {$institutoNombre}, no puedes crear comisiones en una materia de otro instituto.");
+            }
+
             $validated['horas_totales'] = $validated['horas_teoricas'] + $validated['horas_practicas'];
 
             if ($validated['horas_totales'] > $materia->horas_semanales) {
@@ -256,7 +273,17 @@ class ComisionController extends Controller
         try {
             $comision = Comision::findOrFail($id);
             $materia = $comision->materia;
-            $this->authorize('delete', $comision);
+
+            $user = auth()->user();
+            if ($user->cannot('delete', $comision)) {
+                $rolesFriendly = [
+                    'Admin_instituto' => 'Director de instituto',
+                    'Coord_carrera' => 'Coordinador de carrera',
+                ];
+                $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
+                $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+                return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes eliminar comisiones de tu propio instituto.");
+            }
             $comision->delete();
             return redirect()->route('materias.show', $materia->id)->with('success', 'Comision eliminada.');
         } catch (\Exception $e) {
@@ -267,7 +294,16 @@ class ComisionController extends Controller
 
     public function toggleStatus(Comision $comision)
     {
-        $this->authorize('restore', $comision);
+        $user = auth()->user();
+        if ($user->cannot('restore', $comision)) {
+            $rolesFriendly = [
+                'Admin_instituto' => 'Director de instituto',
+                'Coord_carrera' => 'Coordinador de carrera',
+            ];
+            $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
+            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes editar comisiones de tu propio instituto.");
+        }
         $comision->estado = !$comision->estado;
         $comision->save();
 

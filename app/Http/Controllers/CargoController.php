@@ -21,7 +21,6 @@ class CargoController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorize('update', $docente);
         $validated = $request->validate([
             'cargo' => 'required|string|max:255',
             'dedicacion_id' => 'required|exists:dedicaciones,id',
@@ -29,6 +28,7 @@ class CargoController extends Controller
         ]);
 
         $docente = Docente::findOrFail($validated['docente_id']);
+        $this->authorize('update', $docente);
 
         $cargo = $docente->cargos()->create([
             'nombre' => $validated['cargo'],
@@ -45,6 +45,7 @@ class CargoController extends Controller
 
     public function destroy(Cargo $cargo)
     {
+        $docente = $cargo->docente;
         $this->authorize('update', $docente);
         $cargo->delete();
         return redirect()

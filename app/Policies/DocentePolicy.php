@@ -37,30 +37,62 @@ class DocentePolicy
      */
     public function update(User $user, Docente $docente): bool
     {
-        return $user->can('modificar_docente') && $docente->es_activo;
+        if (!$user->can('modificar_docente') || !$docente->es_activo) {
+            return false;
+        }
+
+        return $this->userPerteneceADocente($user, $docente);
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user): bool
+    public function delete(User $user, Docente $docente): bool
     {
-        return $user->can('modificar_docente');
+        if (!$user->can('restore_docente')) {
+            return false;
+        }
+
+        return $this->userPerteneceADocente($user, $docente);
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user): bool
+    public function restore(User $user, Docente $docente): bool
     {
-        return $user->can('restore_docente');
+        if (!$user->can('restore_docente')) {
+            return false;
+        }
+
+        return $this->userPerteneceADocente($user, $docente);
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user): bool
+    public function forceDelete(User $user, Docente $docente): bool
     {
         return false;
+    }
+
+    private function userPerteneceADocente(User $user, Docente $docente): bool
+    {
+        if (!$user->instituto_id) {
+            return true;
+        }
+
+        // 1. Si el docente tiene materias en el instituto del usuario, tiene permiso
+        $perteneceAlInstituto = Docente::deInstituto($user->instituto_id)
+            ->where('docentes.id', $docente->id)
+            ->exists();
+
+        if ($perteneceAlInstituto) {
+            return true;
+        }
+
+        // 2. Si el docente NO tiene NINGUNA materia asignada en todo el sistema, 
+        // permitimos que el director lo gestione (caso de docente recién creado)
+        return !$docente->dictas()->exists();
     }
 }
