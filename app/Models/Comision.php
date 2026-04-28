@@ -157,7 +157,7 @@ class Comision extends Model
     {
         return $query->whereHas('materia', function ($q) use ($carreraId) {
             // Invoca el scope 'ByCarreras' del modelo Materia
-            $q->byCarrera ($carreraIds);
+            $q->byCarrera ($carreraId);
         });
     }
 
