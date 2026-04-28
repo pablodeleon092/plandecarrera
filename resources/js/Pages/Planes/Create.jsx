@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Button from '@/Components/Button';
 import TableFilters from "@/Components/TableFilters";
 import DataTable from "@/Components/DataTable";
@@ -27,16 +26,25 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
 
     // Sincronizar materias con el form al cambiar las listas
     useEffect(() => {
-        setData('materias', enPlan.map(m => m.id));
+        setData('materias', enPlan.map(m => ({
+            id: m.id,
+            anio: m.pivot?.anio || 1 // Mantiene el año actualizado
+        })));
     }, [enPlan]);
 
     // Lógica para avanzar al paso 2 filtrando las seleccionadas
     const irAlPasoDos = () => {
-        const conservadas = materiasEnPlanAnterior.filter(m => seleccionadasPrevias.includes(m.id));
+        const conservadas = materiasEnPlanAnterior
+            .filter(m => seleccionadasPrevias.includes(m.id))
+            .map(m => ({
+                ...m,
+                // Nos aseguramos de que tengan la estructura pivot.anio
+                pivot: { anio: m.pivot?.anio || 1 } 
+            }));
+
         const noConservadas = materiasEnPlanAnterior.filter(m => !seleccionadasPrevias.includes(m.id));
 
         setEnPlan(conservadas);
-        // Las que no quiso conservar se suman a las disponibles para agregar después
         setDisponibles([...materiasDisponibles, ...noConservadas]);
         setStep(2);
     };
@@ -74,6 +82,31 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
 
     const columns = [
         { key: "nombre", label: "Nombre"},
+        { 
+            key: "anio", 
+            label: "Año",
+            render: (materia) => (
+                <input 
+                    type="number"
+                    min="1"
+                    max="6"
+                    // Usamos el valor que ya tiene la materia en el estado local
+                    value={materia.pivot?.anio || 1} 
+                    onChange={(e) => {
+                        const nuevoAnio = parseInt(e.target.value) || 1;
+                        
+                        // Actualizamos el estado 'enPlan' para que cuando 
+                        // envíes el formulario, los datos ya estén listos.
+                        setEnPlan(prev => prev.map(m => 
+                            m.id === materia.id 
+                                ? { ...m, pivot: { ...m.pivot, anio: nuevoAnio } } 
+                                : m
+                        ));
+                    }}
+                    className="w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+            )
+        },
         { key: "codigo", label: "Codigo" }, // Corregido de 'cargo' a 'codigo'
         {
             key: "acciones",
@@ -92,19 +125,19 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
     ];
 
     const agregarMateriaAlPlan = (materia) => {
-    // 1. Evitar duplicados
-    if (enPlan.some(m => m.id === materia.id)) return;
+        if (enPlan.some(m => m.id === materia.id)) return;
 
-    // 2. Agregar a la lista del plan
-    setEnPlan(prev => [...prev, materia]);
+        // Le agregamos un pivot por defecto al entrar al plan
+        const nuevaMateria = {
+            ...materia,
+            pivot: { anio: 1 }
+        };
 
-    // 3. Quitar de la lista de disponibles (para que no aparezca en el buscador)
-    setDisponibles(prev => prev.filter(m => m.id !== materia.id));
-
-    // 4. Limpiar el buscador (opcional, reseteando el filtro)
-    setFilters(prev => ({ ...prev, search: "" }));
+        setEnPlan(prev => [...prev, nuevaMateria]);
+        setDisponibles(prev => prev.filter(m => m.id !== materia.id));
+        setFilters(prev => ({ ...prev, search: "" }));
     };
-
+    
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -144,6 +177,19 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
 
                 {/* PASO 2: Drag and Drop */}
                 {step === 2 && (
+
+                <> {/* Agregamos el Fragment para agrupar todo */}
+                        {flash?.success && (
+                            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                                {flash.success}
+                            </div>
+                        )}
+                        {flash?.error && (
+                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                {flash.error}
+                            </div>
+                        )}                  
+                    
                     <div className="bg-white p-6 rounded-lg shadow">
                         <div className="flex justify-between items-center mb-6">
                             <h3 className="text-lg font-medium">Paso 2: Organizar materias del nuevo plan</h3>
@@ -211,6 +257,7 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
                             </Button>
                         </div>
                     </div>
+                </>    
                 )}
             </div>
         </AuthenticatedLayout>

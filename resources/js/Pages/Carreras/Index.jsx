@@ -80,7 +80,6 @@ export default function Index({ auth, carreras, institutos, filters }) {
                             columns={columns}
                             data={carreras.data}
                             onShow={(carrera) => router.visit(route('carreras.show', carrera.id))}
-                            onEdit={(carrera) => router.visit(route('carreras.edit', carrera.id))}
                             onDelete={handleDelete}
                             onToggleStatus={handleToggleStatus}
                             hover={true}

@@ -51,7 +51,12 @@ export default function CarreraMaterias({ carrera, planes }) {
         { key: "nombre", label: "Nombre" },
         { key: "codigo", label: "Código" },
         { key: "regimen", label: "Régimen" },
-        { key: "cuatrimestre", label: "Cuatrimestre / Año" },
+        { 
+            key: "anio", 
+            label: "Año",
+            render: (m) => m.pivot?.anio || 'N/A' 
+        },
+        { key: "cuatrimestre", label: "Cuatrimestre" },
         {
             key: "acciones",
             label: "Acciones",

@@ -261,6 +261,7 @@ class ComisionController extends Controller
             return redirect()->route('materias.show', $materia->id)->with('success', 'Comisión creada exitosamente.');
 
         }   catch (\Throwable $e) {
+
                 return redirect()->route('comisiones.create')
                     ->with(['error' => 'Ocurrió un error inesperado: ' . $e->getMessage()])
                     ->withInput();

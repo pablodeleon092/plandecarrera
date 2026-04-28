@@ -51,11 +51,13 @@ class Carrera extends Model
         return $this->hasOne(Plan::class, 'carrera_id')
             ->where(function ($query) {
                 $query->whereNull('anio_fin')
-                    ->orWhereYear('anio_fin', '>=', now()->year); // Cambiado a whereYear
+                    ->orWhere('anio_fin', '>', now()); // Planes que vencen después de hoy (exactamente)
             })
-            ->orderByRaw('anio_fin IS NULL ASC')
-            ->orderBy('anio_fin', 'asc')
-            ->orderBy('anio_comienzo', 'asc');
+            // 1. Los que son NULL primero (vigencia indefinida)
+            ->orderByRaw('anio_fin IS NULL DESC') 
+            // 2. Si ambos tienen fecha, el que termine más lejos en el futuro
+            ->orderBy('anio_fin', 'desc') 
+            ->orderBy('anio_comienzo', 'desc');
     }
-    
+        
 }

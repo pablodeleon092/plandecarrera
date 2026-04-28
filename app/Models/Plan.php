@@ -23,6 +23,7 @@ class Plan extends Model
 
     public function materias()
     {
-        return $this->belongsToMany(Materia::class, 'plan_materia', 'plan_id', 'materia_id');
+        return $this->belongsToMany(Materia::class, 'plan_materia')
+                    ->withPivot('anio'); // <--- CRÍTICO: Esto permite cargar el campo extra
     }
 }

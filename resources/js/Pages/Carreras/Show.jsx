@@ -66,13 +66,6 @@ export default function Show({ auth, carrera, planes }) {
 
                                 {/* Botones */}
                                 <div className="flex gap-3">
-                                    <Button variant="primary"
-                                        as={Link}
-                                        href={route('carreras.edit', carrera.id)}
-                                    >
-                                        Editar
-                                    </Button>
-
                                     <Button variant="danger"
                                         onClick={handleDelete}
                                     >

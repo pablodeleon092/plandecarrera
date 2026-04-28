@@ -40,28 +40,38 @@ class PlanController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'carrera_id'    => 'required|exists:carreras,id',
-            'anio_comienzo' => 'required|date', // Valida formato YYYY-MM-DD
-            'materias'      => 'required|array|min:1',
-            'materias.*'    => 'exists:materias,id',
-        ]);
-
         try {
+
+            $validated = $request->validate([
+            'carrera_id'    => 'required|exists:carreras,id',
+            'anio_comienzo' => 'required|date',
+            'materias'      => 'required|array|min:1',
+            // Validamos que cada elemento del array tenga el id y el anio
+            'materias.*.id'   => 'required|exists:materias,id',
+            'materias.*.anio' => 'required|integer|min:1|max:6',
+            ]);
+
             $plan = Plan::create([
                 'carrera_id'    => $validated['carrera_id'],
                 'anio_comienzo' => $validated['anio_comienzo'],
-                // 'anio_fin' se mantiene null hasta que se cree un nuevo plan 
-                // o se cierre este manualmente
             ]);
 
-            $plan->materias()->attach($validated['materias']);
+            // Transformamos el array de materias para el formato de attach:
+            // [ id_materia => ['anio' => valor], ... ]
+            $materiasConPivot = collect($request->materias)->mapWithKeys(function ($materia) {
+                return [$materia['id'] => ['anio' => $materia['anio']]];
+            })->toArray();
+
+            // Guardamos en la tabla intermedia con el campo extra
+            $plan->materias()->attach($materiasConPivot);
 
             return redirect()->route('carreras.show', $validated['carrera_id'])
                 ->with('success', 'Nuevo plan de estudio creado correctamente.');
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Error al guardar el plan: ' . $e->getMessage())->withInput();
+                return redirect()->route('planes.create', $request['carrera_id'])
+                    ->with(['error' => 'Ocurrió un error inesperado: ' . $e->getMessage()])
+                    ->withInput();
         }
     }
 

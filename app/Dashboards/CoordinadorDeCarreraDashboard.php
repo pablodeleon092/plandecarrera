@@ -39,8 +39,6 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
             $kpis = $this->getKpisCarrera($selectedCarreraId);
         }
 
-
-
         return Inertia::render('Gestion/DashboardCoordinador', [
             'user' => $user,
             'carreras' => $carreras,
@@ -96,14 +94,16 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
         $plan = $carrera->planActual;
         if (!$plan) return null;
 
-        $materiasAgrupadas = $plan->materias->map(function ($materia) {
-            $cuat = $materia->cuatrimestre;
-            if ($materia->regimen = 'cuatrimestral') {
-                $año = ceil($cuat / 2);
-            } else {
-                $año = $cuat;
-            }
+        $plan->load([
+            'materias.comisiones.dictas.docente', 
+            'materias.comisiones.dictas.cargo'
+        ]);
 
+        $materiasAgrupadas = $plan->materias->map(function ($materia) {
+
+        $año = $materia->pivot->anio ?? 'N/A'; 
+
+        $cuat = $materia->cuatrimestre ?? 'Sin asignar';
             $comisionesData = $materia->comisiones->map(function($comision) {
                 return [
                     'nombre' => $comision->nombre,
@@ -184,10 +184,15 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
         $plan = $carrera->planActual;
         if (!$plan) return null;
 
+        $plan->load([
+            'materias.comisiones.dictas.docente', 
+            'materias.comisiones.dictas.cargo'
+        ]);
+
         $materiasAgrupadas = $plan->materias->map(function ($materia) {
-            $cuat = $materia->cuatrimestre;
-            // Corrección de lógica de año
-            $año = ($materia->regimen == 'cuatrimestral') ? ceil($cuat / 2) : $cuat;
+            $año = $materia->pivot->anio ?? 'N/A'; 
+
+            $cuat = $materia->cuatrimestre ?? 'Sin asignar';
 
             $comisionesData = $materia->comisiones->map(function($comision) {
                 // Sumamos las horas que los docentes efectivamente tienen frente al aula
