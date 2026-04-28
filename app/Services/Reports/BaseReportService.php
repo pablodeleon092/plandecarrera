@@ -66,6 +66,7 @@ abstract class BaseReportService implements ReportServiceInterface
                 }
             }
         }
+
         return $params;
     }
 }

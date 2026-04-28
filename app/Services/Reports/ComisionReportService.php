@@ -18,9 +18,6 @@ class ComisionReportService extends BaseReportService {
             'modalidad'                     => 'MODALIDAD',
             'regimen'                       => 'REGIMEN',
             'horarios.dia_semana'           => 'DIA_SEMANA',
-            'by_Instituto'                  => 'INSTITUTO',
-            'by_Carrera'                    => 'CARRERA',
-
             // Números
             'anio'                          => 'ANIO',
             'horas_totales'                 => 'HORAS_TOTALES',

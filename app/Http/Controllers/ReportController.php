@@ -9,6 +9,7 @@ class ReportController extends Controller
     public function exportar(Request $request, string $tipo)
     {
         try {
+
             $service = \App\Factories\ReportFactory::make($tipo);
             $path = $service->generarPdf($request);
 
