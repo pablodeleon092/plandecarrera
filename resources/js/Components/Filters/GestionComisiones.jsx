@@ -74,38 +74,13 @@ export default function gestionComisiones ({institutos, carreras}) {
 
     const handleApplyFilters = (key, value) => {
         const newFilters = { ...activeFilters, [key]: value };
+        console.log('Filtros aplicados:', newFilters);
         router.get(route('comisiones.index'), 
         newFilters, {
             preserveScroll: true,
             preserveState: true,
             replace: true,
         });
-    };
-
-
-    const handleExportarPdf = () => {
-        // 1. Creamos el objeto de búsqueda de la URL
-        const params = new URLSearchParams();
-
-        activeFilters.forEach((filter, index) => {
-            if (typeof filter.value === 'object' && filter.value !== null) {
-                params.append(`filters[${index}][field]`, filter.field);
-                params.append(`filters[${index}][operator]`, filter.operator);
-                params.append(`filters[${index}][value][min]`, filter.value.min || '');
-                params.append(`filters[${index}][value][max]`, filter.value.max || '');
-            } else {
-                params.append(`filters[${index}][field]`, filter.field);
-                params.append(`filters[${index}][operator]`, filter.operator);
-                params.append(`filters[${index}][value]`, filter.value || '');
-            }
-        });
-
-        // 3. Construimos la URL final
-        const baseUrl = route('docentes.exportar');
-        const fullUrl = `${baseUrl}?${params.toString()}`;
-
-        // 4. Redireccionamos (esto disparará la descarga en el navegador)
-        window.location.href = fullUrl;
     };
     
     return (

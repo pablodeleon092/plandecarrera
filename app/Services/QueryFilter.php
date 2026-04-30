@@ -51,25 +51,33 @@ class QueryFilter
 
     protected function applyOperator($query, $field, $operator, $value)
     {
-        
         switch ($operator) {
             case 'contains':
-                $query->where($field, 'ILIKE', "%{$value}%"); // Uso ILIKE para PostgreSQL (insensible a mayúsculas)
-                
+                $query->where($field, 'ILIKE', "%{$value}%");
                 break;
+
             case 'equals':
                 $query->where($field, '=', $value);
-  
                 break;
+
             case 'not_equals':
                 $query->where($field, '!=', $value);
                 break;
+
+            // --- Casos solicitados ---
+            case 'greater':
+                $query->where($field, '>', $value);
+                break;
+
+            case 'less':
+                $query->where($field, '<', $value);
+                break;
+
             case 'between':
                 if (isset($value['min'], $value['max'])) {
                     $query->whereBetween($field, [$value['min'], $value['max']]);
                 }
                 break;
-            // Otros operadores...
         }
     }
 }

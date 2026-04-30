@@ -49,7 +49,7 @@ class ComisionController extends Controller
         $queryFilter = new QueryFilter;
 
         $filters = $request->all();
-
+       
         $queryFilter->apply($query, $filters);
 
         $comisiones = $query
