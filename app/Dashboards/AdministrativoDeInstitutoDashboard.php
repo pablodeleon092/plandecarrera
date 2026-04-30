@@ -21,6 +21,15 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
     {
         $institutoId = $user->instituto_id;
         
+        if ($user->cargo === 'Administrador') {
+            $institutoId = $request->input('instituto_id') ?? Instituto::first()?->id;
+        } else {
+            if (!$institutoId) {
+                abort(403, 'Usuario sin instituto asignado');
+            }
+        }
+        
+        $instituto = Instituto::with('carreras')->findOrFail($institutoId);
         // Cálculo de período lectivo
         $currentYear = date('Y');
         $currentMonth = (int)date('m');
@@ -28,7 +37,7 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
 
         return Inertia::render('Gestion/DashboardAdministrativo', [
             'user' => $user,
-            'instituto' => $user->instituto,
+            'instituto' => $instituto,
             'currentYear' => $currentYear,
             'currentSemester' => $currentSemester,
             

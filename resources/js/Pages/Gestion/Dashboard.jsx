@@ -43,7 +43,7 @@ export default function Dashboard({ user, institutos, materias, docentes, select
         // 2. Disparar la petición a Laravel con los nuevos filtros
         router.get(route('dashboard'), {
             instituto_id: newInstitutoId,
-            carrera_id: 'all', // Resetear la carrera al cambiar de instituto
+            selected_carrera: 'all', // Resetear la carrera al cambiar de instituto
             view: currentView
         }, {
             // Esto evita que se recargue toda la página, solo actualiza las props.
@@ -62,7 +62,7 @@ export default function Dashboard({ user, institutos, materias, docentes, select
         // 2. Disparar la petición a Laravel, conservando el instituto actual
         router.get(route('dashboard'), {
             instituto_id: selectedInstitutoId,
-            carrera_id: newCarreraId,
+            selected_carrera: newCarreraId,
             view: currentView
         }, {
             preserveScroll: true,
@@ -76,7 +76,7 @@ export default function Dashboard({ user, institutos, materias, docentes, select
 
         router.get(route('dashboard'), {
             instituto_id: selectedInstitutoId,
-            carrera_id: selectedCarreraId,
+            selected_carrera: selectedCarreraId,
             view: view
         }, {
             preserveScroll: true,
@@ -98,14 +98,60 @@ export default function Dashboard({ user, institutos, materias, docentes, select
         ...carrerasDisponibles.map(c => ({ id: c.id, nombre: c.nombre }))
     ];
 
+    const CARGOS_DISPONIBLES = [
+        'Administrador',
+        'Consejero',
+        'Secretaría académica',
+        'Director de instituto',
+        'Coordinador Academico',
+        'Administrativo de instituto',
+        'Coordinador de Carrera'
+    ];
+
+    const handleRoleOverride = (e) => {
+            const selectedCargo = e.target.value;
+            
+            router.get(route('dashboard'), {
+                // Pasamos el cargo elegido al backend
+                view: selectedCargo, 
+                instituto_id: selectedInstitutoId,
+                selected_carrera: selectedCarreraId,
+            }, {
+                preserveScroll: true,
+                replace: true,
+            });
+        };
 
     return (
         <AuthenticatedLayout
             user={user}
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard de Gestión
-                </h2>
+                <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                        Dashboard de Gestión
+                    </h2>
+                    
+                    {/* SELECTOR DE MODO ADMINISTRADOR */}
+                    {user.cargo === 'Administrador' && (
+                        <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 p-2 rounded-lg">
+                            <label className="text-xs font-bold text-amber-800 uppercase" htmlFor="admin_role_select">
+                                Vista de Rol:
+                            </label>
+                            <select
+                                id="admin_role_select"
+                                // Aquí podrías recibir desde el backend qué vista estás viendo actualmente si querés que el select quede marcado
+                                onChange={handleRoleOverride}
+                                className="text-sm border-amber-300 focus:border-amber-500 focus:ring-amber-500 rounded py-1"
+                            >
+                                {CARGOS_DISPONIBLES.map(cargo => (
+                                    <option key={cargo} value={cargo}>
+                                        {cargo}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                </div>
             }
         >
             <Head title="Dashboard" />
@@ -209,7 +255,7 @@ export default function Dashboard({ user, institutos, materias, docentes, select
                         routeName={'dashboard'}
                         routeParams={{
                             instituto_id: selectedInstitutoId,
-                            carrera_id: selectedCarreraId,
+                            selected_carrera: selectedCarreraId,
                             view: currentView
                         }}
                     />

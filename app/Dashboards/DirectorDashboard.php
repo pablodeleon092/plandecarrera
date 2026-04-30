@@ -13,7 +13,13 @@ class DirectorDashboard implements DashboardStrategy
     public function render(User $user, Request $request): Response
     {
         $service = new DirectorDashboardService();
-        $data = $service->getData($user->instituto_id);
+                
+        if ($user->cargo === 'Administrador') {
+            $institutoId = $request->input('instituto_id') ?? Instituto::first()?->id;
+        } else {
+            $institutoId = $user->instituto_id;
+        }
+        $data = $service->getData($institutoId);
 
         return Inertia::render('Gestion/DashboardDirector', $data);
     }

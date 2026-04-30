@@ -18,14 +18,18 @@ class ConsejeroDashboard implements DashboardStrategy
 {
     public function render(User $user, Request $request): Response
     {
-        // Obtener el instituto del consejero
-        $institutoId = $user->instituto_id;
 
-        if (!$institutoId) {
-            abort(403, 'Usuario sin instituto asignado');
+        $institutoId = $user->instituto_id;
+        
+        if ($user->cargo === 'Administrador') {
+            $institutoId = $request->input('instituto_id') ?? Instituto::first()?->id;
+        } else {
+            if (!$institutoId) {
+                abort(403, 'Usuario sin instituto asignado');
+            }
         }
 
-        $instituto = Instituto::findOrFail($institutoId);
+        $instituto = Instituto::with('carreras')->findOrFail($institutoId);
 
         // Obtener todos los KPIs
         $resumenEjecutivo = $this->getResumenEjecutivo($institutoId);

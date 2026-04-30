@@ -22,7 +22,12 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
 
     public function render(User $user, Request $request): Response
     {
-        $carreras = $user->carreras()->select('carreras.id', 'carreras.nombre')->get();
+        if ($user->cargo === 'Administrador') {
+            $carreras = Carrera::select('id', 'nombre')->get();
+        } else {
+            $carreras = $user->carreras()->select('carreras.id', 'carreras.nombre')->get();
+        }
+        
         $selectedCarreraId = $request->input('selected_carrera');
 
         // Si no hay ID en el request, tomamos la primera
