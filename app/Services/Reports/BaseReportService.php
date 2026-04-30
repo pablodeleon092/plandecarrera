@@ -1,6 +1,7 @@
 <?php
 namespace App\Services\Reports;
 
+use Illuminate\Support\Facades\File;
 use App\Contracts\ReportServiceInterface;
 use PHPJasper\PHPJasper;
 use Illuminate\Http\Request;
@@ -19,11 +20,19 @@ abstract class BaseReportService implements ReportServiceInterface
 
     public function generarPdf(Request $request): string
     {
-        $input = storage_path('app/reports/' . $this->getReportPath());
-        $output = storage_path('app/reports/pdf/reporte_' . time());
-        
+        $input = resource_path('reports/' . $this->getReportPath());
+
+        $directory = resource_path('reports');
+
+        if (!File::exists($directory)) {
+            File::makeDirectory($directory, 0775, true);
+        }
+
+        $output = $directory . '/reporte_' . time();
+
         $params = $this->parseFilters($request->input('filters', []));
-  
+        $params['logoPath'] = resource_path('img/fotoUni.jpg');
+
         $options = [
             'format' => ['pdf'],
             'locale' => 'es_AR',
@@ -39,6 +48,7 @@ abstract class BaseReportService implements ReportServiceInterface
         ];
 
         $this->jasper->process($input, $output, $options)->execute();
+
         return $output . '.pdf';
     }
 

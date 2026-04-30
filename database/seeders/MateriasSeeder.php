@@ -48,6 +48,9 @@ class MateriasSeeder extends Seeder
             DB::table('plan_materia')->insert([
                 'plan_id' => $plan->id,
                 'materia_id' => $materia->id,
+                'anio' => $faker->numberBetween(1, 5),
+
+
             ]);
         }
     }

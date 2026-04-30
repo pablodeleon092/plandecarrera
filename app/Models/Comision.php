@@ -47,7 +47,7 @@ class Comision extends Model
     public function dictas()
     {
         return $this->hasMany(Dicta::class, 'comision_id');
-    } 
+    }
 
     public function horarios()
     {
@@ -63,13 +63,13 @@ class Comision extends Model
             // 2. Si no fue cargada, forzar la carga (esto dispara la consulta N+1, pero es el fallback)
             $dictas = $this->dictas()->with(['docente', 'cargo'])->get();
         }
-        
+
         // 3. Mapear la colección, asegurándonos que 'docente' y 'cargo' existen
         return $dictas->map(function($dicta) {
             // Usamos null coalescing para evitar errores si las sub-relaciones no existen
             $docenteNombre = $dicta->docente->nombre ?? 'N/A';
             $docenteApellido = $dicta->docente->apellido ?? 'N/A';
-            
+
             return [
                 'id' => $dicta->docente->id ?? null,
                 'dicta_id' => $dicta->id,
@@ -87,7 +87,7 @@ class Comision extends Model
 
     public function getDocentesNamesByCargoAttribute()
     {
-        $docentesWithCargo = $this->docentes_with_cargo; 
+        $docentesWithCargo = $this->docentes_with_cargo;
         $docentesCollection = collect($docentesWithCargo);
 
         $namesByCargo = [
@@ -97,14 +97,14 @@ class Comision extends Model
             'Jefe de Trabajos Practicos' => collect(),
             'Ayudante de Primera' => collect(),
         ];
-    
+
         $uniqueDocentes = $docentesCollection->unique('id');
 
         foreach ($uniqueDocentes as $docente) {
             $cargoName = $docente['cargo'];
             $fullName = $docente['nombre'] . ' ' . $docente['apellido'];
 
-            
+
             if ($cargoName && $cargoName === 'Titular') {
                 $namesByCargo['Titular']->push($fullName);
             } elseif ($cargoName && $cargoName === 'Asociado') {
@@ -118,7 +118,7 @@ class Comision extends Model
             }
         }
 
-        
+
 
         return [
             'totalDocentes' => $uniqueDocentes->count(),
@@ -167,12 +167,12 @@ class Comision extends Model
         $cargos = $this->dictas->map(fn($d) => strtolower($d->cargo->nombre ?? ''));
 
         // 1. Verificar Responsable (Titular o Adjunto)
-        $tieneResponsable = $cargos->contains(fn($c) => 
+        $tieneResponsable = $cargos->contains(fn($c) =>
             str_contains($c, 'titular') || str_contains($c, 'adjunto')
         );
-        
+
         // 2. Verificar Auxiliar (JTP o Ayudante)
-        $tieneAuxiliar = $cargos->contains(fn($c) => 
+        $tieneAuxiliar = $cargos->contains(fn($c) =>
             str_contains($c, 'jefe de trabajos') || str_contains($c, 'ayudante')
         );
 
