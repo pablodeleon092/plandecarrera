@@ -21,9 +21,6 @@ export default function gestionMaterias ({institutos, carreras}) {
                 { value: 'cuatrimestral', label: 'Cuatrimestal' }
             ]
         },
-        { key: 'sede', label: 'Sede', type: 'select', 
-          options: [{ value: 'Ushuaia', label: 'Ushuaia' }, { value: 'Rio Grande', label: 'Rio grande' }] 
-        },
         { key: 'cuatrimestre', label: 'Cuatrimestre', type: 'number' },        
         { key: 'horas_semanales', label: 'Horas Semanales', type: 'number' },
         { key: 'by_Instituto', label: 'Instituto', type: 'select', 

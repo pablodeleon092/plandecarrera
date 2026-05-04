@@ -67,6 +67,7 @@ class MateriaController extends Controller
                 'cuatrimestre'    => $materia->cuatrimestre,
                 'horas_semanales' => $materia->horas_semanales,
                 'horas_totales'   => $materia->horas_totales,
+                'sede'   => $materia->sede,
                 'can' => [
                     'view'   => $user->can('consultar_materia', $materia),
                     'update' => $user->can('modificar_materia', $materia),

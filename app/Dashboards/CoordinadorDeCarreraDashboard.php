@@ -35,14 +35,18 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
             $selectedCarreraId = $carreras->first()->id;
         }
 
-        $mapaCurricular = null;
-        if ($selectedCarreraId) {
-            $mapaCurricular = $this->getResumenMapaCurricular($selectedCarreraId);
-            $coberturaPorAño = $this->getCoberturaPorAño($selectedCarreraId);
-            $equipoDocenteCarrera = $this->getEquipoDocenteCarrera($selectedCarreraId);
-            $cargaHorariaDelPlanPorAño = $this->getCargaHorariaDelPlanPorAño($selectedCarreraId);
-            $kpis = $this->getKpisCarrera($selectedCarreraId);
+        if (!$selectedCarreraId || $selectedCarreraId === 'all') {
+            abort(403, 'Carrera no seleccionada o inválida.');
         }
+
+        $mapaCurricular = null;
+
+        $mapaCurricular = $this->getResumenMapaCurricular($selectedCarreraId);
+        $coberturaPorAño = $this->getCoberturaPorAño($selectedCarreraId);
+        $equipoDocenteCarrera = $this->getEquipoDocenteCarrera($selectedCarreraId);
+        $cargaHorariaDelPlanPorAño = $this->getCargaHorariaDelPlanPorAño($selectedCarreraId);
+        $kpis = $this->getKpisCarrera($selectedCarreraId);
+    
 
         return Inertia::render('Gestion/DashboardCoordinador', [
             'user' => $user,
