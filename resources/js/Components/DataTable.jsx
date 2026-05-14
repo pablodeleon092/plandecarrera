@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react'; // Importamos hooks necesarios
 import IconButton from '@/Components/IconButton';
 import { Link } from '@inertiajs/react';
 
@@ -17,6 +18,53 @@ export default function DataTable({
     statusKey = 'estado',
     disableScroll = false
 }) {
+    // --- ESTADO PARA EL SORT ---
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
+    // --- LÓGICA DE ORDENADO ---
+    const sortedData = useMemo(() => {
+        let sortableItems = [...data];
+        if (sortConfig.key !== null) {
+            sortableItems.sort((a, b) => {
+                let aValue = a[sortConfig.key] ?? '';
+                let bValue = b[sortConfig.key] ?? '';
+
+                // --- LÓGICA PARA CAMPOS COMPLEJOS (Arrays/Colecciones) ---
+                if (Array.isArray(aValue)) {
+                    // Si es un array de objetos, extraemos el 'nombre' y lo unimos
+                    aValue = aValue.map(item => item.nombre || '').join(', ').toLowerCase();
+                }
+                if (Array.isArray(bValue)) {
+                    bValue = bValue.map(item => item.nombre || '').join(', ').toLowerCase();
+                }
+
+                // Comparación estándar
+                if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+        return sortableItems;
+    }, [data, sortConfig]);
+    
+    const requestSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    // Helper para renderizar el icono de orden
+    const getSortIcon = (columnKey) => {
+        if (sortConfig.key !== columnKey) {
+            return <span className="ml-1 opacity-30">↕</span>;
+        }
+        return sortConfig.direction === 'asc' 
+            ? <span className="ml-1 text-blue-600">↑</span> 
+            : <span className="ml-1 text-blue-600">↓</span>;
+    };
+
     const EmptyIcon = () => (
         emptyIcon || (
             <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,26 +73,19 @@ export default function DataTable({
         )
     );
 
-    // Componente simplificado que usa los botones modulares
     const ActionButtons = ({ item }) => {
-        // Si el item no trae objeto 'can', por defecto permitimos (para no romper otros modelos)
-        // Pero si lo trae, respetamos lo que diga el servidor.
         const permissions = item.can || { view: true, update: true, delete: true, toggle: true };
-
         return (
             <div className="flex items-center justify-end gap-3">
                 {onShow && permissions.view && (
                     <IconButton action="show" item={item} onShow={onShow} />
                 )}
-                
                 {onEdit && permissions.update && (
                     <IconButton action="edit" item={item} onEdit={onEdit} />
                 )}
-                
                 {onDelete && permissions.delete && (
                     <IconButton action="delete" item={item} onDelete={onDelete} />
                 )}
-                
                 {onToggleStatus && permissions.update && (
                     <IconButton 
                         action="toggle"
@@ -73,9 +114,13 @@ export default function DataTable({
                             {columns.map((col, index) => (
                                 <th
                                     key={index}
-                                    className={`${headerPaddingClass} datatable-th`}
+                                    className={`${headerPaddingClass} datatable-th ${col.sortable !== false ? 'cursor-pointer select-none hover:bg-gray-100' : ''}`}
+                                    onClick={() => col.sortable !== false && requestSort(col.key)} // Evento click
                                 >
-                                    {col.label}
+                                    <div className="flex items-center">
+                                        {col.label}
+                                        {col.sortable !== false && getSortIcon(col.key)}
+                                    </div>
                                 </th>
                             ))}
                             {actions && data.some(item => hasAnyAction(item)) && (
@@ -86,10 +131,10 @@ export default function DataTable({
                         </tr>
                     </thead>
                     <tbody className="datatable-tbody">
-                        {data.length === 0 ? (
+                        {sortedData.length === 0 ? ( // Usamos sortedData aquí
                             <tr>
                                 <td
-                                    colSpan={columns.length + (actions && (onShow || onEdit || onDelete || onToggleStatus) ? 1 : 0)}
+                                    colSpan={columns.length + (actions ? 1 : 0)}
                                     className="datatable-empty"
                                 >
                                     <div className="flex flex-col items-center">
@@ -99,13 +144,12 @@ export default function DataTable({
                                 </td>
                             </tr>
                         ) : (
-                            data.map((item) => (
+                            sortedData.map((item) => ( // Usamos sortedData aquí
                                 <tr key={item.id} className={hover ? 'hover:bg-gray-50 transition' : ''}>
                                     {columns.map((col, index) => (
                                         <td
                                             key={index}
-                                            className={`${paddingClass} ${col.nowrap !== false ? 'whitespace-nowrap' : ''} ${col.className || 'text-sm text-gray-900'
-                                                }`}
+                                            className={`${paddingClass} ${col.nowrap !== false ? 'whitespace-nowrap' : ''} ${col.className || 'text-sm text-gray-900'}`}
                                         >
                                             {col.render ? col.render(item) : item[col.key]}
                                         </td>

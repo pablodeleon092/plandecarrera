@@ -23,9 +23,9 @@ export default function Index({ auth, institutos, carreras, materias, filters, f
     };
 
     // Totales
-    const totalMaterias = materias.meta?.total || materias.data.length;
-    const materiasActivas = useMemo(() => materias.data.filter(m => m.estado).length, [materias.data]);
-    const materiasCuatrimestrales = useMemo(() => materias.data.filter(m => m.regimen === 'cuatrimestral').length, [materias.data]);
+    const totalMaterias = materias.meta?.total || materias.length;
+    const materiasActivas = useMemo(() => materias.filter(m => m.estado).length, [materias]);
+    const materiasCuatrimestrales = useMemo(() => materias.filter(m => m.regimen === 'cuatrimestral').length, [materias]);
 
     return (
         <AuthenticatedLayout
@@ -108,7 +108,7 @@ export default function Index({ auth, institutos, carreras, materias, filters, f
                                     )
                                 }
                             ]}
-                            data={materias.data}
+                            data={materias}
                             onShow={(materia) => router.visit(route('materias.show', materia.id))}
                             onEdit={(materia) => router.visit(route('materias.edit', materia.id))}
                             onDelete={(materia) => handleDelete(materia.id, materia.nombre, materia.apellido)}
@@ -123,14 +123,6 @@ export default function Index({ auth, institutos, carreras, materias, filters, f
                             }
                         />
                     </div>
-
-                    {/* PAGINACIÓN */}
-                    <PaginatorButtons
-                        meta={materias.meta}
-                        paginator={materias}
-                        routeParams = {filters}
-                        routeName="materias.index"
-                    />
 
                     {/* CARDS TOTALES */}
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">

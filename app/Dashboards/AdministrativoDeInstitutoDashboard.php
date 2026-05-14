@@ -28,8 +28,9 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
                 abort(403, 'Usuario sin instituto asignado');
             }
         }
-        
+
         $instituto = Instituto::with('carreras')->findOrFail($institutoId);
+        
         // Cálculo de período lectivo
         $currentYear = date('Y');
         $currentMonth = (int)date('m');

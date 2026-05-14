@@ -23,11 +23,11 @@ export default function Index({ auth, comisiones, carreras, institutos, filters,
             nowrap: false
         },
         {
-            key: 'id_materia',
+            key: 'nombre',
             label: 'Materia',
             render: (comision) => (
                 <span>
-                    {comision.materia?.nombre || '-'}
+                    {comision.materia || '-'}
                 </span>
             ),
             nowrap: false
@@ -40,7 +40,6 @@ export default function Index({ auth, comisiones, carreras, institutos, filters,
         {
             key: 'modalidad',
             label: 'Modalidad',
-
         },
         {
             key: 'sede',
@@ -109,7 +108,7 @@ export default function Index({ auth, comisiones, carreras, institutos, filters,
                         <DataTable
                             dense={true}
                             columns={columns}
-                            data={comisiones.data}
+                            data={comisiones}
                             onShow={(comision) => router.visit(route('comisiones.show', comision.id))}
                             onEdit={(comision) => router.visit(route('comisiones.edit', comision.id))}
                             onDelete={handleDelete}
@@ -124,16 +123,11 @@ export default function Index({ auth, comisiones, carreras, institutos, filters,
                         />
                     </div>
 
-                    <PaginatorButtons 
-                    meta={comisiones?.meta} 
-                    paginator={comisiones} 
-                    routeParams = {filters}
-                    routeName={'comisiones.index'}/>
 
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="bg-white rounded-lg shadow p-4">
                             <p className="text-sm text-gray-600">Total Comisiones</p>
-                            <p className="text-2xl font-bold text-gray-900">{comisiones.meta?.total || comisiones.data.length}</p>
+                            <p className="text-2xl font-bold text-gray-900">{comisiones.meta?.total || comisiones.length}</p>
                         </div>
                     </div>
 

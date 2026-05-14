@@ -17,17 +17,22 @@ class PlanController extends Controller
 
     public function create(int $carrera)
     {
-        // Obtenemos las materias que ya están en el plan
         $carrera = Carrera::findOrFail($carrera);
         $this->authorize('update', $carrera);
+
+        // Intentamos obtener el plan actual
         $plan_anterior = $carrera->planActual;
 
-        $materiasEnPlanActual = $plan_anterior->materias;
+        // Si existe el plan, obtenemos sus materias; si no, inicializamos una colección vacía
+        if ($plan_anterior) {
+            $materiasEnPlanActual = $plan_anterior->materias;
+            $materiasEnPlanIds = $materiasEnPlanActual->pluck('id');
+        } else {
+            $materiasEnPlanActual = collect(); // Colección vacía
+            $materiasEnPlanIds = collect();     // IDs vacíos
+        }
 
-        // Obtenemos los IDs de las materias que ya están en el plan
-        $materiasEnPlanIds = $materiasEnPlanActual->pluck('id');
-
-        // Obtenemos las materias que NO están en el plan para mostrarlas como disponibles
+        // Al estar vacío $materiasEnPlanIds, traerá TODAS las materias de la base de datos
         $materiasDisponibles = Materia::whereNotIn('id', $materiasEnPlanIds)->get();
 
         return Inertia::render('Planes/Create', [

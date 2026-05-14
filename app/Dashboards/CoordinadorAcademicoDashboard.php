@@ -21,6 +21,14 @@ class CoordinadorAcademicoDashboard implements DashboardStrategy
     {
         $institutoId = $user->instituto_id;
 
+        if ($user->cargo === 'Administrador') {
+            $institutoId = $request->input('instituto_id') ?? Instituto::first()?->id;
+        } else {
+            if (!$institutoId) {
+                abort(403, 'Usuario sin instituto asignado');
+            }
+        }
+
         // Obtenemos los datos a través de métodos especializados
         $materiasCompartidas = $this->getMateriasCompartidas($institutoId);
         $docentesStats = $this->getDocentesStats($institutoId);

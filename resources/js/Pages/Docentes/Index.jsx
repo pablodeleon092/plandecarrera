@@ -30,9 +30,9 @@ export default function Index({ auth, institutos, carreras, docentes, flash, fil
     };
 
     // Calcular totales para las tarjetas de resumen
-    const totalDocentes = docentes.meta?.total || docentes.data.length;
-    const docentesActivos = useMemo(() => docentes.data.filter(d => d.es_activo).length, [docentes.data]);
-    const docentesInactivos = useMemo(() => docentes.data.filter(d => !d.es_activo).length, [docentes.data]);
+    const totalDocentes = docentes.meta?.total || docentes.length;
+    const docentesActivos = useMemo(() => docentes.filter(d => d.es_activo).length, [docentes]);
+    const docentesInactivos = useMemo(() => docentes.filter(d => !d.es_activo).length, [docentes]);
 
 
     return (
@@ -121,7 +121,7 @@ export default function Index({ auth, institutos, carreras, docentes, flash, fil
                                     }
                                 }
                             ]}
-                            data={docentes.data}
+                            data={docentes}
                             onShow={(docente) => router.visit(route('docentes.show', docente.id))}
                             onEdit={(docente) => router.visit(route('docentes.edit', docente.id))}
                             onDelete={(docente) => handleDelete(docente.id, docente.nombre, docente.apellido)}
@@ -136,12 +136,6 @@ export default function Index({ auth, institutos, carreras, docentes, flash, fil
                             }
                         />
                     </div>
-                    <PaginatorButtons 
-                        meta={docentes.meta} 
-                        paginator={docentes}  
-                        routeParams = {filters}
-                        routeName={'docentes.index'}
-                    />
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                         <KPICard
                             title="Total Docentes"

@@ -56,9 +56,8 @@ class MateriaController extends Controller
         $queryFilter->apply($query, $filters);    
 
         $materias = $query->orderBy('cuatrimestre', 'asc')
-            ->paginate(15)
-            ->withQueryString()
-            ->through(fn ($materia) => [
+            ->get()
+            ->map(fn ($materia) => [
                 'id'              => $materia->id,
                 'nombre'          => $materia->nombre,
                 'codigo'          => $materia->codigo,

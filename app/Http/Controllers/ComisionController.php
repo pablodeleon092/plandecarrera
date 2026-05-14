@@ -55,9 +55,8 @@ class ComisionController extends Controller
         $comisiones = $query
             ->with(['materia', 'horarios']) // Eager loading para evitar N+1
             ->orderBy('id', 'desc')
-            ->paginate(15)
-            ->withQueryString()
-            ->through(fn ($comision) => [
+            ->get()
+            ->map(fn ($comision) => [
                 'id'              => $comision->id,
                 'codigo'          => $comision->codigo,
                 'nombre'          => $comision->nombre,
@@ -69,10 +68,7 @@ class ComisionController extends Controller
                 'estado'          => (bool) $comision->estado,
                 'horas_totales'   => $comision->horas_totales,
                 // Relación con Materia (para mostrar el nombre en la tabla)
-                'materia' => $comision->materia ? [
-                    'id'     => $comision->materia->id,
-                    'nombre' => $comision->materia->nombre,
-                ] : null,
+                'materia' => $comision->materia->nombre ? : null,
                 'horarios' => $comision->horarios->map(fn ($horario) => [
                         'id'          => $horario->id,
                         'dia_semana'  => $horario->dia_semana,
@@ -92,6 +88,7 @@ class ComisionController extends Controller
         $carreras = $institutosDisponibles->flatMap(function ($instituto) {
             return $instituto->carreras;
         })->values();
+
 
         return Inertia::render('Comisiones/Index', [
             'comisiones' => $comisiones,

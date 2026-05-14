@@ -40,9 +40,8 @@ class DocenteController extends Controller
                 'dictas.comision.materia' 
             ])
             ->orderBy('apellido')
-            ->paginate(15)
-            ->withQueryString()
-            ->through(fn ($docente) => [
+            ->get()
+            ->map(fn ($docente) => [
                 'id'                  => $docente->id,
                 'legajo'              => $docente->legajo,
                 'nombre'              => $docente->nombre,
@@ -78,6 +77,8 @@ class DocenteController extends Controller
         })->values();
         
         $dedicaciones = Dedicaciones::all();
+
+        #dd($docentes);
 
         return Inertia::render('Docentes/Index', [
             'docentes' => $docentes,
