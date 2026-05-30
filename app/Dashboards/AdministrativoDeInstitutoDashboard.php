@@ -79,10 +79,10 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
                 'legajo' => $docente->legajo,
                 'email' => $docente->email,
                 'telefono' => $docente->telefono,
-                'campos_faltantes' => array_filter([
+                'campos_faltantes' => array_values(array_filter([
                     empty($docente->email) ? 'Email' : null,
                     empty($docente->telefono) ? 'Teléfono' : null
-                ]),
+                ])),
             ]);
 
         return [
