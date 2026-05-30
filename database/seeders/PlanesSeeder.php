@@ -16,15 +16,15 @@ class PlanesSeeder extends Seeder
         $planes = [];
 
         foreach ($carreras as $carrera_id) {
-            $planes[] = [
-                'carrera_id' => $carrera_id,
-                'anio_comienzo' => Carbon::create(2020, 1, 1), // Año de inicio del plan
-                'anio_fin' => null, // O poner un año si corresponde
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ];
+            DB::table('planes')->updateOrInsert(
+                ['carrera_id' => $carrera_id],
+                [
+                    'anio_comienzo' => Carbon::create(2020, 1, 1),
+                    'anio_fin' => null,
+                    'updated_at' => Carbon::now(),
+                    'created_at' => Carbon::now(),
+                ]
+            );
         }
-
-        DB::table('planes')->insert($planes);
     }
 }

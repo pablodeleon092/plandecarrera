@@ -33,13 +33,18 @@ class CargosSeeder extends Seeder
             $dedicacion = $dedicaciones->random();
 
 
-            Cargo::create([
-                'nombre' => $cargosDisponibles[array_rand($cargosDisponibles)],
-                'dedicacion_id' => $dedicacion->id,
-                'nro_materias_asig' => 0,
-                'sum_horas_frente_aula' => 0,
-                'docente_id' => $docente->id,
-            ]);
+            $nombreCargo = $cargosDisponibles[array_rand($cargosDisponibles)];
+            Cargo::firstOrCreate(
+                [
+                    'docente_id' => $docente->id,
+                    'nombre' => $nombreCargo,
+                ],
+                [
+                    'dedicacion_id' => $dedicacion->id,
+                    'nro_materias_asig' => 0,
+                    'sum_horas_frente_aula' => 0,
+                ]
+            );
         }
     }
 }

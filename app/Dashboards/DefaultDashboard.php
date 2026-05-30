@@ -18,7 +18,7 @@ class DefaultDashboard implements DashboardStrategy
     public function render(User $user, Request $request): Response
     {
         $selectedInstitutoId = $request->input('instituto_id');
-        $selectedCarreraId = $request->input('carrera_id');
+        $selectedCarreraId = $request->input('selected_carrera', 'all');
         $currentView = $request->input('view', 'materias');
 
         // 1. Obtener Institutos disponibles
@@ -45,7 +45,7 @@ class DefaultDashboard implements DashboardStrategy
             'user' => $user,
             'institutos' => $institutosDisponibles,
             'selectedInstitutoId' => (int) $selectedInstitutoId,
-            'selectedCarreraId' => $selectedCarreraId ?: 'all',
+            'selectedCarreraId' => $selectedCarreraId,
             'currentView' => $currentView,
             'materias' => $materiasFiltradas,
             'docentes' => $docentesFiltrados,
@@ -59,7 +59,7 @@ class DefaultDashboard implements DashboardStrategy
 
         if (in_array($rol, ['Administrador', 'Administrativo de Secretaria Academica'])) {
 
-            return Instituto::with('carreras.planActual')->get(['id', 'nombre']);
+            return Instituto::with('carreras')->get();
 
         } elseif (in_array($rol, ['Administrativo de instituto', 'Director de instituto', 'Coordinador Academico', 'Consejero'])) {
 

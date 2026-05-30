@@ -20,16 +20,19 @@ class DocenteSeeder extends Seeder
         for ($i = 0; $i < 100; $i++) {
             // En lugar de usar la factory, creamos el modelo directamente.
             // Esto evita que el generador `unique()` de la factory acumule memoria.
-            Docente::create([
-                'legajo' => $faker->unique(true)->numberBetween(10000, 99999),
-                'nombre' => $faker->firstName,
-                'apellido' => $faker->lastName,
-                'modalidad_desempeño' => $faker->randomElement(['Investigador', 'Desarrollo']),
-                'carga_horaria' => 0,
-                'es_activo' => $faker->boolean(90),
-                'telefono' => $faker->unique(true)->optional()->e164PhoneNumber,
-                'email' => $faker->unique(true)->optional()->safeEmail,
-            ]);
+            $legajo = $faker->unique(true)->numberBetween(10000, 99999);
+            Docente::updateOrCreate(
+                ['legajo' => $legajo],
+                [
+                    'nombre' => $faker->firstName,
+                    'apellido' => $faker->lastName,
+                    'modalidad_desempeño' => $faker->randomElement(['Investigador', 'Desarrollo']),
+                    'carga_horaria' => 0,
+                    'es_activo' => $faker->boolean(90),
+                    'telefono' => $faker->unique(true)->optional()->e164PhoneNumber,
+                    'email' => $faker->unique(true)->optional()->safeEmail,
+                ]
+            );
         }
     }
 }

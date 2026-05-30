@@ -39,16 +39,21 @@ class DictasSeeder extends Seeder
                     continue;
                 }
 
-                $dicta = Dicta::create([
-                    'comision_id' => $comision->id,
-                    'docente_id'  => $docente->id,
-                    'cargo_id'    => $docente->cargos->random()->id, // Toma 1 cargo
-                    'ano_inicio'  => '2025-03-01',
-                    'año_fin'     => null,
-                    'modalidad_presencia' => collect(['presencial', 'virtual', 'mixta'])->random(),
-                    'horas_frente_aula'   => rand(2, 6),
-                    'funcion_aulica_id'   => $funcionesAulicas->isNotEmpty() ? $funcionesAulicas->random()->id : null,
-                ]);
+                $cargoId = $docente->cargos->random()->id;
+                $dicta = Dicta::firstOrCreate(
+                    [
+                        'comision_id' => $comision->id,
+                        'docente_id'  => $docente->id,
+                        'cargo_id'    => $cargoId,
+                    ],
+                    [
+                        'ano_inicio'  => '2025-03-01',
+                        'año_fin'     => null,
+                        'modalidad_presencia' => collect(['presencial', 'virtual', 'mixta'])->random(),
+                        'horas_frente_aula'   => rand(2, 6),
+                        'funcion_aulica_id'   => $funcionesAulicas->isNotEmpty() ? $funcionesAulicas->random()->id : null,
+                    ]
+                );
 
                 NormativaAsignacion::recalcularCargo($dicta->docente, $dicta->cargo);
 

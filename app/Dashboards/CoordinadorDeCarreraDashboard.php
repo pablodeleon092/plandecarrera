@@ -30,12 +30,12 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
         
         $selectedCarreraId = $request->input('selected_carrera');
 
-        // Si no hay ID en el request, tomamos la primera
-        if (!$selectedCarreraId && $carreras->isNotEmpty()) {
+        // Si no hay ID en el request o es 'all', tomamos la primera
+        if ((!$selectedCarreraId || $selectedCarreraId === 'all') && $carreras->isNotEmpty()) {
             $selectedCarreraId = $carreras->first()->id;
         }
 
-        if (!$selectedCarreraId || $selectedCarreraId === 'all') {
+        if (!$selectedCarreraId) {
             abort(403, 'Carrera no seleccionada o inválida.');
         }
 

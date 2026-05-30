@@ -32,26 +32,26 @@ class MateriasSeeder extends Seeder
                 ? $faker->numberBetween(1, 12)
                 : $faker->numberBetween(1, 6);
 
-            // Crear la materia
-            $materia = Materia::create([
-                'codigo' => $faker->unique()->regexify('[A-Z]{3}[0-9]{3}'),
-                'nombre' => $faker->sentence(3),
-                'estado' => $faker->boolean(90),
-                'regimen' => $regimen,
-                'cuatrimestre' => $cuatrimestre,
-                'horas_semanales' => $horas_semanales,
-                'horas_totales' => $horas_totales,
-            ]);
+            // Crear la materia (evitar duplicados por código)
+            $codigo = $faker->unique()->regexify('[A-Z]{3}[0-9]{3}');
+            $materia = Materia::updateOrCreate(
+                ['codigo' => $codigo],
+                [
+                    'nombre' => $faker->sentence(3),
+                    'estado' => $faker->boolean(90),
+                    'regimen' => $regimen,
+                    'cuatrimestre' => $cuatrimestre,
+                    'horas_semanales' => $horas_semanales,
+                    'horas_totales' => $horas_totales,
+                ]
+            );
 
-            // Asociar la materia a un plan activo al azar
+            // Asociar la materia a un plan activo al azar (evitar duplicados)
             $plan = $planesActivos->random();
-            DB::table('plan_materia')->insert([
-                'plan_id' => $plan->id,
-                'materia_id' => $materia->id,
-                'anio' => $faker->numberBetween(1, 5),
-
-
-            ]);
+            DB::table('plan_materia')->updateOrInsert(
+                ['plan_id' => $plan->id, 'materia_id' => $materia->id],
+                ['anio' => $faker->numberBetween(1, 5)]
+            );
         }
     }
 }
