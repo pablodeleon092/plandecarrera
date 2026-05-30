@@ -49,26 +49,30 @@ export default function DashboardCoordinadorAcademico({
                     </div>
 
                     {/* SECCIÓN 2: Pestañas de Navegación */}
-                    <div className="flex border-b border-gray-200 mb-6 space-x-8 bg-white p-4 rounded-t-lg shadow-sm">
+                    <div className="flex border-b border-gray-200 mb-6 gap-x-8 bg-white p-4 rounded-t-lg shadow-sm">
                         <button 
+                            type="button"
                             onClick={() => setActiveTab('overview')}
                             className={`pb-2 px-2 font-medium transition-colors duration-200 ${activeTab === 'overview' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                              Visión General
                         </button>
                         <button 
+                            type="button"
                             onClick={() => setActiveTab('materias')}
                             className={`pb-2 px-2 font-medium transition-colors duration-200 ${activeTab === 'materias' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                               Materias Transversales
                         </button>
                         <button 
+                            type="button"
                             onClick={() => setActiveTab('docentes')}
                             className={`pb-2 px-2 font-medium transition-colors duration-200 ${activeTab === 'docentes' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >
                              Docentes y Carga
                         </button>
                         <button
+                            type="button"
                             onClick={() =>setActiveTab('comisiones')}
                             className={`pb-2 px-2 font-medium transition-colors duration-200 ${activeTab === 'comisiones' ? 'border-b-2 border-indigo-600 text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
                         >

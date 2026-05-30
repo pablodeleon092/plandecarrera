@@ -63,7 +63,7 @@ export default function Index({ auth, comisiones, carreras, institutos, filters,
                             </div>
                         ))
                     ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-gray-400">-</span>
                     )}
                 </div>
             )

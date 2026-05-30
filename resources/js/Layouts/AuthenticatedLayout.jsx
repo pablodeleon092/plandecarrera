@@ -26,7 +26,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Link>
                             </div>
 
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                            <div className="hidden gap-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink
                                     href={route('dashboard')}
                                     active={route().current('dashboard')}
@@ -133,6 +133,8 @@ export default function AuthenticatedLayout({ header, children }) {
 
                         <div className="-me-2 flex items-center sm:hidden">
                             <button
+                                type="button"
+                                aria-label={showingNavigationDropdown ? "Cerrar menú de navegación" : "Abrir menú de navegación"}
                                 onClick={() =>
                                     setShowingNavigationDropdown(
                                         (previousState) => !previousState,

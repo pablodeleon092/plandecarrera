@@ -6,6 +6,15 @@ import Materias from './Partials/Materias';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 import DocentesList from './Partials/DocentesList';
 
+const CARGOS_DISPONIBLES = [
+    'Administrador',
+    'Secretaría académica',
+    'Director de instituto',
+    'Coordinador Academico',
+    'Administrativo de instituto',
+    'Coordinador de Carrera'
+];
+
 export default function Dashboard({ user, institutos, materias, docentes, selectedInstitutoId: initialInstitutoId, selectedCarreraId: initialCarreraId, currentView: initialView }) {
     // 1. STATE 
     const [selectedInstitutoId, setSelectedInstitutoId] = useState(initialInstitutoId || (institutos.length > 0 ? institutos[0].id : null));
@@ -84,15 +93,6 @@ export default function Dashboard({ user, institutos, materias, docentes, select
         ...carrerasDisponibles.map(c => ({ id: c.id, nombre: c.nombre }))
     ];
 
-    const CARGOS_DISPONIBLES = [
-        'Administrador',
-        'Secretaría académica',
-        'Director de instituto',
-        'Coordinador Academico',
-        'Administrativo de instituto',
-        'Coordinador de Carrera'
-    ];
-
     const handleRoleOverride = (e) => {
             const cargo = selectedCargo;
             router.get(route('dashboard'), {
@@ -131,7 +131,7 @@ export default function Dashboard({ user, institutos, materias, docentes, select
                             </label>
                             <select
                                 id="admin_role_select"
-                                valu = {selectedCargo}
+                                value={selectedCargo}
                                 onChange={(e) => setSelectedCargo(e.target.value)}
                                 className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm"
                             >

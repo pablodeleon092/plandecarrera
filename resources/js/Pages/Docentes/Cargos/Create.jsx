@@ -81,7 +81,7 @@ export default function Create({ auth, docente, dedicaciones, flash }) {
                                 <InputError message={errors.dedicacion_id} className="mt-2" />
                             </div>
 
-                            <div className="flex justify-end space-x-4">
+                            <div className="flex justify-end gap-x-4">
                                 <Button variant="danger"
                                     as={Link}
                                     href="#"

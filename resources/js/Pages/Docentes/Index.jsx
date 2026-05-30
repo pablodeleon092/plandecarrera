@@ -103,9 +103,9 @@ export default function Index({ auth, institutos, carreras, docentes, flash, fil
                                     label: 'Materias',
                                     render: (doc) => {
                                         if (!doc.materias) return <span className="text-gray-400">Sin materias</span>;
-                                        const links = doc.materias.map((materia) => {
-                                            if (!materia) return null;
-                                            return (
+                                        const links = doc.materias.flatMap((materia) => {
+                                            if (!materia) return [];
+                                            return [
                                                 <Link
                                                     key={materia.id}
                                                     href={route('materias.show', materia.id)} 
@@ -113,10 +113,10 @@ export default function Index({ auth, institutos, carreras, docentes, flash, fil
                                                 >
                                                     {materia.nombre}
                                                 </Link>
-                                            );
-                                        }).filter(Boolean); 
+                                            ];
+                                        });
                                         return links.length > 0 
-                                            ? <div className="flex flex-col space-y-1">{links}</div>
+                                            ? <div className="flex flex-col gap-y-1">{links}</div>
                                             : <span className="text-gray-400">Sin materias</span>;
                                     }
                                 }

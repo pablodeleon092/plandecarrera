@@ -176,7 +176,7 @@ export default function EditDicta({ auth, flash, dicta, funcionesAulicas, cargos
                             {errors.funcion_aulica_id && <p className="text-red-500 text-sm mt-1">{errors.funcion_aulica_id}</p>}
                         </div>
 
-                        <div className="flex justify-end items-center pt-4 space-x-4">
+                        <div className="flex justify-end items-center pt-4 gap-x-4">
                             <Button variant="danger"
                                 as={Link}
                                 href="#"

@@ -57,9 +57,9 @@ export default function MateriasTab({ materias = [] }) {
                                 <td className="px-6 py-4">
                                     <div className="flex flex-wrap gap-2">
                                         {/* Iteramos sobre los nombres de las carreras */}
-                                        {materia.carreras_nombres && materia.carreras_nombres.map((carrera, index) => (
+                                        {materia.carreras_nombres && materia.carreras_nombres.map((carrera) => (
                                             <span 
-                                                key={index}
+                                                key={carrera}
                                                 className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
                                             >
                                                 {carrera}

@@ -85,6 +85,7 @@ export default function Show({ auth, carrera, planes }) {
                             <div className="flex gap-4">
 
                                 <button
+                                    type="button"
                                     onClick={() => setTab('info')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${tab === 'info'
                                         ? 'border-blue-600 text-blue-600'
@@ -95,6 +96,7 @@ export default function Show({ auth, carrera, planes }) {
                                 </button>
 
                                 <button
+                                    type="button"
                                     onClick={() => setTab('plan')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${tab === 'plan'
                                         ? 'border-blue-600 text-blue-600'

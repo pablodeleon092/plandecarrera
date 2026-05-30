@@ -1,6 +1,6 @@
 import { Transition } from '@headlessui/react';
 import { Link } from '@inertiajs/react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 
 const DropDownContext = createContext();
 
@@ -12,7 +12,7 @@ const Dropdown = ({ children }) => {
     };
 
     return (
-        <DropDownContext.Provider value={{ open, setOpen, toggleOpen }}>
+        <DropDownContext.Provider value={useMemo(() => ({ open, setOpen, toggleOpen }), [open])}>
             <div className="relative">{children}</div>
         </DropDownContext.Provider>
     );
@@ -23,12 +23,19 @@ const Trigger = ({ children }) => {
 
     return (
         <>
-            <div onClick={toggleOpen}>{children}</div>
+            <div
+                role="button"
+                tabIndex={0}
+                onClick={toggleOpen}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleOpen(); } }}
+            >{children}</div>
 
             {open && (
                 <div
                     className="fixed inset-0 z-40"
                     onClick={() => setOpen(false)}
+                    onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false); }}
+                    role="presentation"
                 ></div>
             )}
         </>
@@ -71,6 +78,9 @@ const Content = ({
                 <div
                     className={`dropdown-content-container ${alignmentClasses} ${widthClasses}`}
                     onClick={() => setOpen(false)}
+                    onKeyDown={(e) => { if (e.key === 'Escape') { setOpen(false); e.stopPropagation(); } }}
+                    role="menu"
+                    tabIndex={-1}
                 >
                     <div
                         className={`dropdown-content-inner ${contentClasses}`}

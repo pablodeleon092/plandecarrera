@@ -18,6 +18,7 @@ export default function DashboardDirector({
     proyecciones
 }) {
     const [currentTab, setCurrentTab] = useState('resumen');
+    const [currentDate] = useState(() => new Date());
 
     // Asegurarnos de que los datos internos no sean null
     const safeResumen = resumenGeneral ?? { totalDocentes: 0, totalCarreras: 0, totalComisiones: 0, porcentajeCobertura: 0, estado: 'Crítico' };
@@ -73,10 +74,10 @@ export default function DashboardDirector({
                                     Gestión del Instituto
                                 </h3>
                                 <p className="text-gray-600 mt-1">
-                                    Año Académico {new Date().getFullYear()}
+                                    Año Académico {currentDate.getFullYear()}
                                 </p>
                             </div>
-                            <div className="flex items-center space-x-6">
+                            <div className="flex items-center gap-x-6">
                                 <StatusIndicator status={
                                     safeResumen.porcentajeCobertura >= 80 ? 'green' : 
                                     (safeResumen.porcentajeCobertura >= 60 ? 'yellow' : 'red')
@@ -118,9 +119,10 @@ export default function DashboardDirector({
 
                     {/* TABS DE NAVEGACIÓN */}
                     <div className="border-b border-gray-200 mb-6">
-                        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                        <nav className="-mb-px flex gap-x-8" aria-label="Tabs">
                             {tabs.map(tab => (
                                 <button
+                                    type="button"
                                     key={tab.id}
                                     onClick={() => setCurrentTab(tab.id)}
                                     className={`
@@ -154,7 +156,7 @@ export default function DashboardDirector({
                                     </h3>
                                     <div className="space-y-4">
                                         {(comparativoInstitutos ?? []).map((ins, index) => (
-                                            <div key={index}>
+                                            <div key={ins.nombre || index}>
                                                 <div className="flex items-center justify-between mb-1">
                                                     <span className={`text-sm font-medium ${ins.esActual ? 'text-indigo-600 font-bold' : 'text-gray-700'}`}>
                                                         {ins.nombre} {ins.esActual ? '(Mi Instituto)' : ''}
@@ -207,7 +209,7 @@ export default function DashboardDirector({
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {(estadoCarreras ?? []).map((carrera, index) => (
-                                            <tr key={index} className="hover:bg-gray-50">
+                                            <tr key={carrera.nombre || index} className="hover:bg-gray-50">
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{carrera.nombre}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                                                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${carrera.estado === 'Activa' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
@@ -252,7 +254,7 @@ export default function DashboardDirector({
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                                     {(safeRH.porDedicacion ?? []).map((item, index) => (
-                                        <div key={index} className="border border-gray-100 rounded-lg p-4 bg-gray-50">
+                                        <div key={item.nombre || index} className="border border-gray-100 rounded-lg p-4 bg-gray-50">
                                             <p className="text-sm text-gray-600 mb-1">{item.nombre}</p>
                                             <p className="text-2xl font-bold text-gray-900">{item.cantidad}</p>
                                             <p className="text-xs text-gray-500">{item.porcentaje}% del total</p>
@@ -267,7 +269,7 @@ export default function DashboardDirector({
                                 </h3>
                                 <div className="space-y-4">
                                     {(safeRH.porModalidad ?? []).map((item, index) => (
-                                        <div key={index}>
+                                        <div key={item.nombre || index}>
                                             <div className="flex items-center justify-between mb-1">
                                                 <span className="text-sm font-medium text-gray-700">{item.nombre}</span>
                                                 <span className="text-sm text-gray-600">{item.cantidad} docentes ({item.porcentaje}%)</span>
@@ -297,7 +299,7 @@ export default function DashboardDirector({
                                         </div>
                                         <div className="max-h-[250px] overflow-y-auto pr-2 space-y-2">
                                             {(safeAlertas.disponibles ?? []).map((doc, idx) => (
-                                                <div key={idx} className="text-sm p-2 border-b border-gray-50 flex justify-between items-center">
+                                                <div key={doc.docente || idx} className="text-sm p-2 border-b border-gray-50 flex justify-between items-center">
                                                     <div>
                                                         <p className="font-medium text-gray-800">{doc.docente}</p>
                                                         <p className="text-xs text-gray-500">{doc.cargo}</p>
@@ -320,7 +322,7 @@ export default function DashboardDirector({
                                         </div>
                                         <div className="max-h-[250px] overflow-y-auto pr-2 space-y-2">
                                             {(safeAlertas.sobrecargados ?? []).map((doc, idx) => (
-                                                <div key={idx} className="text-sm p-2 border-b border-gray-50 flex justify-between items-center">
+                                                <div key={doc.docente || idx} className="text-sm p-2 border-b border-gray-50 flex justify-between items-center">
                                                     <div>
                                                         <p className="font-medium text-gray-800">{doc.docente}</p>
                                                         <p className="text-xs text-gray-500">{doc.cargo}</p>
@@ -385,7 +387,7 @@ export default function DashboardDirector({
                                             </thead>
                                             <tbody className="bg-white divide-y divide-gray-200">
                                                 {safeProyecciones.materiasSinAsignacion.map((p, i) => (
-                                                    <tr key={i}>
+                                                    <tr key={p.materia + '_' + p.comision || i}>
                                                         <td className="px-6 py-4 text-sm font-medium text-gray-900">{p.materia} (Com. {p.comision})</td>
                                                         <td className="px-6 py-4 text-sm text-gray-500">{p.periodo}</td>
                                                         <td className="px-6 py-4 text-sm">

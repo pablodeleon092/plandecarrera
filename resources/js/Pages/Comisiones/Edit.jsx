@@ -2,8 +2,11 @@ import Button from '@/Components/Button';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Edit({ auth, materias, comision, flash }) {
+
+    const [currentDate] = useState(() => new Date());
 
     const { data, setData, put, processing, errors } = useForm({
         codigo: comision?.codigo || '',
@@ -159,7 +162,7 @@ export default function Edit({ auth, materias, comision, flash }) {
                                     >
                                         <option value="">Seleccionar año</option>
                                         {[...Array(4)].map((_, i) => {
-                                            const year = new Date().getFullYear() + i;
+                                            const year = currentDate.getFullYear() + i;
                                             return (
                                                 <option key={year} value={year}>
                                                     {year}
@@ -197,7 +200,7 @@ export default function Edit({ auth, materias, comision, flash }) {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end space-x-4">
+                            <div className="flex justify-end gap-x-4">
                                 <Button variant="danger"
                                     as={Link}
                                     href="#"

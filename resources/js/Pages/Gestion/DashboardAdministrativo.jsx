@@ -2,6 +2,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 
+const tabs = [
+    { id: 'vision', label: 'Visión General' },
+    { id: 'transversales', label: 'Materias Transversales' },
+    { id: 'docentes', label: 'Docentes y Carga' },
+    { id: 'comisiones', label: 'Comisiones' },
+];
+
 export default function DashboardAdministrativo({
     user,
     instituto,
@@ -21,13 +28,7 @@ export default function DashboardAdministrativo({
     visionGeneral = { eficiencia: { solo_una_carrera: 0, multi_carrera: 0 }, topMaterias: [] },
 }) {
     const [activeTab, setActiveTab] = useState('vision');
-
-    const tabs = [
-        { id: 'vision', label: 'Visión General' },
-        { id: 'transversales', label: 'Materias Transversales' },
-        { id: 'docentes', label: 'Docentes y Carga' },
-        { id: 'comisiones', label: 'Comisiones' },
-    ];
+    const [currentDate] = useState(() => new Date());
 
     // Calcular porcentajes para el donut chart
     const totalDocentes = kpis?.docentes_activos?.total || 1;
@@ -118,6 +119,7 @@ export default function DashboardAdministrativo({
                             <nav className="flex px-6 gap-6">
                                 {tabs.map(tab => (
                                     <button
+                                        type="button"
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
                                         className={`py-4 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
@@ -212,7 +214,7 @@ export default function DashboardAdministrativo({
                                             </>
                                         )}
                                         <p className="text-xs text-gray-400 mt-4">
-                                            Última actualización: {new Date().toLocaleDateString('es-AR')}
+                                            Última actualización: {currentDate.toLocaleDateString('es-AR')}
                                         </p>
                                     </div>
 
@@ -223,8 +225,8 @@ export default function DashboardAdministrativo({
                                             <p className="text-xs text-gray-400 text-center py-4">No hay materias compartidas entre carreras</p>
                                         ) : (
                                             <div className="space-y-3">
-                                                {visionGeneral.topMaterias.map((materia, idx) => (
-                                                    <div key={idx}>
+                                                {visionGeneral.topMaterias.map((materia) => (
+                                                    <div key={materia.codigo || materia.nombre}>
                                                         <div className="flex justify-between items-center mb-1">
                                                             <span className="text-sm font-medium text-gray-800">{materia.codigo || materia.nombre}</span>
                                                             <span className="text-xs text-gray-500">{materia.total_carreras} carreras</span>
@@ -266,16 +268,16 @@ export default function DashboardAdministrativo({
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-gray-50">
-                                                    {materiasCompartidas.materias.map((materia, idx) => (
-                                                        <tr key={idx} className="hover:bg-gray-50 transition">
+                                                    {materiasCompartidas.materias.map((materia) => (
+                                                        <tr key={materia.id || materia.codigo} className="hover:bg-gray-50 transition">
                                                             <td className="py-3 pr-4 font-medium text-gray-900">{materia.nombre}</td>
                                                             <td className="py-3 pr-4">
                                                                 <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-mono">{materia.codigo}</span>
                                                             </td>
                                                             <td className="py-3">
                                                                 <div className="flex flex-wrap gap-1">
-                                                                    {materia.carreras?.map((carrera, i) => (
-                                                                        <span key={i} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                                                                    {materia.carreras?.map((carrera) => (
+                                                                        <span key={carrera} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
                                                                             {carrera}
                                                                         </span>
                                                                     ))}
@@ -328,8 +330,8 @@ export default function DashboardAdministrativo({
                                                             <td className="py-3 pr-4 text-indigo-600 font-mono text-xs">{docente.legajo}</td>
                                                             <td className="py-3">
                                                                 <div className="flex flex-wrap gap-1">
-                                                                    {docente.carreras?.map((carrera, i) => (
-                                                                        <span key={i} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
+                                                                    {docente.carreras?.map((carrera) => (
+                                                                        <span key={carrera} className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
                                                                             {carrera}
                                                                         </span>
                                                                     ))}
@@ -349,7 +351,7 @@ export default function DashboardAdministrativo({
                                 <div>
                                     <div className="flex items-center justify-between mb-4">
                                         <h3 className="text-sm font-semibold text-gray-700">
-                                            Comisiones del Cuatrimestre {currentSemester} — {currentYear}
+                                            Comisiones del Cuatrimestre {currentSemester}, {currentYear}
                                         </h3>
                                         <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
                                             {comisionesActuales.total} comisiones
@@ -365,15 +367,15 @@ export default function DashboardAdministrativo({
                                                         <div className="flex-1">
                                                             <p className="font-medium text-gray-900">{comision.materia}</p>
                                                             <p className="text-sm text-gray-500 mt-1">
-                                                                {comision.nombre} — {comision.turno} ({comision.modalidad})
+                                                                {comision.nombre}, {comision.turno} ({comision.modalidad})
                                                             </p>
                                                             <div className="mt-2 space-y-1">
                                                                 {comision.docentes.length === 0 ? (
                                                                     <span className="text-xs text-red-500">Sin docentes asignados</span>
                                                                 ) : (
                                                                     comision.docentes.slice(0, 3).map((doc, idx) => (
-                                                                        <p key={idx} className="text-xs text-gray-600">
-                                                                            • {doc.nombre} — <span className="text-gray-400">{doc.cargo}</span>
+                                                                        <p key={doc.id || idx} className="text-xs text-gray-600">
+                                                                                • {doc.nombre}, <span className="text-gray-400">{doc.cargo}</span>
                                                                         </p>
                                                                     ))
                                                                 )}
@@ -419,8 +421,8 @@ export default function DashboardAdministrativo({
                                                         <p className="text-sm font-medium text-gray-900">{docente.nombre_completo}</p>
                                                         <p className="text-xs text-gray-500">Legajo: {docente.legajo}</p>
                                                         <div className="mt-1 flex flex-wrap gap-1">
-                                                            {docente.campos_faltantes.map((campo, idx) => (
-                                                                <span key={idx} className="text-xs bg-red-200 text-red-700 px-2 py-0.5 rounded">
+                                                            {docente.campos_faltantes.map((campo) => (
+                                                                <span key={campo} className="text-xs bg-red-200 text-red-700 px-2 py-0.5 rounded">
                                                                     Falta: {campo}
                                                                 </span>
                                                             ))}
@@ -448,8 +450,8 @@ export default function DashboardAdministrativo({
                                     <p className="text-gray-400 text-center py-4 text-sm"> No hay tareas pendientes</p>
                                 ) : (
                                     <div className="space-y-2 max-h-72 overflow-y-auto">
-                                        {tareasPendientes.tareas.map((tarea, idx) => (
-                                            <div key={idx} className="border-l-4 border-transparent bg-yellow-50 p-3 rounded">
+                                        {tareasPendientes.tareas.map((tarea) => (
+                                            <div key={tarea.id} className="border-l-4 border-transparent bg-yellow-50 p-3 rounded">
                                                 <div className="flex justify-between items-start">
                                                     <div className="flex-1">
                                                         <p className="text-sm font-medium text-gray-900">{tarea.nombre}</p>

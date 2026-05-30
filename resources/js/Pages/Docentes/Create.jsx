@@ -134,7 +134,7 @@ export default function Create({ auth }) {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end space-x-4">
+                            <div className="flex justify-end gap-x-4">
                                 <Button variant="danger"
                                     as={Link}
                                     href={route('docentes.index')}

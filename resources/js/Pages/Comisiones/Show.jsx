@@ -104,6 +104,7 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                         <div className="px-8 pt-6 border-b border-gray-200">
                             <div className="flex gap-4">
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('informacion')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${currentTab === 'informacion'
                                         ? 'border-blue-600 text-blue-600'
@@ -114,6 +115,7 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                 </button>
 
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('docentes')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${currentTab === 'docentes'
                                         ? 'border-blue-600 text-blue-600'
@@ -125,6 +127,7 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
 
 
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('horarios')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${
                                         currentTab === 'horarios'

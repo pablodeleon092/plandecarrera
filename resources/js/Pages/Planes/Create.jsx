@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Button from '@/Components/Button';
@@ -13,9 +13,9 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
         });
 
     const [enPlan, setEnPlan] = useState([]);
-    const [disponibles, setDisponibles] = useState(materiasDisponibles || []);
+    const disponiblesRef = useRef(materiasDisponibles || []);
     const [seleccionadasPrevias, setSeleccionadasPrevias] = useState(
-        materiasEnPlanAnterior.map(m => m.id)
+        () => materiasEnPlanAnterior.map(m => m.id)
     );
 
     const { data, setData, post, processing, errors } = useForm({
@@ -35,17 +35,15 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
     // Lógica para avanzar al paso 2 filtrando las seleccionadas
     const irAlPasoDos = () => {
         const conservadas = materiasEnPlanAnterior
-            .filter(m => seleccionadasPrevias.includes(m.id))
-            .map(m => ({
+            .flatMap(m => seleccionadasPrevias.includes(m.id) ? [{
                 ...m,
-                // Nos aseguramos de que tengan la estructura pivot.anio
                 pivot: { anio: m.pivot?.anio || 1 } 
-            }));
+            }] : []);
 
         const noConservadas = materiasEnPlanAnterior.filter(m => !seleccionadasPrevias.includes(m.id));
 
         setEnPlan(conservadas);
-        setDisponibles([...materiasDisponibles, ...noConservadas]);
+        disponiblesRef.current = [...materiasDisponibles, ...noConservadas];
         setStep(2);
     };
 
@@ -86,7 +84,8 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
             key: "anio", 
             label: "Año",
             render: (materia) => (
-                <input 
+                <input
+                    aria-label="Año de la materia"
                     type="number"
                     min="1"
                     max="6"
@@ -115,7 +114,7 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
                 <Button variant="danger" 
                     onClick={() => {
                         setEnPlan(prev => prev.filter(m => m.id !== materia.id));
-                        setDisponibles(prev => [...prev, materia]);
+                        disponiblesRef.current = [...disponiblesRef.current, materia];
                     }}
                 >
                     Quitar
@@ -134,7 +133,7 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
         };
 
         setEnPlan(prev => [...prev, nuevaMateria]);
-        setDisponibles(prev => prev.filter(m => m.id !== materia.id));
+        disponiblesRef.current = disponiblesRef.current.filter(m => m.id !== materia.id);
         setFilters(prev => ({ ...prev, search: "" }));
     };
     
@@ -155,7 +154,7 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
 
                         <div className="space-y-2 max-h-96 overflow-y-auto border p-4 rounded mb-6">
                             {materiasEnPlanAnterior.map(materia => (
-                                <label key={materia.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                                <label key={materia.id} className="flex items-center gap-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
                                     <input
                                         type="checkbox"
                                         className="rounded border-gray-300 text-indigo-600"
@@ -202,8 +201,9 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
 
                         <div className="grid grid-cols-2 gap-4 mb-6">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Año de Comienzo</label>
+                                <label htmlFor="anio_comienzo" className="block text-sm font-medium text-gray-700">Año de Comienzo</label>
                                 <input
+                                    id="anio_comienzo"
                                     type="date"
                                     value={data.anio_comienzo}
                                     onChange={e => setData('anio_comienzo', e.target.value)}
@@ -232,17 +232,18 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
                         {materiasFiltradas.length > 0 && (
                             <ul className="border border-gray-200 rounded-md shadow-sm bg-white max-h-60 overflow-y-auto">
                                 {materiasFiltradas.map((materia) => (
-                                    <li
-                                        key={materia.id}
-                                        className="p-3 hover:bg-blue-50 cursor-pointer flex justify-between items-center border-b last:border-0"
-                                        // CAMBIO AQUÍ: Llamamos a nuestra nueva función
-                                        onClick={() => agregarMateriaAlPlan(materia)}
-                                    >
-                                        <div className="flex flex-col">
-                                            <span className="font-medium text-gray-900">{materia.nombre}</span>
-                                            <span className="text-xs text-gray-500">Código: {materia.codigo || "—"}</span>
-                                        </div>
-                                        <span className="text-blue-600 font-bold text-xl">+</span>
+                                    <li key={materia.id} className="p-3 border-b last:border-0">
+                                        <button
+                                            type="button"
+                                            className="hover:bg-blue-50 cursor-pointer flex justify-between items-center w-full"
+                                            onClick={() => agregarMateriaAlPlan(materia)}
+                                        >
+                                            <div className="flex flex-col">
+                                                <span className="font-medium text-gray-900">{materia.nombre}</span>
+                                                <span className="text-xs text-gray-500">Código: {materia.codigo || "—"}</span>
+                                            </div>
+                                            <span className="text-blue-600 font-bold text-xl">+</span>
+                                        </button>
                                     </li>
                                 ))}
                             </ul>

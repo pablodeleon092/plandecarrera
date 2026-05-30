@@ -78,7 +78,7 @@ export default function CarreraMaterias({ carrera, planes }) {
         <div className="space-y-10">
             {/* SECCIÓN 1: Listado de Planes */}
             <div>
-                <h3 className="text-2xl font-bold mb-5">Planes de Estudio — {carrera.nombre}</h3>
+                <h3 className="text-2xl font-bold mb-5">Planes de Estudio: {carrera.nombre}</h3>
 
                 <Button
                 variant="primary"
@@ -112,13 +112,13 @@ export default function CarreraMaterias({ carrera, planes }) {
                                 {planSeleccionado.anio_fin ? "Este plan ya ha sido finalizado." : "Este plan se encuentra actualmente vigente."}
                             </p>
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex gap-x-2">
                             {!mostrandoBaja && (
                                 <Button variant="danger" onClick={() => setMostrandoBaja(true)}>
                                     Dar de Baja Plan
                                 </Button>
                             )}
-                            <button onClick={() => { setPlanSeleccionado(null); setMostrandoBaja(false); }} className="px-3 py-2 text-gray-400 hover:text-gray-600 text-sm">
+                            <button type="button" onClick={() => { setPlanSeleccionado(null); setMostrandoBaja(false); }} className="px-3 py-2 text-gray-400 hover:text-gray-600 text-sm">
                                 Cerrar
                             </button>
                         </div>
@@ -134,8 +134,9 @@ export default function CarreraMaterias({ carrera, planes }) {
 
                             <form onSubmit={confirmarBaja} className="flex flex-col sm:flex-row items-end gap-4">
                                 <div className="flex-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de finalización</label>
+                                    <label htmlFor="anio_fin" className="block text-sm font-medium text-gray-700 mb-1">Fecha de finalización</label>
                                     <input
+                                        id="anio_fin"
                                         type="date"
                                         value={data.anio_fin}
                                         onChange={e => setData('anio_fin', e.target.value)}

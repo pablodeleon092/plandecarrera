@@ -1,8 +1,11 @@
 import Button from '@/Components/Button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function Create({ auth, materias, materia, flash }) {
+
+    const [currentDate] = useState(() => new Date());
 
     const { data, setData, post, processing, errors } = useForm({
         codigo: '',
@@ -53,8 +56,9 @@ export default function Create({ auth, materias, materia, flash }) {
                                     {errors.codigo && <div className="text-red-600 mt-1 text-sm">{errors.codigo}</div>}
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Materia</label>
+                                    <label htmlFor="materia_nombre" className="block text-sm font-medium text-gray-700">Materia</label>
                                     <input
+                                        id="materia_nombre"
                                         type="text"
                                         value={materia.nombre}
                                         readOnly
@@ -150,7 +154,7 @@ export default function Create({ auth, materias, materia, flash }) {
                                     >
                                         <option value="">Seleccionar año</option>
                                         {[...Array(4)].map((_, i) => {
-                                            const year = new Date().getFullYear() + i;
+                                            const year = currentDate.getFullYear() + i;
                                             return (
                                                 <option key={year} value={year}>
                                                     {year}
@@ -188,7 +192,7 @@ export default function Create({ auth, materias, materia, flash }) {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end space-x-4">
+                            <div className="flex justify-end gap-x-4">
                                 <Button variant="danger"
                                     as={Link}
                                     href="#"

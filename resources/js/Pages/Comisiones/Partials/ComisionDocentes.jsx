@@ -46,7 +46,7 @@ export default function ComisionDocentes({ comision, docentes, allDocentes, filt
             key: "acciones",
             label: "Acciones",
             render: (d) => (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-x-3">
                     <Link href={route("dictas.edit", d.dicta_id)} className="text-blue-600 hover:underline">
                         Editar
                     </Link>
@@ -89,20 +89,22 @@ export default function ComisionDocentes({ comision, docentes, allDocentes, filt
                 {docentesFiltrados.length > 0 && (
                     <ul className="border border-gray-200 rounded-md shadow-sm bg-white max-h-60 overflow-y-auto">
                         {docentesFiltrados.map((docente) => (
-                            <li
-                                key={docente.id}
-                                className="p-2 hover:bg-blue-50 cursor-pointer flex justify-between items-center"
-                                onClick={() =>
-                                (window.location.href = route("dictas.create", {
-                                    comision_id: comision.id,
-                                    docente_id: docente.id,
-                                }))
-                                }
-                            >
-                                <span>
-                                    {docente.nombre} {docente.apellido}
-                                </span>
-                                <span className="text-sm text-gray-500">Legajo: {docente.legajo || "—"}</span>
+                            <li key={docente.id} className="p-2">
+                                <button
+                                    type="button"
+                                    className="hover:bg-blue-50 cursor-pointer flex justify-between items-center w-full"
+                                    onClick={() =>
+                                    (window.location.href = route("dictas.create", {
+                                        comision_id: comision.id,
+                                        docente_id: docente.id,
+                                    }))
+                                    }
+                                >
+                                    <span>
+                                        {docente.nombre} {docente.apellido}
+                                    </span>
+                                    <span className="text-sm text-gray-500">Legajo: {docente.legajo || "—"}</span>
+                                </button>
                             </li>
                         ))}
                     </ul>

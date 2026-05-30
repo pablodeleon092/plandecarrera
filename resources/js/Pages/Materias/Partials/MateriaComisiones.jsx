@@ -15,7 +15,7 @@ export default function MateriaComisiones({ comisiones, materia }) {
                         </span>
 
                         {/* Contenedor de acciones */}
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center gap-x-4">
                             <Link
                                 href={route('comisiones.show', comision.id)}
                                 className="text-blue-600 hover:underline"

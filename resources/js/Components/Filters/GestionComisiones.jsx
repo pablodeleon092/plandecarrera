@@ -4,7 +4,7 @@ import DynamicFilters from '@/Components/Filters/DynamicFilters';
 import { PrinterIcon } from '@heroicons/react/24/outline';
 import BtnExportar from '@/Components/Buttons/BtnExportar'; // Ajusta la ruta
 
-export default function gestionComisiones ({institutos, carreras}) {
+export default function GestionComisiones ({institutos, carreras}) {
     // Definimos qué campos pueden ser filtrados
     const availableFields = [
         { key: 'nombre', label: 'Nombre', type: 'string' },
@@ -94,6 +94,7 @@ export default function gestionComisiones ({institutos, carreras}) {
                 {/* BOTÓN APLICAR: Posicionado a la derecha del área de filtros */}
                 <div className="flex justify-end mt-4 border-t pt-4">
                     <button 
+                        type="button"
                         onClick={handleApplyFilters}
                         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition shadow-sm"
                     >

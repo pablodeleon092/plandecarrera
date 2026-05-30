@@ -46,9 +46,10 @@ export default function ComisionesTab({ superposiciones = [] }) {
                     <div key={item.id} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
 
                         {/* FILA PRINCIPAL */}
-                        <div
+                        <button
+                            type="button"
                             onClick={() => toggleExpandir(item.id)}
-                            className="flex items-center justify-between px-6 py-4 bg-white hover:bg-red-50 cursor-pointer transition-colors"
+                            className="flex items-center justify-between px-6 py-4 bg-white hover:bg-red-50 cursor-pointer transition-colors w-full"
                         >
                             <div className="flex items-center gap-4">
                                 <span className={`text-gray-400 transition-transform duration-200 ${expandido === item.id ? 'rotate-90' : ''}`}>
@@ -59,7 +60,7 @@ export default function ComisionesTab({ superposiciones = [] }) {
                                         {item.apellido}, {item.nombre}
                                     </p>
                                     <p className="text-xs text-gray-400">
-                                        {item.anio} — {item.cuatrimestre}º Cuatrimestre
+                                        {item.anio}, {item.cuatrimestre}º Cuatrimestre
                                     </p>
                                 </div>
                             </div>
@@ -68,14 +69,17 @@ export default function ComisionesTab({ superposiciones = [] }) {
                                 <span className="bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full border border-red-200">
                                     {item.cantidad_conflictos} {item.cantidad_conflictos === 1 ? 'choque' : 'choques'}
                                 </span>
-                                <button
-                                    onClick={(e) => abrirModal(e, item)}
-                                    className="text-indigo-600 hover:text-indigo-900 font-medium text-sm hover:underline whitespace-nowrap"
+                                <span
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={(e) => { e.stopPropagation(); abrirModal(e, item); }}
+                                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); abrirModal(e, item); } }}
+                                    className="text-indigo-600 hover:text-indigo-900 font-medium text-sm hover:underline whitespace-nowrap cursor-pointer"
                                 >
                                     Ver Comisiones →
-                                </button>
+                                </span>
                             </div>
-                        </div>
+                        </button>
 
                         {/* DETALLE EXPANDIBLE */}
                         {expandido === item.id && (
@@ -91,8 +95,8 @@ export default function ComisionesTab({ superposiciones = [] }) {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {item.choques.map((choque, index) => (
-                                            <tr key={index} className="hover:bg-red-50 transition-colors">
+                                        {item.choques.map((choque) => (
+                                            <tr key={`${choque.comision1_id}-${choque.comision2_id}-${choque.dia}`} className="hover:bg-red-50 transition-colors">
                                                 <td className="py-3">
                                                     <span className="capitalize bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-medium">
                                                         {choque.dia}
@@ -123,8 +127,10 @@ export default function ComisionesTab({ superposiciones = [] }) {
             {/* MODAL */}
             {modalDocente && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950 bg-opacity-50"
                     onClick={cerrarModal}
+                    onKeyDown={(e) => { if (e.key === 'Escape') cerrarModal(); }}
+                    role="presentation"
                 >
                     <div
                         className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
@@ -141,6 +147,7 @@ export default function ComisionesTab({ superposiciones = [] }) {
                                 </p>
                             </div>
                             <button
+                                type="button"
                                 onClick={cerrarModal}
                                 className="text-white hover:text-red-200 text-2xl font-bold leading-none"
                             >
@@ -185,6 +192,7 @@ export default function ComisionesTab({ superposiciones = [] }) {
                         {/* Footer modal */}
                         <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end">
                             <button
+                                type="button"
                                 onClick={cerrarModal}
                                 className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
                             >

@@ -41,8 +41,9 @@ export default function Edit({ auth, docente, flash }) {
                         <div className="p-6 bg-white border-b border-gray-200">
                             <form onSubmit={submit} className="space-y-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Legajo</label>
+                                    <label htmlFor="legajo" className="block text-sm font-medium text-gray-700">Legajo</label>
                                     <input
+                                        id="legajo"
                                         type="number"
                                         value={data.legajo}
                                         onChange={(e) => setData('legajo', e.target.value)}
@@ -53,8 +54,9 @@ export default function Edit({ auth, docente, flash }) {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                                        <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">Nombre</label>
                                         <input
+                                            id="nombre"
                                             type="text"
                                             value={data.nombre}
                                             onChange={(e) => setData('nombre', e.target.value)}
@@ -63,8 +65,9 @@ export default function Edit({ auth, docente, flash }) {
                                         {errors.nombre && <p className="text-red-600 text-sm mt-1">{errors.nombre}</p>}
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Apellido</label>
+                                        <label htmlFor="apellido" className="block text-sm font-medium text-gray-700">Apellido</label>
                                         <input
+                                            id="apellido"
                                             type="text"
                                             value={data.apellido}
                                             onChange={(e) => setData('apellido', e.target.value)}
@@ -76,8 +79,9 @@ export default function Edit({ auth, docente, flash }) {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Modalidad de desempeño</label>
+                                        <label htmlFor="modalidad_desempeño" className="block text-sm font-medium text-gray-700">Modalidad de desempeño</label>
                                         <select
+                                            id="modalidad_desempeño"
                                             value={data.modalidad_desempeño}
                                             onChange={(e) => setData('modalidad_desempeño', e.target.value)}
                                             className="mt-1 block w-full rounded-md border-gray-300"
@@ -106,8 +110,9 @@ export default function Edit({ auth, docente, flash }) {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Teléfono</label>
+                                        <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">Teléfono</label>
                                         <input
+                                            id="telefono"
                                             type="text"
                                             value={data.telefono}
                                             onChange={(e) => setData('telefono', e.target.value)}
@@ -116,8 +121,9 @@ export default function Edit({ auth, docente, flash }) {
                                         {errors.telefono && <p className="text-red-600 text-sm mt-1">{errors.telefono}</p>}
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700">Email</label>
+                                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
                                         <input
+                                            id="email"
                                             type="email"
                                             value={data.email}
                                             onChange={(e) => setData('email', e.target.value)}
@@ -127,14 +133,14 @@ export default function Edit({ auth, docente, flash }) {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between space-x-3">
+                                <div className="flex items-center justify-between gap-x-3">
                                     <Link
                                         href={route('docentes.cargo.create', docente.id)}
                                         className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white"
                                     >
                                         Agregar Cargo
                                     </Link>
-                                    <div className="flex justify-end space-x-4">
+                                    <div className="flex justify-end gap-x-4">
                                         <Button variant="danger"
                                             as={Link}
                                             href="#"

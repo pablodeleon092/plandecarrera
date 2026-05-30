@@ -49,8 +49,9 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Seleccionar Cargo */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Cargo</label>
+                            <label htmlFor="cargo_id" className="block text-gray-700 font-semibold mb-2">Cargo</label>
                             <select
+                                id="cargo_id"
                                 value={data.cargo_id}
                                 onChange={e => setData('cargo_id', e.target.value)}
                                 className="w-full border rounded px-3 py-2"
@@ -66,8 +67,9 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
 
                         {/* Horas frente al aula */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Horas frente al aula</label>
+                            <label htmlFor="horas_frente_aula" className="block text-gray-700 font-semibold mb-2">Horas frente al aula</label>
                             <input
+                                id="horas_frente_aula"
                                 type="number"
                                 min="0"
                                 value={data.horas_frente_aula}
@@ -80,8 +82,9 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
 
                         {/* Modalidad Presencia */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Modalidad de presencia</label>
+                            <label htmlFor="modalidad_presencia" className="block text-gray-700 font-semibold mb-2">Modalidad de presencia</label>
                             <select
+                                id="modalidad_presencia"
                                 value={data.modalidad_presencia}
                                 onChange={e => setData('modalidad_presencia', e.target.value)}
                                 className="w-full border rounded px-3 py-2"
@@ -96,8 +99,9 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
 
                         {/* Año Inicio */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Año Inicio</label>
+                            <label htmlFor="ano_inicio" className="block text-gray-700 font-semibold mb-2">Año Inicio</label>
                             <input
+                                id="ano_inicio"
                                 type="date"
                                 value={data.ano_inicio}
                                 onChange={e => setData('ano_inicio', e.target.value)}
@@ -109,8 +113,9 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
 
                         {/* Año Fin */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Año Fin</label>
+                            <label htmlFor="ano_fin" className="block text-gray-700 font-semibold mb-2">Año Fin</label>
                             <input
+                                id="ano_fin"
                                 type="date"
                                 value={data.año_fin}
                                 onChange={e => setData('año_fin', e.target.value)}
@@ -121,8 +126,9 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
 
                         {/* Función Aúlica */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Función Aúlica</label>
+                            <label htmlFor="funcion_aulica_id" className="block text-gray-700 font-semibold mb-2">Función Aúlica</label>
                             <select
+                                id="funcion_aulica_id"
                                 value={data.funcion_aulica_id}
                                 onChange={e => setData('funcion_aulica_id', e.target.value)}
                                 className="w-full border rounded px-3 py-2"

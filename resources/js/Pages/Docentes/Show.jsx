@@ -93,6 +93,7 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                         <div className="px-8 pt-6 border-b border-gray-200">
                             <div className="flex gap-4">
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('informacion')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${currentTab === 'informacion'
                                         ? 'border-blue-600 text-blue-600'
@@ -102,6 +103,7 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                                     Información
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('comisiones')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${currentTab === 'comisiones'
                                         ? 'border-blue-600 text-blue-600'

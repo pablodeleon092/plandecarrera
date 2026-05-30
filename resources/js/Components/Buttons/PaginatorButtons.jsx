@@ -79,6 +79,7 @@ export default function PaginatorButtons({ meta = null, paginator = null, onPage
             </div>
             <div className="paginator-buttons"> {/* Reducido el espacio a space-x-2 */}
                 <button
+                    type="button"
                     onClick={() => goTo(current_page - 1)}
                     disabled={current_page <= 1}
                     className="btn-paginator-nav"
@@ -88,10 +89,11 @@ export default function PaginatorButtons({ meta = null, paginator = null, onPage
 
                 {finalPages.map((p, index) => (
                     p === '...' ? (
-                        <span key={index} className="paginator-ellipsis">...</span>
+                        <span key={`ellipsis-${index}`} className="paginator-ellipsis">...</span>
                     ) : (
-                        <button 
-                            key={index}
+                        <button
+                            type="button"
+                            key={p}
                             onClick={() => goTo(p)}
                             className={p === current_page ? 'btn-paginator-page-active' : 'btn-paginator-page'}
                         >
@@ -101,6 +103,7 @@ export default function PaginatorButtons({ meta = null, paginator = null, onPage
                 ))}
 
                 <button
+                    type="button"
                     onClick={() => goTo(current_page + 1)}
                     disabled={current_page >= last_page}
                     className="btn-paginator-nav"
