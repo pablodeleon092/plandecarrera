@@ -24,7 +24,7 @@
     <parameter name="OP_AULA" class="java.lang.String"/>
     <parameter name="VALOR_AULA" class="java.lang.String"/>
 	<parameter name="logoPath" class="java.lang.String"/>
-    <queryString>
+<queryString>
         <![CDATA[SELECT 
     c.id,
     c.codigo, 
@@ -38,7 +38,7 @@
     c.sede,
     c.turno,
     STRING_AGG(DISTINCT h.dia_semana || ': ' || TO_CHAR(h.hora_inicio, 'HH24:MI') || ' a ' || TO_CHAR(h.hora_fin, 'HH24:MI'), ' / ') AS cronograma,
-    string_agg(DISTINCT d2.nombre || ' ' || d2.apellido || ' (' || c2.nombre || ')', ', ') AS equipo_docente
+    STRING_AGG(DISTINCT d2.nombre || ' ' || d2.apellido, ', ') AS equipo_docente
 FROM comisiones c
 JOIN materias m ON c.id_materia = m.id 
 LEFT JOIN horarios h ON h.comision_id = c.id 
