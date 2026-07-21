@@ -95,17 +95,17 @@ export default function Dashboard({ user, institutos, materias, docentes, select
     ];
 
     const handleRoleOverride = (e) => {
-            const cargo = selectedCargo;
-            router.get(route('dashboard'), {
-                // Pasamos el cargo elegido al backend
-                view: cargo, 
-                instituto_id: selectedInstitutoId,
-                selected_carrera: selectedCarreraId,
-            }, {
-                preserveScroll: true,
-                replace: true,
-            });
-        };
+        const cargo = selectedCargo;
+        router.get(route('dashboard'), {
+            // Pasamos el cargo elegido al backend
+            view: cargo,
+            instituto_id: selectedInstitutoId,
+            selected_carrera: selectedCarreraId,
+        }, {
+            preserveScroll: true,
+            replace: true,
+        });
+    };
 
     return (
         <AuthenticatedLayout
@@ -123,7 +123,7 @@ export default function Dashboard({ user, institutos, materias, docentes, select
             <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg p-6">
                 {/* SELECTORES DE FILTRO */}
                 <div className="flex flex-col md:flex-row items-start gap-6 mb-8">
-                
+
                     {/* SELECTOR DE MODO ADMINISTRADOR */}
                     {user.cargo === 'Administrador' && (
                         <div className="w-full md:w-1/3">
@@ -189,12 +189,12 @@ export default function Dashboard({ user, institutos, materias, docentes, select
                             ))}
                         </select>
                     </div>
-                    
+
                 </div>
                 <Button variant="primary"
-                onClick={handleRoleOverride}
+                    onClick={handleRoleOverride}
                 >
-                Cargar Vista
+                    Cargar Vista
                 </Button>
             </div>
         </AuthenticatedLayout>
