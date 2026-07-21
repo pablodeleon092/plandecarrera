@@ -111,14 +111,9 @@ class RolesYPermisosSeeder extends Seeder
             ],
             'Coord_carrera' => [
                 'consultar_carrera',
-                'modificar_carrera',
                 'consultar_materia',
-                'modificar_materia',
                 'consultar_docente',
-                'crear_comision',
                 'consultar_comision',
-                'modificar_comision',
-                'restore_materia'
             ],
             'Consulta_instituto' => [
                 'consultar_carrera',
