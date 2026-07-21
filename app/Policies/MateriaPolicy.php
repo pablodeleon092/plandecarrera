@@ -72,7 +72,6 @@ class MateriaPolicy
      */
     public function delete(User $user, Materia $materia): bool
     {
-
         if (!$user->can('restore_materia')) {
             return false;
         }

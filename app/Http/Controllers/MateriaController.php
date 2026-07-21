@@ -243,7 +243,7 @@ class MateriaController extends Controller
 
     public function toggleStatus(Materia $materia)
     {
-        $this->authorize('restore', Materia::Class);
+        $this->authorize('restore', $materia);
         $materia->estado = !$materia->estado;
         $materia->save();
 
