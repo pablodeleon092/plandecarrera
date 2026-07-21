@@ -101,7 +101,6 @@ class RolesYPermisosSeeder extends Seeder
                 'consultar_docente',
                 'modificar_docente',
                 'restore_docente',
-                'crear_materia',
                 'consultar_materia',
                 'modificar_materia',
                 'restore_materia',
