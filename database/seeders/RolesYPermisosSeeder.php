@@ -118,7 +118,8 @@ class RolesYPermisosSeeder extends Seeder
                 'consultar_docente',
                 'crear_comision',
                 'consultar_comision',
-                'modificar_comision'
+                'modificar_comision',
+                'restore_materia'
             ],
             'Consulta_instituto' => [
                 'consultar_carrera',
