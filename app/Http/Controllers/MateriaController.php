@@ -85,6 +85,9 @@ class MateriaController extends Controller
             'institutos' => $institutosDisponibles,
             'carreras' => $carreras,
             'filters' => $request->all(),
+            'can'  => [
+        'create' => $user->can('crear_materia'), 
+    ],
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),
