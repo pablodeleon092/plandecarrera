@@ -12,7 +12,8 @@ const CARGOS_DISPONIBLES = [
     'Director de instituto',
     'Coordinador Academico',
     'Administrativo de instituto',
-    'Coordinador de Carrera'
+    'Coordinador de Carrera',
+    'Consejero'
 ];
 
 export default function Dashboard({ user, institutos, materias, docentes, selectedInstitutoId: initialInstitutoId, selectedCarreraId: initialCarreraId, currentView: initialView }) {

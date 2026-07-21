@@ -6,7 +6,7 @@ export default function Show({ auth, cargo, docente }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Cargo {cargo.nombre} de {docente.nombre}</h2>}
+            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Cargo {cargo.nombre} de {docente.nombre}</h2>}
         >
             <Head title={`Cargos` }  />
             

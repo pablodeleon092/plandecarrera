@@ -187,6 +187,9 @@ class ComisionController extends Controller
                 'sede.required' => 'La sede es obligatoria',
                 'anio.required' => 'El año es obligatorio',
                 'id_materia.required' => 'Debe seleccionar una materia válida',
+                'turno.in' => 'El turno seleccionado no es válido',
+                'modalidad.in' => 'La modalidad seleccionada no es válida',
+                'cuatrimestre.in' => 'El cuatrimestre seleccionado no es válido',
             ]);
 
             $materia = \App\Models\Materia::findOrFail($validated['id_materia']);
@@ -235,6 +238,9 @@ class ComisionController extends Controller
                 'sede.required' => 'La sede es obligatoria',
                 'anio.required' => 'El año es obligatorio',
                 'id_materia.required' => 'Debe seleccionar una materia válida',
+                'turno.in' => 'El turno seleccionado no es válido',
+                'modalidad.in' => 'La modalidad seleccionada no es válida',
+                'cuatrimestre.in' => 'El cuatrimestre seleccionado no es válido',
             ]);
 
             // SEGURIDAD: Verificar que la materia pertenezca al instituto del usuario
