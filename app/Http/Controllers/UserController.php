@@ -24,12 +24,26 @@ class UserController extends Controller
     public function index()
     {
         $this->authorize('index', User::class);
+        $authUser = Auth::user();
 
 
-        $users = User::with('instituto')->orderBy('id', 'desc')->paginate(15)->withQueryString();
+        $users = User::with('instituto')
+            ->orderBy('id', 'desc')
+            ->paginate(15)
+            ->withQueryString()
+            ->through(fn ($model) => array_merge($model->toArray(), [
+                'can' => [
+                    'view' => $authUser->can('consultar_usuario', $model),
+                    'update' => $authUser->can('modificar_usuario', $model),
+                    'delete' => $authUser->can('restore_usuario', $model),
+                ],
+            ]));
 
         return Inertia::render('Users/Index', [
             'users' => $users,
+            'can' => [
+                'create' => $authUser->can('crear_usuario'),
+            ],
         ]);
     }
 
@@ -102,10 +116,17 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        $this->authorize('show', User::class);
+        $this->authorize('show', $user);
+        $authUser = Auth::user();
+
         $user->load('instituto');
         return inertia('Users/Show', [
             'user' => $user,
+            'can' => [
+                'view' => $authUser->can('consultar_usuario', $user),
+                'update' => $authUser->can('modificar_usuario', $user),
+                'delete' => $authUser->can('restore_usuario', $user),
+            ],
         ]);
     }
 

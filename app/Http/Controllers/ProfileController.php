@@ -24,6 +24,11 @@ class ProfileController extends Controller
 
         return Inertia::render('Users/Show', [
             'user' => $user,
+            'can' => [
+                'view' => $user->can('consultar_usuario', $user),
+                'update' => $user->can('modificar_usuario', $user),
+                'delete' => $user->can('restore_usuario', $user),
+            ],
         ]);
     }
 

@@ -8,7 +8,7 @@ import TableFilters from '@/Components/TableFilters';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 import KPICard from '@/Components/Dashboard/KPICard';
 
-export default function Index({ auth, carreras, institutos, filters }) {
+export default function Index({ auth, carreras, institutos, filters, can = { create: false } }) {
 
     const columns = [
         {
@@ -67,7 +67,7 @@ export default function Index({ auth, carreras, institutos, filters }) {
                     <ListHeader
                         title="Listado de Carreras"
                         buttonLabel="Agregar Carrera"
-                        buttonRoute={route('carreras.create')}
+                        buttonRoute={can.create ? route('carreras.create') : null}
                     />
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
                         <GestionCarreras

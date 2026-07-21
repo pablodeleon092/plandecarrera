@@ -2,7 +2,7 @@ import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 
-export default function Show({ auth, cargo, docente }) {
+export default function Show({ auth, cargo, docente, can = { delete: false } }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -42,16 +42,18 @@ export default function Show({ auth, cargo, docente }) {
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
-                                    <Link
-                                        href={route('cargos.destroy', cargo.id)} 
-                                        method="delete"
-                                        as="button"
-                                        onBefore={() => confirm('¿Estás seguro de que deseas eliminar este cargo?')}
-                                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition flex items-center gap-2 font-semibold"
-                                    >
-                                        {/* Icono de Eliminar */}
-                                        Eliminar
-                                    </Link>
+                                    {can.delete && (
+                                        <Link
+                                            href={route('cargos.destroy', cargo.id)}
+                                            method="delete"
+                                            as="button"
+                                            onBefore={() => confirm('¿Estás seguro de que deseas eliminar este cargo?')}
+                                            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition flex items-center gap-2 font-semibold"
+                                        >
+                                            {/* Icono de Eliminar */}
+                                            Eliminar
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
                         </div>

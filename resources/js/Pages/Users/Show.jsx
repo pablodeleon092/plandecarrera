@@ -3,7 +3,7 @@ import React from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-export default function Show({ user }) {
+export default function Show({ user, can = { update: false, delete: false } }) {
     const { auth } = usePage().props;
 
     const handleDelete = () => {
@@ -41,17 +41,21 @@ export default function Show({ user }) {
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
-                                    <Button variant="primary"
-                                        as={Link}
-                                        href={route('users.edit', user.id)}
-                                    >
-                                        Editar
-                                    </Button>
-                                    <Button variant="danger"
-                                        onClick={handleDelete}
-                                    >
-                                        Eliminar
-                                    </Button>
+                                    {can.update && (
+                                        <Button variant="primary"
+                                            as={Link}
+                                            href={route('users.edit', user.id)}
+                                        >
+                                            Editar
+                                        </Button>
+                                    )}
+                                    {can.delete && (
+                                        <Button variant="danger"
+                                            onClick={handleDelete}
+                                        >
+                                            Eliminar
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         </div>

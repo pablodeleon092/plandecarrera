@@ -88,7 +88,10 @@ class MateriaController extends Controller
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),
-            ],   
+            ],
+            'can' => [
+                'create' => $user->can('crear_materia'),
+            ],
         ]);
     }
 
@@ -165,9 +168,16 @@ class MateriaController extends Controller
     public function show(Materia $materia)
     {
         $this->authorize('view', $materia);
+        $user = Auth::user();
+
         return Inertia::render('Materias/Show', [
             'materia' => $materia,
             'comisiones' => $materia->comisiones()->get(),
+            'can' => [
+                'view' => $user->can('consultar_materia', $materia),
+                'update' => $user->can('modificar_materia', $materia),
+                'delete' => $user->can('restore_materia', $materia),
+            ],
         ]);
     }
 

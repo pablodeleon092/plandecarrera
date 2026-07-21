@@ -8,7 +8,7 @@ import GestionMaterias from '@/Components/Filters/GestionMaterias';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 import KPICard from '@/Components/Dashboard/KPICard';
 
-export default function Index({ auth, institutos, carreras, materias, filters, flash }) {
+export default function Index({ auth, institutos, carreras, materias, filters, flash, can = { create: false } }) {
 
     const handleDelete = (id) => {
         if (confirm('¿Estás seguro de eliminar esta materia?')) {
@@ -49,7 +49,7 @@ export default function Index({ auth, institutos, carreras, materias, filters, f
                     <ListHeader
                         title="Listado de Materias"
                         buttonLabel="Nueva Materia"
-                        buttonRoute={route('materias.create')}
+                        buttonRoute={can.create ? route('materias.create') : null}
                     />
 
                     {/* FILTROS */}

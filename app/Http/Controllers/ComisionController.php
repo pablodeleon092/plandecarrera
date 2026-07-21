@@ -102,6 +102,8 @@ class ComisionController extends Controller
     {
         $comision = Comision::with('materia', 'horarios')->findOrFail($id);
         $this->authorize('view', $comision); 
+        $user = Auth::user();
+
         $docentes = $comision->dictas()->exists() 
             ? $comision->docentes_with_cargo
             : collect(); // colección vacía
@@ -111,6 +113,11 @@ class ComisionController extends Controller
             'comision' => $comision,
             'docentes' => $docentes,
             'allDocentes' => $allDocentes,
+            'can' => [
+                'view' => $user->can('consultar_comision', $comision),
+                'update' => $user->can('modificar_comision', $comision),
+                'delete' => $user->can('restore_comision', $comision),
+            ],
         ]);
     }
 

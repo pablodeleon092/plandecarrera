@@ -20,7 +20,7 @@ class UserPolicy
     /**
      * Si el usuario puede llegar al show de User
      */
-    public function show(User $user): bool
+    public function show(User $user, User $model): bool
     {
         return ($user->can('consultar_usuario') or $user->id === $model->id);
 
@@ -40,6 +40,11 @@ class UserPolicy
     public function update(User $user): bool
     {
         return ($user->can('modificar_usuario'));
+    }
+
+    public function delete(User $user, User $model): bool
+    {
+        return $user->can('restore_usuario');
     }
 
 

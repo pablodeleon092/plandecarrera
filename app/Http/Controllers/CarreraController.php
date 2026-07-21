@@ -81,6 +81,9 @@ class CarreraController extends Controller
             'carreras'   => $carreras,
             'institutos' => $institutos,
             'filters'    => $filters,
+            'can' => [
+                'create' => $user->can('crear_carrera'),
+            ],
         ]);
     }
 

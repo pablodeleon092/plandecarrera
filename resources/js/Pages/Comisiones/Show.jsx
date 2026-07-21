@@ -7,7 +7,7 @@ import ComisionInfo from './Partials/ComisionInfo';
 import ComisionDocentes from './Partials/ComisionDocentes';
 import ComisionHorarios from './Partials/ComisionHorarios';
 
-export default function ShowComision({ auth, comision, flash, docentes, allDocentes }) {
+export default function ShowComision({ auth, comision, flash, docentes, allDocentes, can = { update: false, delete: false } }) {
 
     const [currentTab, setCurrentTab] = useState('informacion');
 
@@ -86,12 +86,14 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                 </div>
 
                                 <div className="flex gap-2">
-                                   <Button variant="primary"
-                                        as={Link}
-                                        href={route('comisiones.edit', comision.id)}
-                                    >
-                                        Editar comisión
-                                    </Button>
+                                    {can.update && (
+                                        <Button variant="primary"
+                                            as={Link}
+                                            href={route('comisiones.edit', comision.id)}
+                                        >
+                                            Editar comisión
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -150,6 +152,7 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                     comision={comision}
                                     docentes={docentes}
                                     allDocentes={allDocentes}
+                                    can={can}
                                 />
                             )}
                             {currentTab === 'horarios' && (

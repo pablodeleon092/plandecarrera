@@ -5,7 +5,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import MateriaInfo from './Partials/MateriaInfo';
 import MateriaComisiones from './Partials/MateriaComisiones';
 
-export default function Show({ auth, materia, flash, comisiones }) {
+export default function Show({ auth, materia, flash, comisiones, can = { update: false, delete: false } }) {
 
     const [currentTab, setCurrentTab] = useState('informacion');
 
@@ -87,19 +87,23 @@ export default function Show({ auth, materia, flash, comisiones }) {
 
                                 {/* Botones */}
                                 <div className="flex gap-3">
-                                    <Button variant="primary"
-                                        as={Link}
-                                        href={route('materias.edit', materia.id)}
-                                    >
-                                        Editar
-                                    </Button>
+                                    {can.update && (
+                                        <Button variant="primary"
+                                            as={Link}
+                                            href={route('materias.edit', materia.id)}
+                                        >
+                                            Editar
+                                        </Button>
+                                    )}
 
                                     {/* Solo si querés eliminar materias */}
-                                    <Button variant="danger"
-                                        onClick={handleDelete}
-                                    >
-                                        Eliminar
-                                    </Button>
+                                    {can.delete && (
+                                        <Button variant="danger"
+                                            onClick={handleDelete}
+                                        >
+                                            Eliminar
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
 

@@ -5,7 +5,7 @@ import { Link, router } from "@inertiajs/react";
 import TableFilters from "@/Components/TableFilters";
 import DataTable from "@/Components/DataTable";
 
-export default function ComisionDocentes({ comision, docentes, allDocentes, filters: initialFilters = {} }) {
+export default function ComisionDocentes({ comision, docentes, allDocentes, can = { update: false }, filters: initialFilters = {} }) {
     const [filters, setFilters] = useState({
         search: initialFilters.search || "",
     });
@@ -55,16 +55,18 @@ export default function ComisionDocentes({ comision, docentes, allDocentes, filt
                         Ver
                     </Link>
 
-                    <Button variant="danger"
-                        onClick={() => {
-                            if (confirm("¿Eliminar docente de esta comisión?")) {
-                                router.delete(route("dictas.destroy", d.dicta_id));
-                            }
-                        }}
-                        className="px-3 py-1 text-xs"
-                    >
-                        Eliminar
-                    </Button>
+                    {can.update && (
+                        <Button variant="danger"
+                            onClick={() => {
+                                if (confirm("¿Eliminar docente de esta comisión?")) {
+                                    router.delete(route("dictas.destroy", d.dicta_id));
+                                }
+                            }}
+                            className="px-3 py-1 text-xs"
+                        >
+                            Eliminar
+                        </Button>
+                    )}
                 </div>
             ),
         },

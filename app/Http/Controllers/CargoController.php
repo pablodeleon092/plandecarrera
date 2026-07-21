@@ -12,10 +12,16 @@ class CargoController extends Controller
     public function show(Cargo $cargo)
     {
         $docente = $cargo->docente;
+        $user = auth()->user();
 
         return Inertia::render('Docentes/Cargos/Show', [
             'cargo' => $cargo,
             'docente' => $docente,
+            'can' => [
+                'view' => $user->can('consultar_docente', $docente),
+                'update' => $user->can('modificar_docente', $docente),
+                'delete' => $user->can('modificar_docente', $docente),
+            ],
         ]);        
     }
 
