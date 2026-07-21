@@ -45,7 +45,7 @@ export default function EditDicta({ auth, flash, dicta, funcionesAulicas, cargos
         <AuthenticatedLayout
             user={auth.user}
             // CLAVE: Referencia correcta a comision.nombre
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
+            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">
                 Editar Asignación - Comisión: {comision.nombre}
             </h2>}
         >

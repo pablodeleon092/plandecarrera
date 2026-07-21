@@ -23,7 +23,7 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Comisión: {comision.nombre}</h2>}
+            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Comisión: {comision.nombre}</h2>}
         >
             <Head title={`Comisión: ${comision.nombre}`} />
 
