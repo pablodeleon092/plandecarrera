@@ -6,6 +6,23 @@ use App\Models\{Docente, Cargo, Instituto, Carrera, Materia, Comision, Dicta, Fu
 
 class QueryFilter
 {
+    private const SPANISH_ACCENT_REPLACEMENTS = [
+        'á' => 'a',
+        'é' => 'e',
+        'í' => 'i',
+        'ó' => 'o',
+        'ú' => 'u',
+        'ü' => 'u',
+        'ñ' => 'n',
+        'Á' => 'a',
+        'É' => 'e',
+        'Í' => 'i',
+        'Ó' => 'o',
+        'Ú' => 'u',
+        'Ü' => 'u',
+        'Ñ' => 'n',
+    ];
+
     public function apply(Builder $query, array $filters): Builder
     {
         foreach ($filters as $filter) {
@@ -53,7 +70,7 @@ class QueryFilter
     {
         switch ($operator) {
             case 'contains':
-                $query->where($field, 'ILIKE', "%{$value}%");
+                $this->applyContains($query, $field, $value);
                 break;
 
             case 'equals':
@@ -79,5 +96,27 @@ class QueryFilter
                 }
                 break;
         }
+    }
+
+    protected function applyContains($query, $field, $value): void
+    {
+        $grammar = $query->getQuery()->getGrammar();
+        $normalizedField = 'lower('.$grammar->wrap($field).')';
+        $bindings = [];
+
+        foreach (self::SPANISH_ACCENT_REPLACEMENTS as $accented => $plain) {
+            $normalizedField = "replace({$normalizedField}, ?, ?)";
+            $bindings[] = $accented;
+            $bindings[] = $plain;
+        }
+
+        $normalizedValue = mb_strtolower(
+            strtr((string) $value, self::SPANISH_ACCENT_REPLACEMENTS),
+            'UTF-8'
+        );
+
+        $bindings[] = "%{$normalizedValue}%";
+
+        $query->whereRaw("{$normalizedField} LIKE ?", $bindings);
     }
 }
