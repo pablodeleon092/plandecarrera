@@ -3,17 +3,10 @@ import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function EditDicta({ auth, flash, dicta, funcionesAulicas, cargos }) {
+export default function EditDicta({ auth, flash, dicta, periodo, funcionesAulicas, cargos }) {
 
     const comision = dicta.comision;
     const docente = dicta.docente
-
-    // Función de ayuda para asegurar que las fechas se muestren correctamente en el input 'date'
-    const formatYearDate = (dateString) => {
-        if (!dateString) return '';
-        // Asume que la cadena es 'YYYY-MM-DD HH:MM:SS' y toma solo la parte de la fecha
-        return dateString.substring(0, 10);
-    };
 
     const { data, setData, put, processing, errors } = useForm({
         // Campos que se inicializan con los valores existentes de dicta
@@ -21,9 +14,6 @@ export default function EditDicta({ auth, flash, dicta, funcionesAulicas, cargos
         docente_id: docente.id,
         cargo_id: dicta.cargo_id, // Usamos el ID de cargo existente en dicta
         horas_frente_aula: dicta.horas_frente_aula || '',
-        modalidad_presencia: dicta.modalidad_presencia,
-        ano_inicio: formatYearDate(dicta.ano_inicio),
-        año_fin: formatYearDate(dicta.año_fin),
         funcion_aulica_id: dicta.funcion_aulica_id || '',
     });
 
@@ -116,18 +106,14 @@ export default function EditDicta({ auth, flash, dicta, funcionesAulicas, cargos
                         {/* Modalidad Presencia */}
                         <div>
                             <label className="block text-gray-700 font-semibold mb-2" htmlFor="modalidad_presencia">Modalidad de presencia</label>
-                            <select
+                            <input
                                 id="modalidad_presencia"
-                                value={data.modalidad_presencia}
-                                onChange={e => setData('modalidad_presencia', e.target.value)}
-                                className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                required
-                            >
-                                <option value="presencial">Presencial</option>
-                                <option value="virtual">Virtual</option>
-                                <option value="mixta">Mixta</option>
-                            </select>
-                            {errors.modalidad_presencia && <p className="text-red-500 text-sm mt-1">{errors.modalidad_presencia}</p>}
+                                type="text"
+                                value={comision.modalidad}
+                                className="w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700 capitalize cursor-not-allowed"
+                                readOnly
+                            />
+                            <p className="text-sm text-gray-500 mt-1">Definida por la modalidad de la comisión.</p>
                         </div>
 
                         {/* Año Inicio */}
@@ -137,27 +123,25 @@ export default function EditDicta({ auth, flash, dicta, funcionesAulicas, cargos
                                 <input
                                     id="ano_inicio"
                                     type="date"
-                                    value={data.ano_inicio}
-                                    onChange={e => setData('ano_inicio', e.target.value)}
-                                    className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    required
+                                    value={periodo.inicio}
+                                    className="w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700 cursor-not-allowed"
+                                    readOnly
                                 />
-                                {errors.ano_inicio && <p className="text-red-500 text-sm mt-1">{errors.ano_inicio}</p>}
                             </div>
 
                             {/* Año Fin (puede ser nulo) */}
                             <div>
-                                <label className="block text-gray-700 font-semibold mb-2" htmlFor="año_fin">Fecha Fin (Opcional)</label>
+                                <label className="block text-gray-700 font-semibold mb-2" htmlFor="año_fin">Fecha Fin</label>
                                 <input
                                     id="año_fin"
                                     type="date"
-                                    value={data.año_fin}
-                                    onChange={e => setData('año_fin', e.target.value)}
-                                    className="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    value={periodo.fin}
+                                    className="w-full border-gray-300 rounded-md shadow-sm bg-gray-100 text-gray-700 cursor-not-allowed"
+                                    readOnly
                                 />
-                                {errors.año_fin && <p className="text-red-500 text-sm mt-1">{errors.año_fin}</p>}
                             </div>
                         </div>
+                        <p className="text-sm text-gray-500 -mt-4">Período definido por el régimen y cuatrimestre de la comisión.</p>
 
                         {/* Función Aúlica */}
                         <div>

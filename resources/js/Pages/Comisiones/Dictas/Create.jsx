@@ -3,15 +3,12 @@ import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function CreateDicta({ auth, comision, flash, docente, funcionesAulicas }) {
+export default function CreateDicta({ auth, comision, periodo, flash, docente, funcionesAulicas }) {
     const { data, setData, post, errors } = useForm({
         comision_id: comision.id,
         docente_id: docente.id,
         cargo_id: '',
         horas_frente_aula: '',
-        modalidad_presencia: 'presencial',
-        ano_inicio: comision.anio,
-        año_fin: '',
         funcion_aulica_id: '',
     });
 
@@ -83,18 +80,14 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
                         {/* Modalidad Presencia */}
                         <div>
                             <label htmlFor="modalidad_presencia" className="block text-gray-700 font-semibold mb-2">Modalidad de presencia</label>
-                            <select
+                            <input
                                 id="modalidad_presencia"
-                                value={data.modalidad_presencia}
-                                onChange={e => setData('modalidad_presencia', e.target.value)}
-                                className="w-full border rounded px-3 py-2"
-                                required
-                            >
-                                <option value="presencial">Presencial</option>
-                                <option value="virtual">Virtual</option>
-                                <option value="mixta">Mixta</option>
-                            </select>
-                            {errors.modalidad_presencia && <p className="text-red-500 text-sm mt-1">{errors.modalidad_presencia}</p>}
+                                type="text"
+                                value={comision.modalidad}
+                                className="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700 capitalize cursor-not-allowed"
+                                readOnly
+                            />
+                            <p className="text-sm text-gray-500 mt-1">Definida por la modalidad de la comisión.</p>
                         </div>
 
                         {/* Año Inicio */}
@@ -103,12 +96,10 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
                             <input
                                 id="ano_inicio"
                                 type="date"
-                                value={data.ano_inicio}
-                                onChange={e => setData('ano_inicio', e.target.value)}
-                                className="w-full border rounded px-3 py-2"
-                                required
+                                value={periodo.inicio}
+                                className="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"
+                                readOnly
                             />
-                            {errors.ano_inicio && <p className="text-red-500 text-sm mt-1">{errors.ano_inicio}</p>}
                         </div>
 
                         {/* Año Fin */}
@@ -117,11 +108,11 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
                             <input
                                 id="ano_fin"
                                 type="date"
-                                value={data.año_fin}
-                                onChange={e => setData('año_fin', e.target.value)}
-                                className="w-full border rounded px-3 py-2"
+                                value={periodo.fin}
+                                className="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"
+                                readOnly
                             />
-                            {errors.año_fin && <p className="text-red-500 text-sm mt-1">{errors.año_fin}</p>}
+                            <p className="text-sm text-gray-500 mt-1">Período definido por el régimen y cuatrimestre de la comisión.</p>
                         </div>
 
                         {/* Función Aúlica */}
