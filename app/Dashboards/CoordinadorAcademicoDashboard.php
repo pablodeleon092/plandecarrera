@@ -34,6 +34,7 @@ class CoordinadorAcademicoDashboard implements DashboardStrategy
         $docentesStats = $this->getDocentesStats($institutoId);
         $docentesMulti = $this->filtrarDocentesMultiCarrera($docentesStats, $institutoId);
         $superposiciones = $this->getSuperposicionesHorarias($institutoId);
+        $comisionesStats = $this->getComisionesStats($institutoId);
         
         $totalMaterias = $this->getTotalMateriasInstituto($institutoId);
 
@@ -47,6 +48,9 @@ class CoordinadorAcademicoDashboard implements DashboardStrategy
                 'multiCareerTeachersCount' => $docentesMulti->count(),
                 'conflictsCount' => $superposiciones->count(), 
                 'totalCareers' => Carrera::where('instituto_id', $institutoId)->count(),
+                'totalComisiones' => $comisionesStats['totalComisiones'],
+                'comisionesSinCobertura' => $comisionesStats['comisionesSinCobertura'],
+                'porcentajeCobertura' => $comisionesStats['porcentajeCobertura'],
             ],
 
             'stats' => [
@@ -83,6 +87,32 @@ class CoordinadorAcademicoDashboard implements DashboardStrategy
                     ->filter()->unique()->values()
             ])
             ->values();
+    }
+
+    private function getComisionesStats($institutoId)
+    {
+        $anioActual = date('Y');
+
+        $totalComisiones = Comision::byInstituto($institutoId)
+            ->where('anio', $anioActual)
+            ->count();
+
+        $comisionesConCobertura = Comision::byInstituto($institutoId)
+            ->where('anio', $anioActual)
+            ->whereHas('dictas', function ($q) {
+                $q->whereHas('docente', fn($d) => $d->where('es_activo', true))
+                    ->whereHas('cargo', function ($c) {
+                        $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
+                    });
+            })
+            ->count();
+
+        return [
+            'totalComisiones' => $totalComisiones,
+            'comisionesConCobertura' => $comisionesConCobertura,
+            'comisionesSinCobertura' => max(0, $totalComisiones - $comisionesConCobertura),
+            'porcentajeCobertura' => $totalComisiones > 0 ? round(($comisionesConCobertura / $totalComisiones) * 100, 1) : 0,
+        ];
     }
 
     private function getDocentesStats($institutoId)
