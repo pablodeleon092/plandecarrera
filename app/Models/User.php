@@ -75,6 +75,16 @@ class User extends Authenticatable
         return $this->belongsTo(Instituto::class);
     }
 
+    public function isAdministrator(): bool
+    {
+        return $this->hasRole('Admin');
+    }
+
+    public function canDeleteCommissionSchedules(): bool
+    {
+        return $this->hasAnyRole(['Admin', 'Admin_global']);
+    }
+
     public function getInstitutosAutorizados()
     {
         // 1. Administrador (o usuario sin instituto asignado) -> Acceso a todos

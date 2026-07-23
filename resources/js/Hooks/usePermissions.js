@@ -6,16 +6,17 @@ export function usePermissions() {
     const { auth } = usePage().props;
 
     const permissions = auth?.user?.permissions || [];
+    const roles = auth?.user?.roles || [];
 
     return {
         // Devuelve booleanos listos para usar
-        canViewUsers: permissions.includes('consultar_usuario'),
+        canViewUsers: roles.includes('Admin'),
         canEditUsers: permissions.includes('modificar_usuario'),
         canViewCarreras: permissions.includes('modificar_carrera'),
         canEditCarreras: permissions.includes('modificar_carrera'),
         canCreateDocente: permissions.includes('crear_docente'),
         canEditDocente: permissions.includes('modificar_docente'),
-        canDeleteDocente: permissions.includes('restore_docente'),
-        isAdmin: auth?.user?.role === 'admin', 
+        canDeleteDocente: roles.includes('Admin'),
+        isAdmin: roles.includes('Admin'),
     };
 }

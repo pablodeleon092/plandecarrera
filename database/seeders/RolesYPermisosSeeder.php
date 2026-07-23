@@ -71,10 +71,6 @@ class RolesYPermisosSeeder extends Seeder
                 'restore_comision'
             ],
             'Admin_global' => [
-                'consultar_usuario',
-                'modificar_usuario',
-                'restore_usuario',
-                'modificar_permisos',
                 'crear_carrera',
                 'consultar_carrera',
                 'modificar_carrera',

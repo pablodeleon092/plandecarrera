@@ -33,16 +33,16 @@ class UserController extends Controller
             ->withQueryString()
             ->through(fn ($model) => array_merge($model->toArray(), [
                 'can' => [
-                    'view' => $authUser->can('consultar_usuario', $model),
-                    'update' => $authUser->can('modificar_usuario', $model),
-                    'delete' => $authUser->can('restore_usuario', $model),
+                    'view' => $authUser->can('show', $model),
+                    'update' => $authUser->can('update', $model),
+                    'delete' => $authUser->can('delete', $model),
                 ],
             ]));
 
         return Inertia::render('Users/Index', [
             'users' => $users,
             'can' => [
-                'create' => $authUser->can('crear_usuario'),
+                'create' => $authUser->can('create', User::class),
             ],
         ]);
     }
@@ -101,10 +101,7 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        $this->authorize('update', User::class);
-        if (!Auth::user()->can('modificar_usuario')) {
-            abort(403, 'No tienes permiso para modificar usuarios.');
-        }
+        $this->authorize('update', $user);
 
         $institutos = Instituto::select('id', 'siglas')->get();
 
@@ -123,15 +120,16 @@ class UserController extends Controller
         return inertia('Users/Show', [
             'user' => $user,
             'can' => [
-                'view' => $authUser->can('consultar_usuario', $user),
-                'update' => $authUser->can('modificar_usuario', $user),
-                'delete' => $authUser->can('restore_usuario', $user),
+                'view' => $authUser->can('show', $user),
+                'update' => $authUser->can('update', $user),
+                'delete' => $authUser->can('delete', $user),
             ],
         ]);
     }
 
     public function update(Request $request, User $user)
     {
+        $this->authorize('update', $user);
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -170,7 +168,7 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        $this->authorize('update', $user);
+        $this->authorize('delete', $user);
 
         // Prevent deleting the currently authenticated user from the user-management UI
         if (Auth::id() === $user->id) {
@@ -208,6 +206,7 @@ class UserController extends Controller
 
     public function updateCarrerasCoordinador(Request $request, User $user)
     {
+        $this->authorize('update', $user);
 
         $validated = $request->validate([
             'carreras_ids' => 'nullable|array',
