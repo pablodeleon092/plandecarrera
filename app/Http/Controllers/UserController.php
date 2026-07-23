@@ -225,7 +225,8 @@ class UserController extends Controller
         return inertia('Users/AsignarCarrerasCoordinador', [
             'coordinador' => $user->only('id', 'nombre', 'apellido'),
             'carrerasAsignadas' => $carrerasAsignadas,
-            'carrerasRestantes' => $carrerasRestantes
+            'carrerasRestantes' => $carrerasRestantes,
+            'creationMode' => false,
         ]);
     }
 
@@ -243,7 +244,7 @@ class UserController extends Controller
 
 
         return redirect()
-            ->route('coordinadores.carreras.edit', $user) // Redirige de vuelta a la vista de edición
+            ->route('users.show', $user) // Redirige de vuelta a la vista de edición
             ->with('success', 'Asignación de carreras actualizada con éxito.');
     }
 
