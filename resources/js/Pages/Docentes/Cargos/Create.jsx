@@ -4,12 +4,13 @@ import { Head, useForm, Link } from '@inertiajs/react';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 
-export default function Create({ auth, docente, dedicaciones, flash }) {
+export default function Create({ auth, docente, dedicaciones, flash, comisionId = null }) {
 
     const { data, setData, post, processing, errors } = useForm({
         cargo: '',
         dedicacion_id: '',
         docente_id: docente.id,
+        comision_id: comisionId || '',
     });
 
     const submit = (e) => {

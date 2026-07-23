@@ -29,10 +29,26 @@ class DictaController extends Controller
 
         $docente = \App\Models\Docente::with('cargos')->findOrFail($request->docente_id);
 
+        if ($docente->cargos->isEmpty()) {
+            if ($request->user()->can('manageCargos', $docente)) {
+                return redirect()
+                    ->route('docentes.cargo.create', [
+                        'docente' => $docente,
+                        'comision_id' => $comision->id,
+                    ])
+                    ->with('error', 'El docente no tiene cargos registrados. Agregá uno para poder asignarlo a la comisión.');
+            }
+
+            return redirect()
+                ->route('comisiones.show', $comision)
+                ->with('error', 'El docente no tiene cargos registrados y no tenés permiso para agregarlos.');
+        }
+
         $funcionesAulicas = FuncionAulica::all();
 
         return Inertia::render('Comisiones/Dictas/Create', [
             'comision' => $comision,
+            'periodo' => $comision->periodoAcademico(),
             'docente' => $docente,
             'funcionesAulicas' => $funcionesAulicas,
         ]);
