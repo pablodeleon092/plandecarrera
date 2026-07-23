@@ -61,7 +61,7 @@ class ComisionPolicy
     public function update(User $user, Comision $comision): bool
     {
 
-        if (!$user->can('modificar_comision') || !$comision->estado) {
+        if (!$user->can('modificar_comision')) {
             return false;
         }
 
@@ -113,4 +113,3 @@ class ComisionPolicy
             ->exists();
     }
 }
-

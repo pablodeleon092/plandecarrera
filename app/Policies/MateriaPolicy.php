@@ -59,7 +59,7 @@ class MateriaPolicy
     public function update(User $user, Materia $materia): bool
     {
 
-        if (!$user->can('modificar_materia') || !$materia->estado) {
+        if (!$user->can('modificar_materia')) {
             return false;
         }
 

@@ -42,7 +42,7 @@ export default function Index({ auth, carreras, institutos, filters, can = { cre
     ];
 
     const handleDelete = (carrera) => {
-        if (confirm('¿Estás seguro de eliminar esta carrera?')) {
+        if (confirm(`¿Estás seguro de eliminar la carrera "${carrera.nombre}"? Esta acción no se puede deshacer y eliminará sus datos asociados.`)) {
             router.delete(route('carreras.destroy', carrera.id));
         }
     };
@@ -80,6 +80,7 @@ export default function Index({ auth, carreras, institutos, filters, can = { cre
                             columns={columns}
                             data={carreras.data}
                             onShow={(carrera) => router.visit(route('carreras.show', carrera.id))}
+                            onEdit={(carrera) => router.visit(route('carreras.edit', carrera.id))}
                             onDelete={handleDelete}
                             onToggleStatus={handleToggleStatus}
                             hover={true}

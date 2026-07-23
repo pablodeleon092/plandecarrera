@@ -46,7 +46,7 @@ class CarreraPolicy
     public function update(User $user, Carrera $carrera): bool
     {
 
-        if (!$user->can('modificar_carrera') || !$carrera->estado) {
+        if (!$user->can('modificar_carrera')) {
             return false;
         }
 
@@ -76,17 +76,9 @@ class CarreraPolicy
 
         if (!$user->instituto_id) {
             return true;
-        } else {
-            return $user->instituto_id == $carrera->instituto_id;
         }
-    }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Carrera $carrera): bool
-    {
-        return false;
+        return $user->instituto_id == $carrera->instituto_id;
     }
 
     /**

@@ -5,13 +5,15 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import CarreraInfo from './Partials/CarreraInfo';
 import CarreraMaterias from './Partials/CarreraMaterias';
 
-export default function Show({ auth, carrera, planes }) {
+export default function Show({ auth, carrera, planes, can = { update: false, deletePlan: false } }) {
     const [tab, setTab] = useState('info');
 
-    const handleDelete = () => {
-        if (confirm(`¿Estás seguro de eliminar la carrera "${carrera.nombre}"?`)) {
-            router.delete(route('carreras.destroy', carrera.id), {
-                onSuccess: () => router.visit(route('carreras.index')),
+    const handleToggleStatus = () => {
+        const action = carrera.estado ? 'desactivar' : 'activar';
+
+        if (confirm(`¿Estás seguro de ${action} la carrera "${carrera.nombre}"?`)) {
+            router.patch(route('carreras.toggleStatus', carrera.id), {}, {
+                preserveScroll: true,
             });
         }
     };
@@ -32,11 +34,7 @@ export default function Show({ auth, carrera, planes }) {
                     <div className="mb-4">
                         <Button variant="secondary"
                             as={Link}
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                window.history.back();
-                            }}
+                            href={route('carreras.index')}
                             className="flex items-center gap-2"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,11 +64,22 @@ export default function Show({ auth, carrera, planes }) {
 
                                 {/* Botones */}
                                 <div className="flex gap-3">
-                                    <Button variant="danger"
-                                        onClick={handleDelete}
-                                    >
-                                        Eliminar
-                                    </Button>
+                                    {can.update && (
+                                        <>
+                                            <Button
+                                                variant="primary"
+                                                as={Link}
+                                                href={route('carreras.edit', carrera.id)}
+                                            >
+                                                Editar carrera
+                                            </Button>
+                                            <Button variant={carrera.estado ? 'danger' : 'primary'}
+                                                onClick={handleToggleStatus}
+                                            >
+                                                {carrera.estado ? 'Desactivar' : 'Activar'}
+                                            </Button>
+                                        </>
+                                    )}
                                 </div>
 
                             </div>
@@ -116,7 +125,9 @@ export default function Show({ auth, carrera, planes }) {
                             ) : (
                                 <CarreraMaterias 
                                     carrera={carrera} 
-                                    planes={planes} 
+                                    planes={planes}
+                                    canUpdate={can.update}
+                                    canDelete={can.deletePlan}
                                 />
                             )}
                         </div>

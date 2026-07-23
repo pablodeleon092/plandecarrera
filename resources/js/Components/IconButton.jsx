@@ -80,6 +80,12 @@ export default function IconButton({
                 type="button"
                 onClick={(e) => {
                     e.stopPropagation();
+
+                    if (action === 'toggle') {
+                        const toggleAction = isActive ? 'desactivar' : 'activar';
+                        if (!confirm(`¿Estás seguro de que deseas ${toggleAction} este registro?`)) return;
+                    }
+
                     handler(item);
                 }}
                 className={`${finalClassName} ${className}`.trim()}

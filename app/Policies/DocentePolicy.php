@@ -37,11 +37,35 @@ class DocentePolicy
      */
     public function update(User $user, Docente $docente): bool
     {
-        if (!$user->can('modificar_docente') || !$docente->es_activo) {
+        if (!$user->can('modificar_docente')) {
             return false;
         }
 
         return $this->userPerteneceADocente($user, $docente);
+    }
+
+    /**
+     * Determine whether the user can change the docente's legajo.
+     */
+    public function editLegajo(User $user, Docente $docente): bool
+    {
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
+        return !$user->hasRole('Admin_global') && $this->update($user, $docente);
+    }
+
+    /**
+     * Determine whether the user can create cargos for the docente.
+     */
+    public function manageCargos(User $user, Docente $docente): bool
+    {
+        if ($user->isAdministrator()) {
+            return true;
+        }
+
+        return !$user->hasRole('Admin_global') && $this->update($user, $docente);
     }
 
     /**
