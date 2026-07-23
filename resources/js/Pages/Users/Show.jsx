@@ -44,7 +44,7 @@ export default function Show({ user, can = { update: false, delete: false } }) {
                                     {can.update && (
                                         <Button variant="primary"
                                             as={Link}
-                                            href={route('users.edit', user.id)}
+                                            href={`${route('users.edit', user.id)}?from=show`}
                                         >
                                             Editar
                                         </Button>
@@ -124,7 +124,7 @@ export default function Show({ user, can = { update: false, delete: false } }) {
                     </div>
                 </div>
                 <div className="mt-4 flex justify-end">
-                    <Button variant="info" type="button" onClick={() => window.history.back()}>
+                    <Button variant="info" as={Link} href={route('users.index')} replace>
                         Volver
                     </Button>
                 </div>

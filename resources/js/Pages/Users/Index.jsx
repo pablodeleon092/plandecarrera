@@ -143,7 +143,7 @@ export default function Index({ auth, users, can = { create: false } }) {
                     data={filteredData}
                     
                     onShow={(user) => router.visit(route('users.show', user.id))}
-                    onEdit={(user) => router.visit(route('users.edit', user.id))}
+                    onEdit={(user) => router.visit(`${route('users.edit', user.id)}?from=index`)}
                     onDelete={(user) => {
                             if (confirm('¿Eliminar usuario?')) {
                                 // Asumo que `inertiaDelete` es una función/hook de Inertia para DELETE (como `router.delete`)

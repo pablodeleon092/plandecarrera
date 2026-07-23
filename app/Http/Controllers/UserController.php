@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -99,7 +100,7 @@ class UserController extends Controller
         return redirect(route('users.index'))->with('success', 'Usuario creado exitosamente.');
     }
 
-    public function edit(User $user)
+    public function edit(Request $request, User $user)
     {
         $this->authorize('update', $user);
 
@@ -108,6 +109,7 @@ class UserController extends Controller
         return inertia('Users/Edit', [
             'user' => $user,
             'institutos' => $institutos,
+            'returnTo' => $request->query('from') === 'show' ? 'show' : 'index',
         ]);
     }
 
@@ -130,6 +132,7 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $this->authorize('update', $user);
+        $this->normalizeEmail($request);
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -139,6 +142,7 @@ class UserController extends Controller
             'apellido' => 'required|string|max:255',
             'cargo' => 'required|string|max:255',
             'instituto_id' => 'nullable|integer|exists:institutos,id',
+            'return_to' => 'nullable|in:index,show',
         ]);
 
         try {
@@ -157,11 +161,13 @@ class UserController extends Controller
             return back()->with('error', 'Hubo un problema al actualizar el usuario.');
         }
 
-        return Inertia::render('Users/Edit', [
-            'user' => $user,
-            'institutos' => Instituto::select('id', 'siglas')->get(),
-            'flash' => ['success' => 'Usuario actualizado correctamente.'],
-        ]);
+        $returnRoute = $request->input('return_to') === 'show'
+            ? route('users.show', $user)
+            : route('users.index');
+
+        $request->session()->flash('success', 'Usuario actualizado correctamente.');
+
+        return Inertia::location($returnRoute);
     }
 
     public function updatePassword(Request $request, User $user): RedirectResponse
@@ -256,6 +262,15 @@ class UserController extends Controller
         ];
 
         return $cargoRoleMap[$cargo] ?? 'user'; // Rol por defecto si no se encuentra el cargo
+    }
+
+    private function normalizeEmail(Request $request): void
+    {
+        if ($request->has('email')) {
+            $request->merge([
+                'email' => Str::lower(trim((string) $request->input('email'))),
+            ]);
+        }
     }
 
     public function toggleStatus(User $user)
