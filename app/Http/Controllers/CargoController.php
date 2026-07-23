@@ -18,23 +18,27 @@ class CargoController extends Controller
             'cargo' => $cargo,
             'docente' => $docente,
             'can' => [
-                'view' => $user->can('consultar_docente', $docente),
-                'update' => $user->can('modificar_docente', $docente),
-                'delete' => $user->can('modificar_docente', $docente),
+                'view' => $user->can('consultar_docente'),
+                'update' => $user->can('update', $docente),
+                'delete' => $user->can('delete', $docente),
             ],
         ]);        
     }
 
     public function store(Request $request)
     {
+        $docenteReference = $request->validate([
+            'docente_id' => 'required|exists:docentes,id',
+        ]);
+        $docente = Docente::findOrFail($docenteReference['docente_id']);
+        $this->authorize('manageCargos', $docente);
+
         $validated = $request->validate([
             'cargo' => 'required|string|max:255',
             'dedicacion_id' => 'required|exists:dedicaciones,id',
             'docente_id' => 'required|exists:docentes,id',
+            'comision_id' => 'nullable|integer|exists:comisiones,id',
         ]);
-
-        $docente = Docente::findOrFail($validated['docente_id']);
-        $this->authorize('update', $docente);
 
         $cargo = $docente->cargos()->create([
             'nombre' => $validated['cargo'],
@@ -42,6 +46,15 @@ class CargoController extends Controller
             'nro_materias_asig' => 0,
             'sum_horas_frente_aula' => 0,
         ]);
+
+        if ($validated['comision_id'] ?? null) {
+            return redirect()
+                ->route('dictas.create', [
+                    'comision_id' => $validated['comision_id'],
+                    'docente_id' => $docente->id,
+                ])
+                ->with('success', 'Cargo agregado exitosamente. Ya podés completar la asignación.');
+        }
 
         return redirect()
             ->route('docentes.show', $docente->id)
@@ -52,7 +65,7 @@ class CargoController extends Controller
     public function destroy(Cargo $cargo)
     {
         $docente = $cargo->docente;
-        $this->authorize('update', $docente);
+        $this->authorize('delete', $docente);
         $cargo->delete();
         return redirect()
             ->route('docentes.index')

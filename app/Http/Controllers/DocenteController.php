@@ -39,7 +39,8 @@ class DocenteController extends Controller
                 'cargos',
                 'dictas.comision.materia' 
             ])
-            ->orderBy('apellido')
+            ->orderBy('apellido', 'asc')
+            ->orderBy('nombre', 'asc')
             ->get()
             ->map(fn ($docente) => [
                 'id'                  => $docente->id,
@@ -64,9 +65,9 @@ class DocenteController extends Controller
                 ])->filter(fn($m) => $m['nombre'] != null)->values(),
 
                 'can' => [
-                    'view'   => $user->can('consultar_docente', $docente),
-                    'update' => $user->can('modificar_docente', $docente),
-                    'delete' => $user->can('restore_docente', $docente),
+                    'view'   => $user->can('consultar_docente'),
+                    'update' => $user->can('update', $docente),
+                    'delete' => $user->can('delete', $docente),
                 ]
             ]);
 
@@ -118,11 +119,16 @@ class DocenteController extends Controller
     public function show(Docente $docente)
     {
         $this->authorize('viewAny', Docente::Class);
+        $user = auth()->user();
         $docente->load(['cargos.dedicacion', 'comisiones.materia']);
 
         return Inertia::render('Docentes/Show', [
             'docente' => $docente,
-            'comisiones' => $docente->comisiones
+            'comisiones' => $docente->comisiones,
+            'can' => [
+                'update' => $user->can('update', $docente),
+                'delete' => $user->can('delete', $docente),
+            ],
         ]);
     }
 
@@ -132,8 +138,14 @@ class DocenteController extends Controller
     public function edit(Docente $docente)
     {
         $this->authorize('update', $docente);
+        $user = auth()->user();
+
         return Inertia::render('Docentes/Edit', [
             'docente' => $docente->load('cargos'),
+            'can' => [
+                'editLegajo' => $user->can('editLegajo', $docente),
+                'manageCargos' => $user->can('manageCargos', $docente),
+            ],
         ]);
     }
 
@@ -158,12 +170,8 @@ class DocenteController extends Controller
      */
     public function destroy(Docente $docente)
     {
-        $user = auth()->user();
-        if ($user->cannot('delete', $docente)) {
-            $rol = str_replace('_', ' ', $user->getRoleNames()->first() ?? 'usuario');
-            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
-            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes eliminar docentes de tu propio instituto.");
-        }
+        $this->authorize('delete', $docente);
+
         try {
             $docente->delete();
             return redirect()->route('docentes.index')->with('success', 'Docente eliminado exitosamente.');
@@ -175,9 +183,12 @@ class DocenteController extends Controller
     /**
      * Show the form for creating a new cargo.
      */
-    public function createCargo(Docente $docente)
+    public function createCargo(Request $request, Docente $docente)
     {
-        $this->authorize('update', $docente);
+        $this->authorize('manageCargos', $docente);
+        $validated = $request->validate([
+            'comision_id' => 'nullable|integer|exists:comisiones,id',
+        ]);
         if ($docente->modalidad_desempeño === 'Desarrollo') {
             $dedicaciones = \App\Models\Dedicaciones::whereIn('nombre', ['Simple', 'SemiExclusiva(DP)'])->get();
         } elseif ($docente->modalidad_desempeño === 'Investigador') {
@@ -187,6 +198,7 @@ class DocenteController extends Controller
         return Inertia::render('Docentes/Cargos/Create', [
             'docente' => $docente->load('cargos'),
             'dedicaciones' => $dedicaciones,
+            'comisionId' => $validated['comision_id'] ?? null,
         ]);
     }
 

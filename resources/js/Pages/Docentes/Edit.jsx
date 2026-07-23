@@ -3,7 +3,7 @@ import Button from '@/Components/Button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function Edit({ auth, docente, flash }) {
+export default function Edit({ auth, docente, flash, can = {} }) {
     const { data, setData, put, processing, errors } = useForm({
         legajo: docente.legajo ?? '',
         nombre: docente.nombre ?? '',
@@ -47,7 +47,11 @@ export default function Edit({ auth, docente, flash }) {
                                         type="number"
                                         value={data.legajo}
                                         onChange={(e) => setData('legajo', e.target.value)}
-                                        className="mt-1 block w-full rounded-md border-gray-300"
+                                        readOnly={!can?.editLegajo}
+                                        aria-disabled={!can?.editLegajo}
+                                        className={`mt-1 block w-full rounded-md border-gray-300 ${
+                                            can?.editLegajo ? '' : 'bg-gray-100 text-gray-600 cursor-not-allowed'
+                                        }`}
                                     />
                                     {errors.legajo && <p className="text-red-600 text-sm mt-1">{errors.legajo}</p>}
                                 </div>
@@ -134,12 +138,14 @@ export default function Edit({ auth, docente, flash }) {
                                 </div>
 
                                 <div className="flex items-center justify-between gap-x-3">
-                                    <Link
-                                        href={route('docentes.cargo.create', docente.id)}
-                                        className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white"
-                                    >
-                                        Agregar Cargo
-                                    </Link>
+                                    {can?.manageCargos ? (
+                                        <Link
+                                            href={route('docentes.cargo.create', docente.id)}
+                                            className="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white"
+                                        >
+                                            Agregar Cargo
+                                        </Link>
+                                    ) : null}
                                     <div className="flex justify-end gap-x-4">
                                         <Button variant="danger"
                                             as={Link}
