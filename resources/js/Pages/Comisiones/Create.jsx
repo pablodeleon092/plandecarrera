@@ -10,7 +10,7 @@ export default function Create({ auth, materias, materia, flash }) {
     const { data, setData, post, processing, errors } = useForm({
         codigo: '',
         nombre: '',
-        turno: 'Mañana',
+        turno: 'mañana',
         modalidad: 'presencial',
         sede: 'Ushuaia',
         cuatrimestre: '1ro',
@@ -88,8 +88,8 @@ export default function Create({ auth, materias, materia, flash }) {
                                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                         required
                                     >
-                                        <option value="Mañana">Mañana</option>
-                                        <option value="Tarde">Tarde</option>
+                                        <option value="mañana">Mañana</option>
+                                        <option value="tarde">Tarde</option>
                                     </select>
                                     {errors.turno && <div className="text-red-600 mt-1 text-sm">{errors.turno}</div>}
                                 </div>

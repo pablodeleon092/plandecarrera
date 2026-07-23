@@ -7,7 +7,6 @@ export default function Edit({ auth, materia }) {
     const { data, setData, put, processing, errors } = useForm({
         nombre: materia.nombre,
         codigo: materia.codigo,
-        estado: materia.estado,
         regimen: materia.regimen,
         cuatrimestre: materia.cuatrimestre || '',
         horas_semanales: materia.horas_semanales,
@@ -100,21 +99,6 @@ export default function Edit({ auth, materia }) {
                                     {errors.codigo && (
                                         <p className="text-red-500 text-sm mt-1">{errors.codigo}</p>
                                     )}
-                                </div>
-
-                                <div>
-                                    <label htmlFor="estado" className="block text-sm font-medium text-gray-700 mb-2">
-                                        Estado *
-                                    </label>
-                                    <select
-                                        id="estado"
-                                        value={data.estado}
-                                        onChange={e => setData('estado', e.target.value === 'true')}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="true">Activo</option>
-                                        <option value="false">Inactivo</option>
-                                    </select>
                                 </div>
                             </div>
                         </div>

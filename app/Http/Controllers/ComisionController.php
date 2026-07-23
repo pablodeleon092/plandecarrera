@@ -179,7 +179,7 @@ class ComisionController extends Controller
                     Rule::unique('comisiones', 'codigo')->ignore($comision->id),
                 ],
                 'nombre' => 'required|string|max:255',
-                'turno' => 'required|in:Mañana,Tarde',
+                'turno' => 'required|in:mañana,tarde',
                 'modalidad' => 'required|in:presencial,virtual,mixta',
                 'cuatrimestre' => 'required|in:1ro,2do',
                 'sede' => 'required|string|max:255',
@@ -230,7 +230,7 @@ class ComisionController extends Controller
         $validated = $request->validate([
                 'codigo' => 'required|string|max:50|unique:comisiones,codigo',
                 'nombre' => 'required|string|max:255',
-                'turno' => 'required|in:Mañana,Tarde',
+                'turno' => 'required|in:mañana,tarde',
                 'modalidad' => 'required|in:presencial,virtual,mixta',
                 'cuatrimestre' => 'required|in:1ro,2do',
                 'sede' => 'required|string|max:255',
@@ -314,7 +314,7 @@ class ComisionController extends Controller
         $comision->estado = !$comision->estado;
         $comision->save();
 
-        return redirect()->route('comisiones.index')
+        return redirect()->back()
             ->with('success', 'Estado de la comisión actualizado exitosamente.');
     }
 

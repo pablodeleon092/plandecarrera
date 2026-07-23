@@ -2,7 +2,7 @@ import Button from '@/Components/Button';
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import ComisionInfo from './Partials/ComisionInfo';
 import ComisionDocentes from './Partials/ComisionDocentes';
 import ComisionHorarios from './Partials/ComisionHorarios';
@@ -10,6 +10,15 @@ import ComisionHorarios from './Partials/ComisionHorarios';
 export default function ShowComision({ auth, comision, flash, docentes, allDocentes, can = { update: false, delete: false } }) {
 
     const [currentTab, setCurrentTab] = useState('informacion');
+    const handleToggleStatus = () => {
+        const action = comision.estado ? 'desactivar' : 'activar';
+
+        if (confirm(`¿Estás seguro de ${action} la comision "${comision.nombre}"?`)) {
+            router.patch(route('comisiones.toggleStatus', comision), {}, {
+                preserveScroll: true
+            });
+        }
+    };
 
     return (
         <AuthenticatedLayout
@@ -90,6 +99,13 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                             Editar comisión
                                         </Button>
                                     )}
+                                    {can.delete && (
+                                        <Button  variant={comision.estado ? 'danger' : 'primary'}
+                                            onClick={handleToggleStatus}
+                                        >
+                                            {comision.estado ? 'Desactivar' : 'Activar'}
+                                        </Button>
+                                    )}                                    
                                 </div>
                             </div>
                         </div>

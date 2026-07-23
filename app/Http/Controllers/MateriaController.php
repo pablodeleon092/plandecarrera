@@ -200,7 +200,6 @@ class MateriaController extends Controller
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'codigo' => 'required|string|max:50|unique:materias,codigo,' . $materia->id,
-            'estado' => 'boolean',
             'regimen' => 'required|in:anual,cuatrimestral',
             'cuatrimestre' => [
                 'nullable',
@@ -256,8 +255,7 @@ class MateriaController extends Controller
         $materia->estado = !$materia->estado;
         $materia->save();
 
-        return redirect()->route('materias.index')
-            ->with('success', 'Estado de la materia actualizado exitosamente.');
+        return redirect()->back()->with('success', 'Estado de la materia actualizado exitosamente.');
     }
 
 }

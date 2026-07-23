@@ -11,7 +11,7 @@ export default function Edit({ auth, materias, comision, flash }) {
     const { data, setData, put, processing, errors } = useForm({
         codigo: comision?.codigo || '',
         nombre: comision?.nombre || '',
-        turno: comision?.turno || 'Mañana',
+        turno: comision?.turno || 'mañana',
         modalidad: comision?.modalidad || 'presencial',
         sede: comision?.sede || 'Ushuaia',
         cuatrimestre: comision?.cuatrimestre || '1ro',
@@ -30,9 +30,9 @@ export default function Edit({ auth, materias, comision, flash }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Crear Nuevo Comision</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Editar Comision</h2>}
         >
-            <Head title="Crear Comision" />
+            <Head title="Editar Comision" />
 
             {flash?.error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -86,8 +86,8 @@ export default function Edit({ auth, materias, comision, flash }) {
                                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                         required
                                     >
-                                        <option value="Mañana">Mañana</option>
-                                        <option value="Tarde">Tarde</option>
+                                        <option value="mañana">Mañana</option>
+                                        <option value="tarde">Tarde</option>
                                     </select>
                                     {errors.turno && <div className="text-red-600 mt-1 text-sm">{errors.turno}</div>}
                                 </div>
@@ -151,10 +151,11 @@ export default function Edit({ auth, materias, comision, flash }) {
                                         required
                                     >
                                         <option value="">Seleccionar año</option>
-                                        {[...Array(4)].map((_, i) => {
-                                            const year = currentDate.getFullYear() + i;
+                                        {[...Array(6)].map((_, i) => {
+                                            // Genera desde (Año Actual - 2) hasta (Año Actual + 3)
+                                            const year = currentDate.getFullYear() - 2 + i;
                                             return (
-                                                <option key={year} value={year}>
+                                                <option key={year} value={String(year)}>
                                                     {year}
                                                 </option>
                                             );

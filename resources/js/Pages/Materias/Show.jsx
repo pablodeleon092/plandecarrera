@@ -9,12 +9,15 @@ export default function Show({ auth, materia, flash, comisiones, can = { update:
 
     const [currentTab, setCurrentTab] = useState('informacion');
 
-    const handleDelete = () => {
-        if (confirm(`¿Estás seguro de eliminar la materia "${materia.nombre}"?`)) {
-            router.delete(route('materias.destroy', materia.id));
+    const handleToggleStatus = () => {
+        const action = materia.estado ? 'desactivar' : 'activar';
+
+        if (confirm(`¿Estás seguro de ${action} la materia "${materia.nombre}"?`)) {
+            router.patch(route('materias.toggleStatus', materia.id), {}, {
+                preserveScroll: true,
+            });
         }
     };
-
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -98,10 +101,10 @@ export default function Show({ auth, materia, flash, comisiones, can = { update:
 
                                     {/* Solo si querés eliminar materias */}
                                     {can.delete && (
-                                        <Button variant="danger"
-                                            onClick={handleDelete}
+                                        <Button  variant={materia.estado ? 'danger' : 'primary'}
+                                            onClick={handleToggleStatus}
                                         >
-                                            Eliminar
+                                            {materia.estado ? 'Desactivar' : 'Activar'}
                                         </Button>
                                     )}
                                 </div>

@@ -64,8 +64,6 @@ export default function DashboardDirector({
             <Head title="Dashboard Director" />
 
             <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    
                     {/* HEADER CON ESTADO GENERAL */}
                     <div className="bg-white rounded-lg shadow-sm p-6 mb-6 border border-gray-200">
                         <div className="flex items-center justify-between">
@@ -453,7 +451,7 @@ export default function DashboardDirector({
                             </div>
                         </div>
                     )}
-                </div>
+
             </div>
         </AuthenticatedLayout>
     );
