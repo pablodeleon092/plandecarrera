@@ -9,6 +9,7 @@ use App\Models\Materia;
 use Inertia\Inertia;
 use App\Models\Instituto;
 use App\Models\Carrera;
+use App\Models\Horario;
 use App\Services\QueryFilter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -54,7 +55,7 @@ class ComisionController extends Controller
 
         $comisiones = $query
             ->with(['materia', 'horarios']) // Eager loading para evitar N+1
-            ->orderBy('id', 'desc')
+            ->orderBy('nombre', 'asc')
             ->get()
             ->map(fn ($comision) => [
                 'id'              => $comision->id,
@@ -77,9 +78,9 @@ class ComisionController extends Controller
                     ]),
                 // Permisos específicos del modelo Comisión
                 'can' => [
-                    'view'   => $user->can('consultar_comision', $comision),
-                    'update' => $user->can('modificar_comision', $comision),
-                    'delete' => $user->can('restore_comision', $comision),
+                    'view'   => $user->can('view', $comision),
+                    'update' => $user->can('update', $comision),
+                    'delete' => $user->can('delete', $comision),
                 ]
             ]);
             
@@ -114,9 +115,10 @@ class ComisionController extends Controller
             'docentes' => $docentes,
             'allDocentes' => $allDocentes,
             'can' => [
-                'view' => $user->can('consultar_comision', $comision),
-                'update' => $user->can('modificar_comision', $comision),
-                'delete' => $user->can('restore_comision', $comision),
+                'view' => $user->can('view', $comision),
+                'update' => $user->can('update', $comision),
+                'delete' => $user->can('delete', $comision),
+                'deleteHorario' => $user->can('deleteAny', Horario::class),
             ],
         ]);
     }
@@ -166,8 +168,7 @@ class ComisionController extends Controller
             $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
             return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes editar comisiones de tu propio instituto.");
         }
-        try {
-            $validated = $request->validate([
+        $validated = $request->validate([
                 'codigo' => [
                     'required',
                     'string',
@@ -176,7 +177,7 @@ class ComisionController extends Controller
                 ],
                 'nombre' => 'required|string|max:255',
                 'turno' => 'required|in:Mañana,Tarde',
-                'modalidad' => 'required|in:presencial,virtual,mixto',
+                'modalidad' => 'required|in:presencial,virtual,mixta',
                 'cuatrimestre' => 'required|in:1ro,2do',
                 'sede' => 'required|string|max:255',
                 'anio' => 'required|integer|min:2000|max:2100',
@@ -199,6 +200,7 @@ class ComisionController extends Controller
                 'cuatrimestre.in' => 'El cuatrimestre seleccionado no es válido',
             ]);
 
+        try {
             $materia = \App\Models\Materia::findOrFail($validated['id_materia']);
             $validated['horas_totales'] = $validated['horas_teoricas'] + $validated['horas_practicas'];
 
@@ -222,12 +224,11 @@ class ComisionController extends Controller
     
     public function store(Request $request) {
         $this->authorize('create', Comision::class);
-        try {
-            $validated = $request->validate([
+        $validated = $request->validate([
                 'codigo' => 'required|string|max:50|unique:comisiones,codigo',
                 'nombre' => 'required|string|max:255',
                 'turno' => 'required|in:Mañana,Tarde',
-                'modalidad' => 'required|in:presencial,virtual,mixto',
+                'modalidad' => 'required|in:presencial,virtual,mixta',
                 'cuatrimestre' => 'required|in:1ro,2do',
                 'sede' => 'required|string|max:255',
                 'anio' => 'required|integer|min:2000|max:2100',
@@ -250,10 +251,11 @@ class ComisionController extends Controller
                 'cuatrimestre.in' => 'El cuatrimestre seleccionado no es válido',
             ]);
 
+        try {
             // SEGURIDAD: Verificar que la materia pertenezca al instituto del usuario
             $materia = \App\Models\Materia::findOrFail($validated['id_materia']);
             $user = auth()->user();
-            if ($user->instituto_id && $materia->carrera->instituto_id != $user->instituto_id) {
+            if ($user->instituto_id && !Materia::byInstituto($user->instituto_id)->where('materias.id', $materia->id)->exists()) {
                 $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
                 return redirect()->back()->with('error', "Como director del {$institutoNombre}, no puedes crear comisiones en una materia de otro instituto.");
             }
@@ -281,20 +283,11 @@ class ComisionController extends Controller
 
     public function destroy($id)
     {
-        try {
-            $comision = Comision::findOrFail($id);
-            $materia = $comision->materia;
+        $comision = Comision::findOrFail($id);
+        $this->authorize('delete', $comision);
 
-            $user = auth()->user();
-            if ($user->cannot('delete', $comision)) {
-                $rolesFriendly = [
-                    'Admin_instituto' => 'Director de instituto',
-                    'Coord_carrera' => 'Coordinador de carrera',
-                ];
-                $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
-                $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
-                return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes eliminar comisiones de tu propio instituto.");
-            }
+        try {
+            $materia = $comision->materia;
             $comision->delete();
             return redirect()->route('materias.show', $materia->id)->with('success', 'Comision eliminada.');
         } catch (\Exception $e) {

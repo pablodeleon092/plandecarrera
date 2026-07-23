@@ -12,7 +12,7 @@ export default function Edit({ auth, materias, comision, flash }) {
         codigo: comision?.codigo || '',
         nombre: comision?.nombre || '',
         turno: comision?.turno || 'Mañana',
-        modalidad: comision?.modalidad || 'Presencial',
+        modalidad: comision?.modalidad || 'presencial',
         sede: comision?.sede || 'Ushuaia',
         cuatrimestre: comision?.cuatrimestre || '1ro',
         anio: comision?.anio || '',
@@ -56,21 +56,11 @@ export default function Edit({ auth, materias, comision, flash }) {
                                     {errors.codigo && <div className="text-red-600 mt-1 text-sm">{errors.codigo}</div>}
                                 </div>
                                 <div>
-                                    <label htmlFor="materia" className="block text-sm font-medium text-gray-700">Materia</label>
-                                    <select
-                                        id="id_materia"
-                                        value={data.id_materia}
-                                        onChange={(e) => setData('id_materia', e.target.value)}
-                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                        required
-                                    >
-                                        <option value="">Seleccionar materia</option>
-                                        {materias.map((materia) => (
-                                            <option key={materia.id} value={materia.id}>
-                                                {materia.nombre} ({materia.codigo})
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <label className="block text-sm font-medium text-gray-700">Materia</label>
+                                    <p className="mt-1 block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900">
+                                        {comision?.materia?.nombre}
+                                        {comision?.materia?.codigo ? ` (${comision.materia.codigo})` : ''}
+                                    </p>
                                     {errors.id_materia && <div className="text-red-600 mt-1 text-sm">{errors.id_materia}</div>}
                                 </div>
                             </div>
@@ -114,9 +104,9 @@ export default function Edit({ auth, materias, comision, flash }) {
                                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                         required
                                     >
-                                        <option value="Presencial">Presencial</option>
-                                        <option value="Virtual">Virtual</option>
-                                        <option value="Mixta">Mixta</option>
+                                        <option value="presencial">Presencial</option>
+                                        <option value="virtual">Virtual</option>
+                                        <option value="mixta">Mixta</option>
                                     </select>
                                     {errors.modalidad && <div className="text-red-600 mt-1 text-sm">{errors.modalidad}</div>}
                                 </div>
