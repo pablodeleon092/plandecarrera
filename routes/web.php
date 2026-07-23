@@ -37,6 +37,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware('auth')->group(function () {
     #UsuariusCrud
     Route::middleware('can:index,App\Models\User')->group(function () {
+        Route::get('users/create/carreras', [UserController::class, 'createCoordinatorCarreras'])
+            ->name('users.coordinator-carreras.create');
+        Route::post('users/create/carreras', [UserController::class, 'storeCoordinatorWithCarreras'])
+            ->name('users.coordinator-carreras.store');
         Route::resource('users', UserController::class);
         Route::patch('users/{user}/password', [UserController::class, 'updatePassword'])->name('users.password.update');
         Route::patch('users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggleStatus');

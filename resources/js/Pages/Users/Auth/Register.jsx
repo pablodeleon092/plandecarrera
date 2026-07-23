@@ -3,17 +3,19 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import { useEffect } from 'react';
 import TextInput from '@/Components/TextInput';
+import PasswordInput from '@/Components/PasswordInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-export default function Register({ institutos }) {
+export default function Register({ institutos, pendingUser = {} }) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        dni: '',
-        nombre: '',
-        apellido: '',
-        cargo: '',
+        name: pendingUser.name ?? '',
+        email: pendingUser.email ?? '',
+        dni: pendingUser.dni ?? '',
+        nombre: pendingUser.nombre ?? '',
+        apellido: pendingUser.apellido ?? '',
+        cargo: pendingUser.cargo ?? '',
+        instituto_id: pendingUser.instituto_id ?? '',
         password: '',
         password_confirmation: '',
     });
@@ -132,14 +134,13 @@ export default function Register({ institutos }) {
 
 
                     <div className="mt-4">
-                        <InputLabel htmlFor="password" value="Password" />
+                        <InputLabel htmlFor="password" value="Contraseña" />
 
-                        <TextInput
+                        <PasswordInput
                             id="password"
-                            type="password"
                             name="password"
                             value={data.password}
-                            className="mt-1 block w-full"
+                            className="mt-1"
                             autoComplete="new-password"
                             onChange={(e) => setData('password', e.target.value)}
                             required
@@ -151,15 +152,14 @@ export default function Register({ institutos }) {
                     <div className="mt-4">
                         <InputLabel
                             htmlFor="password_confirmation"
-                            value="Confirm Password"
+                            value="Confirmar contraseña"
                         />
 
-                        <TextInput
+                        <PasswordInput
                             id="password_confirmation"
-                            type="password"
                             name="password_confirmation"
                             value={data.password_confirmation}
-                            className="mt-1 block w-full"
+                            className="mt-1"
                             autoComplete="new-password"
                             onChange={(e) =>
                                 setData('password_confirmation', e.target.value)
@@ -221,7 +221,7 @@ export default function Register({ institutos }) {
 
                     <div className="mt-4 flex items-center justify-end">
                         <Button variant="primary" className="ms-4" disabled={processing}>
-                            Register
+                            Crear usuario
                         </Button>
                     </div>
                     </div>
