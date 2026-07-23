@@ -132,7 +132,7 @@ export default function DataTable({
                                     className="datatable-empty"
                                 >
                                     <div className="flex flex-col items-center">
-                                        <EmptyIcon />
+                                        {typeof EmptyIcon === 'function' ? <EmptyIcon /> : EmptyIcon}
                                         <p className="text-lg">{emptyMessage}</p>
                                     </div>
                                 </td>
