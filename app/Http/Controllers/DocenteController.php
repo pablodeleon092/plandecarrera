@@ -31,9 +31,11 @@ class DocenteController extends Controller
 
         $queryFilter = new QueryFilter;
 
-        $filters = $request->all();
+        $filters = $request->input('filters', []);
+        $search = $request->input('search');
 
         $queryFilter->apply($query, $filters);
+        $queryFilter->applySearch($query, $search, ['nombre', 'apellido', 'legajo']);
 
         $docentes = $query->with([
                 'cargos',
@@ -85,7 +87,8 @@ class DocenteController extends Controller
             'docentes' => $docentes,
             'institutos' => $institutosDisponibles,
             'carreras' => $carreras,
-            'filters' => $request->all(),
+            'filters' => $filters,
+            'search' => $search,
             'dedicaciones' => $dedicaciones,
             'flash' => [
                 'success' => session('success'),

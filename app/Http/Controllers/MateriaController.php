@@ -51,9 +51,11 @@ class MateriaController extends Controller
 
         $queryFilter = new QueryFilter;
 
-        $filters = $request->all();
+        $filters = $request->input('filters', []);
+        $search = $request->input('search');
 
-        $queryFilter->apply($query, $filters);    
+        $queryFilter->apply($query, $filters);
+        $queryFilter->applySearch($query, $search, ['nombre', 'codigo']);
 
         $materias = $query->orderBy('nombre', 'asc')
             ->get()
@@ -84,7 +86,8 @@ class MateriaController extends Controller
             'materias' => $materias,
             'institutos' => $institutosDisponibles,
             'carreras' => $carreras,
-            'filters' => $request->all(),
+            'filters' => $filters,
+            'search' => $search,
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),

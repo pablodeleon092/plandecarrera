@@ -4,12 +4,16 @@ import DynamicFilters from '@/Components/Filters/DynamicFilters';
 import { PrinterIcon } from '@heroicons/react/24/outline';
 import BtnExportar from '@/Components/Buttons/BtnExportar'; // Ajusta la ruta
 
-export default function GestionPersonal ({ institutos, carreras, dedicaciones }) {
+export default function GestionPersonal ({ institutos, carreras, dedicaciones, search = '' }) {
     // Definimos qué campos pueden ser filtrados
     const availableFields = [
-        { key: 'nombre', label: 'Nombre', type: 'string' },
-        { key: 'cargos.nombre', label: 'Cargo', type: 'string' },
-        { key: 'legajo', label: 'Legajo', type: 'number' }, // Ejemplo de número
+        { key: 'cargos.nombre', label: 'Cargo', type: 'select', options: [
+            { value: 'Titular', label: 'Titular' },
+            { value: 'Asociado', label: 'Asociado' },
+            { value: 'Adjunto', label: 'Adjunto' },
+            { value: 'Jefe de Trabajos Practicos', label: 'Jefe de Trabajos Prácticos' },
+            { value: 'Ayudante de Primera', label: 'Ayudante de Primera' },
+        ]},
         { key: 'es_activo', label: 'Estado', type: 'select', 
           options: [{ value: '1', label: 'Activo' }, { value: '0', label: 'Inactivo' }] 
         },
@@ -36,10 +40,31 @@ export default function GestionPersonal ({ institutos, carreras, dedicaciones })
 
     const [activeFilters, setActiveFilters] = useState([]);
 
-    const handleApplyFilters = (key, value) => {
-        const newFilters = { ...activeFilters, [key]: value };
-        router.get(route('docentes.index'), 
-        newFilters, {
+    const handleApplyFilters = () => {
+        const params = new URLSearchParams();
+
+        if (search) {
+            params.set('search', search);
+        }
+
+        activeFilters.forEach((filter, index) => {
+            params.append(`filters[${index}][field]`, filter.field);
+            params.append(`filters[${index}][operator]`, filter.operator);
+
+            if (typeof filter.value === 'object' && filter.value !== null) {
+                params.append(`filters[${index}][value][min]`, filter.value.min || '');
+                params.append(`filters[${index}][value][max]`, filter.value.max || '');
+            } else {
+                params.append(`filters[${index}][value]`, filter.value || '');
+            }
+        });
+
+        const query = params.toString();
+        const url = query
+            ? `${route('docentes.index')}?${query}`
+            : route('docentes.index');
+
+        router.get(url, {}, {
             preserveScroll: true,
             preserveState: true,
             replace: true,

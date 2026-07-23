@@ -38,6 +38,42 @@ class QueryFilter
         return $query;
     }
 
+    public function applySearch(Builder $query, ?string $search, array $fields): Builder
+    {
+        $search = trim((string) $search);
+
+        if ($search === '' || empty($fields)) {
+            return $query;
+        }
+
+        $normalizedSearch = mb_strtolower(
+            strtr($search, self::SPANISH_ACCENT_REPLACEMENTS),
+            'UTF-8'
+        );
+
+        $query->where(function (Builder $searchQuery) use ($fields, $search, $normalizedSearch) {
+            foreach ($fields as $field) {
+                if ($field === 'legajo') {
+                    $grammar = $searchQuery->getQuery()->getGrammar();
+                    $wrappedField = $grammar->wrap($field);
+
+                    $searchQuery->orWhereRaw(
+                        "CAST({$wrappedField} AS TEXT) LIKE ?",
+                        ["%{$normalizedSearch}%"]
+                    );
+
+                    continue;
+                }
+
+                $searchQuery->orWhere(function (Builder $fieldQuery) use ($field, $search) {
+                    $this->applyContains($fieldQuery, $field, $search);
+                });
+            }
+        });
+
+        return $query;
+    }
+
     protected function applyFilter($query, $field, $operator, $value)
     {
 

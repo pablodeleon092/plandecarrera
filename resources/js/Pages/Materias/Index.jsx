@@ -7,8 +7,9 @@ import DataTable from '@/Components/DataTable';
 import GestionMaterias from '@/Components/Filters/GestionMaterias';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 import KPICard from '@/Components/Dashboard/KPICard';
+import SearchBar from '@/Components/SearchBar';
 
-export default function Index({ auth, institutos, carreras, materias, filters, flash, can = { create: false } }) {
+export default function Index({ auth, institutos, carreras, materias, filters = [], search = '', flash, can = { create: false } }) {
 
     const handleDelete = (id) => {
         if (confirm('¿Estás seguro de eliminar esta materia?')) {
@@ -52,11 +53,19 @@ export default function Index({ auth, institutos, carreras, materias, filters, f
                 buttonRoute={can?.create ? route('materias.create') : null}
             />
 
+            <SearchBar
+                routeName="materias.index"
+                initialValue={search}
+                filters={{ filters }}
+                placeholder="Buscar por nombre o código…"
+            />
+
             {/* FILTROS */}
             <div className="bg-white rounded-lg shadow p-6 mb-6">
                 <GestionMaterias
                     institutos={institutos}
                     carreras={carreras}
+                    search={search}
                 />
             </div>
             {/* TABLA */}

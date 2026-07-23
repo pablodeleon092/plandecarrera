@@ -48,16 +48,20 @@ class PlanController extends Controller
         try {
 
             $validated = $request->validate([
-            'carrera_id'    => 'required|exists:carreras,id',
-            'anio_comienzo' => 'required|date',
-            'materias'      => 'required|array|min:1',
-            // Validamos que cada elemento del array tenga el id y el anio
-            'materias.*.id'   => 'required|exists:materias,id',
-            'materias.*.anio' => 'required|integer|min:1|max:6',
+                'carrera_id'    => 'required|exists:carreras,id',
+                'nombre'        => 'required|string|max:255',
+                'codigo'        => 'required|string|max:255|unique:planes,codigo',
+                'anio_comienzo' => 'required|date',
+                'materias'      => 'required|array|min:1',
+                // Validamos que cada elemento del array tenga el id y el anio
+                'materias.*.id'   => 'required|exists:materias,id',
+                'materias.*.anio' => 'required|integer|min:1|max:6',
             ]);
 
             $plan = Plan::create([
                 'carrera_id'    => $validated['carrera_id'],
+                'nombre'        => $validated['nombre'],
+                'codigo'        => $validated['codigo'],
                 'anio_comienzo' => $validated['anio_comienzo'],
             ]);
 
@@ -73,6 +77,8 @@ class PlanController extends Controller
             return redirect()->route('carreras.show', $validated['carrera_id'])
                 ->with('success', 'Nuevo plan de estudio creado correctamente.');
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+                throw $e;
         } catch (\Exception $e) {
                 return redirect()->route('planes.create', $request['carrera_id'])
                     ->with(['error' => 'Ocurrió un error inesperado: ' . $e->getMessage()])
@@ -110,10 +116,19 @@ class PlanController extends Controller
         $this->authorize('update', $carrera);
 
         $validated = $request->validate([
+            'nombre' => 'sometimes|required|string|max:255',
+            'codigo' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('planes', 'codigo')->ignore($plan->id),
+            ],
             'materias' => 'present|array',
             'materias.*' => 'integer|exists:materias,id',
         ]);
 
+        $plan->update(collect($validated)->only(['nombre', 'codigo'])->all());
         $plan->materias()->sync($validated['materias']);
 
         return Redirect::route('planes.edit', $plan)

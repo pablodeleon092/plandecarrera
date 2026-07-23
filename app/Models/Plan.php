@@ -8,6 +8,8 @@ class Plan extends Model
 {
     protected $fillable = [
         'carrera_id',
+        'nombre',
+        'codigo',
         'anio_comienzo',
         'anio_fin',
     ];

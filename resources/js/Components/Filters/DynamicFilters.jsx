@@ -30,7 +30,9 @@ export default function DynamicFilters ({ fields, filters, onChange }) {
         const newFilter = {
             id: Date.now(), // ID único para el key de React
             field: defaultField.key,
-            operator: OPERATORS[defaultField.type][0].value,
+            operator: defaultField.type === 'select'
+                ? 'equals'
+                : OPERATORS[defaultField.type][0].value,
             value: ''
         };
         onChange([...filters, newFilter]);
@@ -48,7 +50,9 @@ export default function DynamicFilters ({ fields, filters, onChange }) {
                 // Si cambiamos de campo, resetear el operador y el valor
                 if (key === 'field') {
                     const fieldConfig = fields.find(f => f.key === newValue);
-                    updated.operator = OPERATORS[fieldConfig.type][0].value;
+                    updated.operator = fieldConfig.type === 'select'
+                        ? 'equals'
+                        : OPERATORS[fieldConfig.type][0].value;
                     updated.value = fieldConfig.type === 'number' && updated.operator === 'between' ? { min: '', max: '' } : '';
                 }
 
@@ -85,15 +89,17 @@ export default function DynamicFilters ({ fields, filters, onChange }) {
                         </select>
 
                         {/* 2. Selección del Operador */}
-                        <select 
-                            value={filter.operator} 
-                            onChange={(e) => updateFilter(filter.id, 'operator', e.target.value)}
-                            className="border p-1 rounded"
-                        >
-                            {availableOperators.map(op => (
-                                <option key={op.value} value={op.value}>{op.label}</option>
-                            ))}
-                        </select>
+                        {fieldConfig.type !== 'select' && (
+                            <select
+                                value={filter.operator}
+                                onChange={(e) => updateFilter(filter.id, 'operator', e.target.value)}
+                                className="border p-1 rounded"
+                            >
+                                {availableOperators.map(op => (
+                                    <option key={op.value} value={op.value}>{op.label}</option>
+                                ))}
+                            </select>
+                        )}
 
                     {/* 3. Input del Valor (Dinámico) */}
                     <div className="flex-1">

@@ -46,8 +46,10 @@ class CarreraController extends Controller
 
         // 3. Filtros de búsqueda
         $queryFilter = new QueryFilter;
-        $filters = $request->all();
+        $filters = $request->input('filters', []);
+        $search = $request->input('search');
         $queryFilter->apply($query, $filters);
+        $queryFilter->applySearch($query, $search, ['nombre']);
 
         // 4. Paginación y Transformación (Aquí inyectamos los permisos)
         $carreras = $query
@@ -81,6 +83,7 @@ class CarreraController extends Controller
             'carreras'   => $carreras,
             'institutos' => $institutos,
             'filters'    => $filters,
+            'search'     => $search,
             'can' => [
                 'create' => $user->can('create', Carrera::class),
             ],

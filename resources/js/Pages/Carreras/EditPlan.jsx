@@ -1,5 +1,6 @@
 import Button from '@/Components/Button';
-import React, { useEffect, useState } from 'react';
+import TableFilters from '@/Components/TableFilters';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
@@ -7,9 +8,29 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 export default function EditPlan({ auth, plan, carrera, materiasEnPlan, materiasDisponibles, flash }) {
     const [enPlan, setEnPlan] = useState(materiasEnPlan || []);
     const [disponibles, setDisponibles] = useState(materiasDisponibles || []);
+    const [searchDisponibles, setSearchDisponibles] = useState('');
     const { setData, put, processing } = useForm({
         materias: (materiasEnPlan || []).map((materia) => materia.id),
     });
+
+    const disponiblesFiltradas = useMemo(() => {
+        const query = searchDisponibles.toLowerCase().trim();
+
+        if (!query) return disponibles;
+
+        return disponibles.filter((materia) => {
+            const nombre = materia.nombre?.toLowerCase() || '';
+            const codigo = materia.codigo?.toLowerCase() || '';
+
+            return nombre.includes(query) || codigo.includes(query);
+        });
+    }, [disponibles, searchDisponibles]);
+
+    const anioPlan = String(plan.anio_comienzo || '').slice(0, 4);
+    const identidadPlan = plan.codigo && plan.nombre
+        ? `${plan.codigo} — ${plan.nombre}`
+        : `Plan ${anioPlan || 'sin año'}`;
+    const tituloPlan = `Editar plan ${identidadPlan}`;
 
     useEffect(() => {
         setData('materias', enPlan.map((materia) => materia.id));
@@ -18,27 +39,33 @@ export default function EditPlan({ auth, plan, carrera, materiasEnPlan, materias
     const onDragEnd = ({ source, destination }) => {
         if (!destination) return;
 
-        if (source.droppableId === destination.droppableId) {
-            const list = source.droppableId === 'enPlan' ? [...enPlan] : [...disponibles];
-            const [moved] = list.splice(source.index, 1);
-            list.splice(destination.index, 0, moved);
+        const sourceList = source.droppableId === 'enPlan'
+            ? enPlan
+            : disponiblesFiltradas;
+        const moved = sourceList[source.index];
 
-            if (source.droppableId === 'enPlan') setEnPlan(list);
-            else setDisponibles(list);
+        if (!moved) return;
+
+        if (source.droppableId === destination.droppableId) {
+            if (source.droppableId === 'disponibles') return;
+
+            const nextEnPlan = enPlan.filter((materia) => materia.id !== moved.id);
+            nextEnPlan.splice(destination.index, 0, moved);
+            setEnPlan(nextEnPlan);
             return;
         }
 
-        const sourceList = source.droppableId === 'enPlan' ? [...enPlan] : [...disponibles];
-        const destinationList = destination.droppableId === 'enPlan' ? [...enPlan] : [...disponibles];
-        const [moved] = sourceList.splice(source.index, 1);
-        destinationList.splice(destination.index, 0, moved);
-
         if (source.droppableId === 'enPlan') {
-            setEnPlan(sourceList);
-            setDisponibles(destinationList);
+            setEnPlan((current) => current.filter((materia) => materia.id !== moved.id));
+            setDisponibles((current) => [...current, moved]);
         } else {
-            setEnPlan(destinationList);
-            setDisponibles(sourceList);
+            setDisponibles((current) => current.filter((materia) => materia.id !== moved.id));
+            setEnPlan((current) => {
+                const nextEnPlan = current.filter((materia) => materia.id !== moved.id);
+                nextEnPlan.splice(destination.index, 0, moved);
+                return nextEnPlan;
+            });
+            setSearchDisponibles('');
         }
     };
 
@@ -68,9 +95,9 @@ export default function EditPlan({ auth, plan, carrera, materiasEnPlan, materias
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Editar Plan de Estudio</h2>}
+            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">{tituloPlan}</h2>}
         >
-            <Head title={`Editar Plan - ${carrera.nombre}`} />
+            <Head title={tituloPlan} />
 
             <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
                 <Button
@@ -87,7 +114,8 @@ export default function EditPlan({ auth, plan, carrera, materiasEnPlan, materias
 
                 <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
                     <div className="mb-6 border-b border-gray-200 pb-4">
-                        <h1 className="text-2xl font-semibold text-gray-900">Editar plan de {carrera.nombre}</h1>
+                        <h1 className="text-2xl font-semibold text-gray-900">{tituloPlan}</h1>
+                        <p className="mt-1 text-sm font-medium text-gray-700">Carrera: {carrera.nombre}</p>
                         <p className="mt-1 text-sm text-gray-500">
                             Arrastrá las materias entre las listas para actualizar este plan de estudio.
                         </p>
@@ -121,6 +149,19 @@ export default function EditPlan({ auth, plan, carrera, materiasEnPlan, materias
 
                                 <div>
                                     <h2 className="mb-3 font-semibold text-gray-900">Materias disponibles</h2>
+                                    <div className="mb-3 rounded-lg border border-gray-200 bg-white p-3">
+                                        <TableFilters
+                                            filters={[{
+                                                key: 'search',
+                                                label: 'Buscar',
+                                                type: 'text',
+                                                value: searchDisponibles,
+                                                placeholder: 'Buscar por nombre o código',
+                                            }]}
+                                            onChange={(_, value) => setSearchDisponibles(value)}
+                                            className="md:grid-cols-1"
+                                        />
+                                    </div>
                                     <Droppable droppableId="disponibles">
                                         {(provided) => (
                                             <div
@@ -129,7 +170,10 @@ export default function EditPlan({ auth, plan, carrera, materiasEnPlan, materias
                                                 className="min-h-56 max-h-[60vh] overflow-y-auto rounded-lg border border-gray-200 bg-gray-50 p-4"
                                             >
                                                 {disponibles.length === 0 && <p className="text-sm text-gray-500">No hay materias disponibles.</p>}
-                                                {renderMaterias(disponibles, 'disponibles')}
+                                                {disponibles.length > 0 && disponiblesFiltradas.length === 0 && (
+                                                    <p className="text-sm text-gray-500">No hay materias que coincidan con la búsqueda.</p>
+                                                )}
+                                                {renderMaterias(disponiblesFiltradas, 'disponibles')}
                                                 {provided.placeholder}
                                             </div>
                                         )}

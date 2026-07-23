@@ -20,6 +20,8 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
 
     const { data, setData, post, processing, errors } = useForm({
         carrera_id: carrera.id,
+        nombre: '',
+        codigo: '',
         anio_comienzo: new Date().toISOString().split('T')[0],
         materias: [],
     });
@@ -221,7 +223,35 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
                             )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-3">
+                            <div>
+                                <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">Nombre del Plan</label>
+                                <input
+                                    id="nombre"
+                                    type="text"
+                                    value={data.nombre}
+                                    onChange={e => setData('nombre', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-300"
+                                    required
+                                />
+                                {errors.nombre && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.nombre}</p>
+                                )}
+                            </div>
+                            <div>
+                                <label htmlFor="codigo" className="block text-sm font-medium text-gray-700">Código del Plan</label>
+                                <input
+                                    id="codigo"
+                                    type="text"
+                                    value={data.codigo}
+                                    onChange={e => setData('codigo', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-gray-300"
+                                    required
+                                />
+                                {errors.codigo && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.codigo}</p>
+                                )}
+                            </div>
                             <div>
                                 <label htmlFor="anio_comienzo" className="block text-sm font-medium text-gray-700">Año de Comienzo</label>
                                 <input
@@ -231,6 +261,9 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
                                     onChange={e => setData('anio_comienzo', e.target.value)}
                                     className="mt-1 block w-full rounded-md border-gray-300"
                                 />
+                                {errors.anio_comienzo && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.anio_comienzo}</p>
+                                )}
                             </div>
                         </div>
                     {/* LISTADO PRINCIPAL - Ahora muestra lo que el usuario va armando */}

@@ -4,10 +4,9 @@ import DynamicFilters from '@/Components/Filters/DynamicFilters';
 import { PrinterIcon } from '@heroicons/react/24/outline';
 import BtnExportar from '@/Components/Buttons/BtnExportar'; // Ajusta la ruta
 
-export default function GestionMaterias ({institutos, carreras}) {
+export default function GestionMaterias ({ institutos, carreras, search = '' }) {
     // Definimos qué campos pueden ser filtrados
     const availableFields = [
-        { key: 'nombre', label: 'Nombre', type: 'string' },
         { key: 'codigo', label: 'Codigo', type: 'string' },
         { key: 'estado', label: 'Estado', type: 'select', 
           options: [{ value: '1', label: 'Activo' }, { value: '0', label: 'Inactivo' }] 
@@ -33,10 +32,31 @@ export default function GestionMaterias ({institutos, carreras}) {
 
     const [activeFilters, setActiveFilters] = useState([]);
 
-    const handleApplyFilters = (key, value) => {
-        const newFilters = { ...activeFilters, [key]: value };
-        router.get(route('materias.index'), 
-        newFilters, {
+    const handleApplyFilters = () => {
+        const params = new URLSearchParams();
+
+        if (search) {
+            params.set('search', search);
+        }
+
+        activeFilters.forEach((filter, index) => {
+            params.append(`filters[${index}][field]`, filter.field);
+            params.append(`filters[${index}][operator]`, filter.operator);
+
+            if (typeof filter.value === 'object' && filter.value !== null) {
+                params.append(`filters[${index}][value][min]`, filter.value.min || '');
+                params.append(`filters[${index}][value][max]`, filter.value.max || '');
+            } else {
+                params.append(`filters[${index}][value]`, filter.value || '');
+            }
+        });
+
+        const query = params.toString();
+        const url = query
+            ? `${route('materias.index')}?${query}`
+            : route('materias.index');
+
+        router.get(url, {}, {
             preserveScroll: true,
             preserveState: true,
             replace: true,

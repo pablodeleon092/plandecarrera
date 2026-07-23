@@ -49,9 +49,11 @@ class ComisionController extends Controller
 
         $queryFilter = new QueryFilter;
 
-        $filters = $request->all();
+        $filters = $request->input('filters', []);
+        $search = $request->input('search');
        
         $queryFilter->apply($query, $filters);
+        $queryFilter->applySearch($query, $search, ['nombre', 'codigo']);
 
         $comisiones = $query
             ->with(['materia', 'horarios']) // Eager loading para evitar N+1
@@ -95,7 +97,8 @@ class ComisionController extends Controller
             'comisiones' => $comisiones,
             'carreras' => $carreras,
             'institutos' => $institutosDisponibles,
-            'filters' => $request->all()
+            'filters' => $filters,
+            'search' => $search,
         ]);
     }
 

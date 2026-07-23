@@ -5,8 +5,9 @@ import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
 import GestionComisiones from '@/Components/Filters/GestionComisiones';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
+import SearchBar from '@/Components/SearchBar';
 
-export default function Index({ auth, comisiones, carreras, institutos, filters, flash}) {
+export default function Index({ auth, comisiones, carreras, institutos, filters = [], search = '', flash}) {
 
 
     const handleToggleStatus = (comision) => {
@@ -96,11 +97,18 @@ export default function Index({ auth, comisiones, carreras, institutos, filters,
                     <ListHeader
                         title="Listado de Comisiones"
                     />
+                    <SearchBar
+                        routeName="comisiones.index"
+                        initialValue={search}
+                        filters={{ filters }}
+                        placeholder="Buscar por nombre o código…"
+                    />
  
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
                         <GestionComisiones
                             institutos = {institutos}
                             carreras = {carreras}
+                            search={search}
                         />
                     </div>
 

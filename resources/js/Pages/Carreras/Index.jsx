@@ -7,8 +7,9 @@ import DataTable from '@/Components/DataTable';
 import TableFilters from '@/Components/TableFilters';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 import KPICard from '@/Components/Dashboard/KPICard';
+import SearchBar from '@/Components/SearchBar';
 
-export default function Index({ auth, carreras, institutos, filters, can = { create: false } }) {
+export default function Index({ auth, carreras, institutos, filters = [], search = '', can = { create: false } }) {
 
     const columns = [
         {
@@ -69,9 +70,16 @@ export default function Index({ auth, carreras, institutos, filters, can = { cre
                         buttonLabel="Agregar Carrera"
                         buttonRoute={can.create ? route('carreras.create') : null}
                     />
+                    <SearchBar
+                        routeName="carreras.index"
+                        initialValue={search}
+                        filters={{ filters }}
+                        placeholder="Buscar por nombre…"
+                    />
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
                         <GestionCarreras
                             institutos = {institutos}
+                            search={search}
                         />
                     </div>
 

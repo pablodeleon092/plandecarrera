@@ -9,8 +9,9 @@ import GestionPersonal from '@/Components/Filters/GestionPersonal';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 import KPICard from '@/Components/Dashboard/KPICard';
 import { usePermissions } from '@/Hooks/usePermissions';
+import SearchBar from '@/Components/SearchBar';
 
-export default function Index({ auth, institutos, carreras, docentes, flash, filters, dedicaciones}) {
+export default function Index({ auth, institutos, carreras, docentes, flash, filters = [], search = '', dedicaciones}) {
     const { canCreateDocente, canDeleteDocente } = usePermissions();
 
     // Función que maneja la eliminación de un docente
@@ -61,11 +62,19 @@ export default function Index({ auth, institutos, carreras, docentes, flash, fil
                         />  
                     )}
 
+                    <SearchBar
+                        routeName="docentes.index"
+                        initialValue={search}
+                        filters={{ filters }}
+                        placeholder="Buscar por nombre, apellido o legajo…"
+                    />
+
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
                         <GestionPersonal
                             institutos = {institutos}
                             carreras = {carreras}
                             dedicaciones={dedicaciones}
+                            search={search}
                         />
                     </div>
 
