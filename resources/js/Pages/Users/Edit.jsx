@@ -1,14 +1,16 @@
 import Button from '@/Components/Button';
-import React from 'react';
-import { Head, useForm, usePage, Link } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { Head, useForm, usePage, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
 import TextInput from '@/Components/TextInput';
+import PasswordInput from '@/Components/PasswordInput';
 
-export default function Edit({ institutos, flash }) {
+export default function Edit({ institutos, flash, returnTo = 'index' }) {
     const { props } = usePage();
     const { user } = props;
+    const [activeTab, setActiveTab] = useState('details');
 
     const { data, setData, put, processing, errors } = useForm({
         name: user.name || '',
@@ -18,13 +20,51 @@ export default function Edit({ institutos, flash }) {
         apellido: user.apellido || '',
         cargo: user.cargo || '',
         instituto_id: user.instituto_id || '',
+        return_to: returnTo,
+    });
+
+    const {
+        data: passwordData,
+        setData: setPasswordData,
+        patch: patchPassword,
+        processing: passwordProcessing,
+        errors: passwordErrors,
+        reset: resetPassword,
+    } = useForm({
         password: '',
         password_confirmation: '',
     });
 
+    const returnUrl = returnTo === 'show'
+        ? route('users.show', user.id)
+        : route('users.index');
+
+    const goBack = () => router.visit(returnUrl);
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(route('users.update', user.id)); // Llama al método update
+        put(route('users.update', user.id), {
+            replace: true,
+        });
+    };
+
+    const handlePasswordSubmit = (e) => {
+        e.preventDefault();
+        patchPassword(route('users.password.update', user.id), {
+            preserveScroll: true,
+            onSuccess: () => resetPassword(),
+        });
+    };
+
+    const handleTabKeyDown = (e) => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) {
+            return;
+        }
+
+        e.preventDefault();
+        const nextTab = ['ArrowRight', 'End'].includes(e.key) ? 'password' : 'details';
+        setActiveTab(nextTab);
+        requestAnimationFrame(() => document.getElementById(`${nextTab}-tab`)?.focus());
     };
 
     const coordinador = user.cargo === 'Coordinador de Carrera';
@@ -50,10 +90,55 @@ export default function Edit({ institutos, flash }) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <h1 className="text-2xl font-bold mb-4">Editar usuario</h1>
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="border rounded p-4 bg-white shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4"
+                <div
+                    role="tablist"
+                    aria-label="Secciones de edición del usuario"
+                    className="mb-5 flex gap-6 border-b border-gray-300"
                 >
+                    <button
+                        id="details-tab"
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === 'details'}
+                        aria-controls="details-panel"
+                        tabIndex={activeTab === 'details' ? 0 : -1}
+                        onClick={() => setActiveTab('details')}
+                        onKeyDown={handleTabKeyDown}
+                        className={`border-b-2 px-1 pb-3 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                            activeTab === 'details'
+                                ? 'border-indigo-600 text-indigo-700'
+                                : 'border-transparent text-gray-600 hover:border-gray-400 hover:text-gray-900'
+                        }`}
+                    >
+                        Datos del usuario
+                    </button>
+                    <button
+                        id="password-tab"
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === 'password'}
+                        aria-controls="password-panel"
+                        tabIndex={activeTab === 'password' ? 0 : -1}
+                        onClick={() => setActiveTab('password')}
+                        onKeyDown={handleTabKeyDown}
+                        className={`border-b-2 px-1 pb-3 text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                            activeTab === 'password'
+                                ? 'border-indigo-600 text-indigo-700'
+                                : 'border-transparent text-gray-600 hover:border-gray-400 hover:text-gray-900'
+                        }`}
+                    >
+                        Cambiar contraseña
+                    </button>
+                </div>
+
+                {activeTab === 'details' && (
+                    <form
+                        id="details-panel"
+                        role="tabpanel"
+                        aria-labelledby="details-tab"
+                        onSubmit={handleSubmit}
+                        className="border rounded p-4 bg-white shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4"
+                    >
                     {/* Username */}
                     <div>
                         <InputLabel htmlFor="name" value="Username" />
@@ -172,34 +257,6 @@ export default function Edit({ institutos, flash }) {
                         <InputError message={errors.instituto_id} className="mt-2" />
                     </div>
 
-                    {/* Password */}
-                    <div>
-                        <InputLabel htmlFor="password" value="Password" />
-                        <TextInput
-                            id="password"
-                            name="password"
-                            type="password"
-                            value={data.password}
-                            className="mt-1 block w-full"
-                            onChange={e => setData('password', e.target.value)}
-                        />
-                        <InputError message={errors.password} className="mt-2" />
-                    </div>
-
-                    {/* Password Confirmation */}
-                    <div>
-                        <InputLabel htmlFor="password_confirmation" value="Confirmar Password" />
-                        <TextInput
-                            id="password_confirmation"
-                            name="password_confirmation"
-                            type="password"
-                            value={data.password_confirmation}
-                            className="mt-1 block w-full"
-                            onChange={e => setData('password_confirmation', e.target.value)}
-                        />
-                        <InputError message={errors.password_confirmation} className="mt-2" />
-                    </div>
-
                     {/* Botón */}
                     <div className="md:col-span-3 flex justify-between mt-4">
                         <Button variant="primary"
@@ -220,20 +277,81 @@ export default function Edit({ institutos, flash }) {
                         )}
 
                     </div>
-                </form>
+                    </form>
+                )}
+
+                {activeTab === 'password' && (
+                    <form
+                        id="password-panel"
+                        role="tabpanel"
+                        aria-labelledby="password-tab"
+                        onSubmit={handlePasswordSubmit}
+                        className="max-w-3xl rounded border bg-white p-5 shadow-sm"
+                    >
+                        <div className="max-w-2xl">
+                            <h2 className="text-lg font-semibold text-gray-900">
+                                Cambiar contraseña
+                            </h2>
+                            <p className="mt-1 text-sm leading-6 text-gray-600">
+                                Definí una nueva contraseña para este usuario. Su contraseña actual no se puede consultar.
+                            </p>
+                        </div>
+
+                        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div>
+                                <InputLabel htmlFor="password" value="Nueva contraseña" />
+                                <PasswordInput
+                                    id="password"
+                                    name="password"
+                                    value={passwordData.password}
+                                    className="mt-1"
+                                    autoComplete="new-password"
+                                    onChange={(e) => setPasswordData('password', e.target.value)}
+                                    required
+                                />
+                                <InputError message={passwordErrors.password} className="mt-2" />
+                            </div>
+
+                            <div>
+                                <InputLabel
+                                    htmlFor="password_confirmation"
+                                    value="Confirmar nueva contraseña"
+                                />
+                                <PasswordInput
+                                    id="password_confirmation"
+                                    name="password_confirmation"
+                                    value={passwordData.password_confirmation}
+                                    className="mt-1"
+                                    autoComplete="new-password"
+                                    onChange={(e) => setPasswordData('password_confirmation', e.target.value)}
+                                    required
+                                />
+                                <InputError
+                                    message={passwordErrors.password_confirmation}
+                                    className="mt-2"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-6">
+                            <Button
+                                variant="primary"
+                                type="submit"
+                                disabled={passwordProcessing}
+                            >
+                                {passwordProcessing ? 'Actualizando...' : 'Cambiar contraseña'}
+                            </Button>
+                        </div>
+                    </form>
+                )}
 
                 <div className="mt-4">
-                    <Link
-                        href="#"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            window.history.back();
-                        }}
+                    <Button
+                        variant="secondary"
+                        onClick={goBack}
                     >
-                        <Button variant="secondary">
-                            Volver
-                        </Button>
-                    </Link>
+                        Volver
+                    </Button>
                 </div>
 
             </div>

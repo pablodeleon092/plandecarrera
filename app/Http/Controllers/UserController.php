@@ -138,7 +138,6 @@ class UserController extends Controller
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
             'cargo' => 'required|string|max:255',
-            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
             'instituto_id' => 'nullable|integer|exists:institutos,id',
         ]);
 
@@ -151,7 +150,6 @@ class UserController extends Controller
                 'apellido' => $request->apellido,
                 'cargo' => $request->cargo,
                 'instituto_id' => $request->instituto_id ?: null,
-                'password' => $request->password ? Hash::make($request->password) : $user->password,
             ]);
             $user->syncRoles($this->getDefaultRoleForCargo($request->cargo));
         } catch (\Exception $e) {
@@ -164,6 +162,27 @@ class UserController extends Controller
             'institutos' => Instituto::select('id', 'siglas')->get(),
             'flash' => ['success' => 'Usuario actualizado correctamente.'],
         ]);
+    }
+
+    public function updatePassword(Request $request, User $user): RedirectResponse
+    {
+        $this->authorize('update', $user);
+
+        $validated = $request->validate([
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        try {
+            $user->update([
+                'password' => Hash::make($validated['password']),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error actualizando contraseña de usuario: '.$e->getMessage());
+
+            return back()->with('error', 'Hubo un problema al actualizar la contraseña.');
+        }
+
+        return back()->with('success', 'Contraseña actualizada correctamente.');
     }
 
     public function destroy(User $user)
