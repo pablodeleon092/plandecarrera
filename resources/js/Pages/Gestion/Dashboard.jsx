@@ -16,12 +16,30 @@ const CARGOS_DISPONIBLES = [
     'Consejero'
 ];
 
-export default function Dashboard({ user, institutos, materias, docentes, selectedInstitutoId: initialInstitutoId, selectedCarreraId: initialCarreraId, currentView: initialView }) {
+const CARGOS_CON_VISTA_GLOBAL = new Set([
+    'Administrador',
+    'Secretaría académica',
+]);
+
+export default function Dashboard({
+    user,
+    institutos,
+    materias,
+    docentes,
+    selectedInstitutoId: initialInstitutoId,
+    selectedCarreraId: initialCarreraId,
+    currentView: initialView,
+    canViewAllInstitutos = false,
+}) {
     // 1. STATE 
-    const [selectedInstitutoId, setSelectedInstitutoId] = useState(initialInstitutoId || (institutos.length > 0 ? institutos[0].id : null));
+    const [selectedInstitutoId, setSelectedInstitutoId] = useState(
+        initialInstitutoId || (canViewAllInstitutos ? 'all' : (institutos[0]?.id ?? null))
+    );
     const [selectedCarreraId, setSelectedCarreraId] = useState(initialCarreraId || 'all');
     const [selectedCargo, setSelectedCargo] = useState(user.cargo || '');
     const [currentView, setCurrentView] = useState(initialView || 'materias');
+    const canSelectAllInstitutos =
+        canViewAllInstitutos && CARGOS_CON_VISTA_GLOBAL.has(selectedCargo);
 
     // ----------------------------------------------------------------------
     // 2. LÓGICA DE DATOS
@@ -35,11 +53,15 @@ export default function Dashboard({ user, institutos, materias, docentes, select
 
     // B. Carreras Disponibles
     const carrerasDisponibles = useMemo(() => {
+        if (selectedInstitutoId === 'all') {
+            return institutos.flatMap(inst => inst.carreras ?? []);
+        }
+
         if (!selectedInstituto || !selectedInstituto.carreras) {
             return [];
         }
         return selectedInstituto.carreras;
-    }, [selectedInstituto]);
+    }, [institutos, selectedInstituto, selectedInstitutoId]);
 
 
     // ----------------------------------------------------------------------
@@ -47,7 +69,8 @@ export default function Dashboard({ user, institutos, materias, docentes, select
     // ----------------------------------------------------------------------
 
     const handleInstitutoChange = (e) => {
-        const newInstitutoId = parseInt(e.target.value);
+        const rawValue = e.target.value;
+        const newInstitutoId = rawValue === 'all' ? 'all' : Number(rawValue);
 
         // 1. Actualizar el estado local
         setSelectedInstitutoId(newInstitutoId);
@@ -63,6 +86,17 @@ export default function Dashboard({ user, institutos, materias, docentes, select
             preserveState: true,
             replace: true,
         });
+    };
+
+    const handleCargoChange = (e) => {
+        const newCargo = e.target.value;
+
+        setSelectedCargo(newCargo);
+        setSelectedCarreraId('all');
+
+        if (!CARGOS_CON_VISTA_GLOBAL.has(newCargo) && selectedInstitutoId === 'all') {
+            setSelectedInstitutoId(institutos[0]?.id ?? null);
+        }
     };
 
     const handleCarreraChange = (e) => {
@@ -133,7 +167,7 @@ export default function Dashboard({ user, institutos, materias, docentes, select
                             <select
                                 id="admin_role_select"
                                 value={selectedCargo}
-                                onChange={(e) => setSelectedCargo(e.target.value)}
+                                onChange={handleCargoChange}
                                 className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm"
                             >
                                 {CARGOS_DISPONIBLES.map(cargo => (
@@ -154,20 +188,23 @@ export default function Dashboard({ user, institutos, materias, docentes, select
                             id="instituto_select"
                             value={selectedInstitutoId || ''}
                             onChange={handleInstitutoChange}
-                            disabled={institutos.length <= 1}
+                            disabled={!canSelectAllInstitutos && institutos.length <= 1}
                             className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm"
                         >
+                            {canSelectAllInstitutos ? (
+                                <option value="all">Todos los institutos</option>
+                            ) : null}
                             {institutos.map(inst => (
                                 <option key={inst.id} value={inst.id}>
                                     {inst.nombre}
                                 </option>
                             ))}
                         </select>
-                        {institutos.length <= 1 && (
+                        {!canSelectAllInstitutos && institutos.length <= 1 ? (
                             <p className="mt-2 text-xs text-gray-500">
                                 Solo tiene acceso a su instituto.
                             </p>
-                        )}
+                        ) : null}
                     </div>
 
                     {/* Selector de Carreras */}
