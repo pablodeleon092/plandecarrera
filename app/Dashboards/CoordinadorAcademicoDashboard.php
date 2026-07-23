@@ -39,8 +39,6 @@ class CoordinadorAcademicoDashboard implements DashboardStrategy
         $totalMaterias = $this->getTotalMateriasInstituto($institutoId);
 
         return Inertia::render('Gestion/DashboardCoordinadorAcademico', [
-            'auth' => ['user' => $user],
-            
             'metrics' => [
                 'sharedPercentage' => $totalMaterias > 0 
                     ? round(($materiasCompartidas->count() / $totalMaterias) * 100, 1) 
