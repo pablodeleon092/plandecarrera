@@ -113,7 +113,7 @@ export default function DashboardSecretaria({
                             status="neutral"
                         />
                         <KPICard
-                            title="Comisiones"
+                            title="Comisiones Activas"
                             value={resumenEjecutivo.totalComisiones}
                             subtitle={`${resumenEjecutivo.comisionesConCobertura} con cobertura`}
                             status="neutral"

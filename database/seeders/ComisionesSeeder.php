@@ -25,7 +25,7 @@ class ComisionesSeeder extends Seeder
                     'turno' => rand(0, 1) ? 'mañana' : 'tarde',
                     'modalidad' => collect(['presencial', 'virtual', 'mixta'])->random(),
                     'sede' => collect(['Ushuaia', 'Rio Grande', 'Ushuaia/Rio Grande'])->random(),
-                    'anio' => 2025,
+                    'anio' => (int) date('Y'),
                     'cuatrimestre' => rand(0, 1) ? '1ro' : '2do',
                     'horas_teoricas' => $horasTeoricas,
                     'horas_practicas' => $horasPracticas,
@@ -37,4 +37,3 @@ class ComisionesSeeder extends Seeder
         }
     }
 }
-

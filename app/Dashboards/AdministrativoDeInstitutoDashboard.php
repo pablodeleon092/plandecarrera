@@ -101,8 +101,13 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
             ->whereHas('materia.planes.carrera', fn($q) => $q->where('instituto_id', $institutoId))
             ->with([
                 'materia:id,nombre,codigo',
-                'dictas.docente:id,nombre,apellido',
-                'dictas.cargo:id,nombre'
+                'dictas' => function ($q) {
+                    $q->whereHas('docente', fn($d) => $d->where('es_activo', true))
+                        ->with([
+                            'docente:id,nombre,apellido',
+                            'cargo:id,nombre',
+                        ]);
+                },
             ])
             ->orderBy('id_materia')
             ->limit(30)

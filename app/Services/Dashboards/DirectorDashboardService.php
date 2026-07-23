@@ -63,7 +63,7 @@ class DirectorDashboardService
         
         $comisiones = Comision::byInstituto($institutoId)
             ->where('anio', now()->year)
-            ->with('dictas.cargo')
+            ->with(['dictas.cargo', 'dictas.docente'])
             ->get();
 
         $totalComisiones = $comisiones->count();
@@ -116,7 +116,7 @@ class DirectorDashboardService
     {
         return Carrera::where('instituto_id', $institutoId)
             ->with(['planActual.materias.comisiones' => function($q) {
-                $q->where('anio', now()->year)->with('dictas.cargo');
+                $q->where('anio', now()->year)->with(['dictas.cargo', 'dictas.docente']);
             }])
             ->get()
             ->map(function($carrera) {
@@ -192,7 +192,7 @@ class DirectorDashboardService
     {
         return Comision::byInstituto($institutoId)
             ->where('anio', now()->year)
-            ->with(['materia', 'dictas.cargo'])
+            ->with(['materia', 'dictas.cargo', 'dictas.docente'])
             ->get()
             ->filter(fn($c) => !$c->estaCompleta())
             ->map(fn($c) => [
@@ -221,7 +221,7 @@ class DirectorDashboardService
             $totalCom = Comision::byInstituto($ins->id)->where('anio', now()->year)->count();
             $cubiertas = 0;
             if ($totalCom > 0) {
-                $cubiertas = Comision::byInstituto($ins->id)->where('anio', now()->year)->with('dictas.cargo')->get()->filter(fn($c) => $c->estaCompleta())->count();
+                $cubiertas = Comision::byInstituto($ins->id)->where('anio', now()->year)->with(['dictas.cargo', 'dictas.docente'])->get()->filter(fn($c) => $c->estaCompleta())->count();
             }
             
             return [
@@ -235,7 +235,7 @@ class DirectorDashboardService
     private function getMetricasComparativas($institutoId)
     {
         $todos = Instituto::all()->map(function($ins) {
-            $comisiones = Comision::byInstituto($ins->id)->where('anio', now()->year)->with('dictas.cargo')->get();
+            $comisiones = Comision::byInstituto($ins->id)->where('anio', now()->year)->with(['dictas.cargo', 'dictas.docente'])->get();
             $total = $comisiones->count();
             $cubiertas = $comisiones->filter(fn($c) => $c->estaCompleta())->count();
             return [

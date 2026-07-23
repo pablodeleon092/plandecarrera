@@ -65,11 +65,13 @@ class ConsejeroDashboardService
 
         $totalComisiones = Comision::whereHas('materia.planes.carrera', function ($q) use ($institutoId) {
             $q->where('instituto_id', $institutoId);
-        })->count();
+        })->where('anio', date('Y'))->count();
 
-        $comisionesConCobertura = Comision::whereHas('dictas')->whereHas('materia.planes.carrera', function ($q) use ($institutoId) {
+        $comisionesConCobertura = Comision::whereHas('dictas', function ($q) {
+            $q->whereHas('docente', fn($d) => $d->where('es_activo', true));
+        })->whereHas('materia.planes.carrera', function ($q) use ($institutoId) {
             $q->where('instituto_id', $institutoId);
-        })->count();
+        })->where('anio', date('Y'))->count();
 
         $porcentajeCobertura = $totalComisiones > 0 ? round(($comisionesConCobertura / $totalComisiones) * 100, 2) : 0;
 
@@ -169,7 +171,7 @@ class ConsejeroDashboardService
 
     private function getEstadisticasCarreras($institutoId)
     {
-        $carreras = Carrera::where('instituto_id', $institutoId)->with('planes.materias.comisiones.dictas')->get();
+        $carreras = Carrera::where('instituto_id', $institutoId)->with('planes.materias.comisiones.dictas.docente')->get();
 
         $estadisticas = [];
 
@@ -185,11 +187,12 @@ class ConsejeroDashboardService
                     $comisionesMateria = $materia->comisiones()->count();
                     $totalComisiones += $comisionesMateria;
                     
-                    // Contar comisiones con cobertura (que tengan dictas)
+                    // Contar comisiones con cobertura (que tengan dictas de docentes activos)
                     foreach ($materia->comisiones as $comision) {
-                        if ($comision->dictas()->count() > 0) {
+                        $dictasActivas = $comision->dictas->filter(fn($dicta) => $dicta->docente && $dicta->docente->es_activo);
+                        if ($dictasActivas->count() > 0) {
                             $comisionesConCobertura++;
-                            foreach ($comision->dictas as $dicta) {
+                            foreach ($dictasActivas as $dicta) {
                                 $docentes->push($dicta->docente_id);
                             }
                         }

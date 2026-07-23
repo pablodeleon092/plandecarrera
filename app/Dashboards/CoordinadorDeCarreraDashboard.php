@@ -253,7 +253,10 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
 
     private function getKpisCarrera($carreraId)
     {
-        $carrera = Carrera::findOrFail($carreraId);
+        $carrera = Carrera::with([
+            'planActual.materias.comisiones.dictas.docente',
+            'planActual.materias.comisiones.dictas.cargo',
+        ])->findOrFail($carreraId);
 
         $plan = $carrera->planActual;
 

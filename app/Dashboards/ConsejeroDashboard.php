@@ -81,9 +81,10 @@ class ConsejeroDashboard implements DashboardStrategy
         })
             ->where('anio', $anioActual)
             ->whereHas('dictas', function ($q) {
-                $q->whereHas('cargo', function ($c) {
-                    $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
-                });
+                $q->whereHas('docente', fn($d) => $d->where('es_activo', true))
+                    ->whereHas('cargo', function ($c) {
+                        $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
+                    });
             })
             ->count();
 
@@ -195,9 +196,10 @@ class ConsejeroDashboard implements DashboardStrategy
         })
             ->where('anio', $anioActual)
             ->whereDoesntHave('dictas', function ($q) {
-                $q->whereHas('cargo', function ($c) {
-                    $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
-                });
+                $q->whereHas('docente', fn($d) => $d->where('es_activo', true))
+                    ->whereHas('cargo', function ($c) {
+                        $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
+                    });
             })
             ->with('materia')
             ->get();
@@ -246,9 +248,10 @@ class ConsejeroDashboard implements DashboardStrategy
             $comisionesConCobertura = Comision::whereIn('id_materia', $materiasIds)
                 ->where('anio', $anioActual)
                 ->whereHas('dictas', function ($q) {
-                    $q->whereHas('cargo', function ($c) {
-                        $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
-                    });
+                    $q->whereHas('docente', fn($d) => $d->where('es_activo', true))
+                        ->whereHas('cargo', function ($c) {
+                            $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
+                        });
                 })
                 ->count();
 
