@@ -75,7 +75,13 @@ class ComisionPolicy
      */
     public function delete(User $user, Comision $comision): bool
     {
-        return $user->isAdministrator();
+        if (!$user->can('modificar_comision')) {
+            return false;
+        }
+
+        $materia = $comision->materia;
+
+        return $this->userPerteneceAMateria($user, $materia);
     }
 
     /**

@@ -27,7 +27,7 @@ class DictaController extends Controller
         $comision = Comision::with('materia')->findOrFail($request->comision_id);
         $this->authorize('update', $comision);
 
-        $docente = \App\Models\Docente::with('cargos')->findOrFail($request->docente_id);
+        $docente = \App\Models\Docente::with('cargos.dedicacion')->findOrFail($request->docente_id);
 
         if ($docente->cargos->isEmpty()) {
             if ($request->user()->can('manageCargos', $docente)) {
@@ -212,7 +212,7 @@ class DictaController extends Controller
 
             });
 
-            return redirect()->route('comisiones.show', $comisionId)
+            return redirect()->back()
                 ->with('success', 'Vinculación del docente eliminada exitosamente.');
         } catch (Exception $e) {
             // Manejar cualquier fallo de la transacción
