@@ -45,11 +45,11 @@ class HorarioController extends Controller
     public function destroy($id)
     {
         $horario = Horario::findOrFail($id);
-        $comisionId = $horario->comision_id;
-        $this->authorize('update', $comision);
+        $comision = Comision::findOrFail($horario->comision_id);
+        $this->authorize('delete', $horario);
         $horario->delete();
 
-        return redirect()->route('comisiones.show', $comisionId)
+        return redirect()->route('comisiones.show', $comision->id)
             ->with('success', 'Horario eliminado correctamente.');
     }
 }

@@ -12,7 +12,7 @@ const diasLabel = {
     sabado: 'Sábado',
 };
 
-export default function ComisionHorarios({ comision }) {
+export default function ComisionHorarios({ comision, canDelete = false }) {
     const [horarios, setHorarios] = useState(comision.horarios || []);
     const [form, setForm] = useState({
         dia_semana: 'lunes',
@@ -86,7 +86,7 @@ export default function ComisionHorarios({ comision }) {
                                     <th className="px-4 py-3 text-left">Inicio</th>
                                     <th className="px-4 py-3 text-left">Fin</th>
                                     <th className="px-4 py-3 text-left">Aula</th>
-                                    <th className="px-4 py-3 text-left">Acción</th>
+                                    {canDelete && <th className="px-4 py-3 text-left">Acción</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -96,15 +96,17 @@ export default function ComisionHorarios({ comision }) {
                                         <td className="px-4 py-3">{h.hora_inicio.substring(0, 5)}</td>
                                         <td className="px-4 py-3">{h.hora_fin.substring(0, 5)}</td>
                                         <td className="px-4 py-3">{h.aula || '—'}</td>
-                                        <td className="px-4 py-3">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDelete(h.id)}
-                                                className="text-red-500 hover:text-red-700 text-xs font-medium"
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </td>
+                                        {canDelete && (
+                                            <td className="px-4 py-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(h.id)}
+                                                    className="text-red-500 hover:text-red-700 text-xs font-medium"
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>

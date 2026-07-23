@@ -9,7 +9,7 @@ const DefaultEmptyIcon = () => (
 );
 
 function ActionButtons({ item, onShow, onEdit, onDelete, onToggleStatus, statusKey }) {
-    const permissions = item.can || { view: true, update: true, delete: true, toggle: true };
+    const permissions = item.can || { view: true, update: true, delete: false, toggle: true };
     return (
         <div className="flex items-center justify-end gap-3">
             {onShow && permissions.view && (
@@ -92,7 +92,7 @@ export default function DataTable({
     const EmptyIcon = emptyIcon || DefaultEmptyIcon;
 
     const hasAnyAction = (item) => {
-        const p = item.can || { view: true, update: true, delete: true };
+        const p = item.can || { view: true, update: true, delete: false };
         return (onShow && p.view) || (onEdit && p.update) || (onDelete && p.delete) || (onToggleStatus && p.update);
     };
 

@@ -72,11 +72,7 @@ class MateriaPolicy
      */
     public function delete(User $user, Materia $materia): bool
     {
-        if (!$user->can('restore_materia')) {
-            return false;
-        }
-
-        return $this->userPerteneceAMateria($user, $materia);
+        return $user->isAdministrator();
     }
 
     /**

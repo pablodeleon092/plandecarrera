@@ -49,11 +49,7 @@ class DocentePolicy
      */
     public function delete(User $user, Docente $docente): bool
     {
-        if (!$user->can('restore_docente')) {
-            return false;
-        }
-
-        return $this->userPerteneceADocente($user, $docente);
+        return $user->isAdministrator();
     }
 
     /**

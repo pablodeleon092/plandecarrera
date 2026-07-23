@@ -150,6 +150,7 @@ export default function Show({ auth, materia, flash, comisiones, can = { update:
                                 <MateriaComisiones
                                     comisiones={comisiones}
                                     materia={materia}
+                                    canDelete={can.delete}
                                 />
                             )}
                         </div>

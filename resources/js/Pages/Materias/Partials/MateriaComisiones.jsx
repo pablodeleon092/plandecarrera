@@ -1,7 +1,7 @@
 // resources/js/Pages/Materias/Partials/MateriaComisiones.jsx
 import { Link } from '@inertiajs/react';
 
-export default function MateriaComisiones({ comisiones, materia }) {
+export default function MateriaComisiones({ comisiones, materia, canDelete = false }) {
     return (
         <div>
             <h3 className="text-2xl font-bold mb-6">Comisiones de la Materia</h3>
@@ -23,15 +23,17 @@ export default function MateriaComisiones({ comisiones, materia }) {
                                 Ver Detalles
                             </Link>
 
-                            <Link
-                                href={route('comisiones.destroy', comision.id)}
-                                method="delete"
-                                as="button"
-                                onBefore={() => confirm('¿Estás seguro de eliminar esta comisión?')}
-                                className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 transition"
-                            >
-                                Eliminar
-                            </Link>
+                            {canDelete && (
+                                <Link
+                                    href={route('comisiones.destroy', comision.id)}
+                                    method="delete"
+                                    as="button"
+                                    onBefore={() => confirm('¿Estás seguro de eliminar esta comisión?')}
+                                    className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 transition"
+                                >
+                                    Eliminar
+                                </Link>
+                            )}
                         </div>
                     </li>
                 ))}

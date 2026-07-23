@@ -62,6 +62,14 @@ class CarreraPolicy
      */
     public function delete(User $user, Carrera $carrera): bool
     {
+        return $user->isAdministrator();
+    }
+
+    /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore(User $user, Carrera $carrera): bool
+    {
         if (!$user->can('restore_carrera')) {
             return false;
         }

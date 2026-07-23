@@ -55,7 +55,7 @@ export default function ComisionDocentes({ comision, docentes, allDocentes, can 
                         Ver
                     </Link>
 
-                    {can.update && (
+                    {can.delete && (
                         <Button variant="danger"
                             onClick={() => {
                                 if (confirm("¿Eliminar docente de esta comisión?")) {

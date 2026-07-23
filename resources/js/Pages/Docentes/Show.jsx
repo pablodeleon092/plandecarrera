@@ -4,11 +4,8 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import DocenteInfo from './Partials/DocenteInfo';             // <--- Nuevo
 import DocenteComisiones from './Partials/DocenteComisiones'; // <--- Nuevo
-import { usePermissions } from '@/Hooks/usePermissions';
 
-export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 'comisiones'
-    const { canEditDocente, canDeleteDocente } = usePermissions();
-
+export default function Show({ auth, docente, comisiones, can = { update: false, delete: false } }) { // <--- Agregamos 'comisiones'
     const [currentTab, setCurrentTab] = useState('informacion');
 
     const handleDelete = () => {
@@ -67,7 +64,7 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
-                                    {canEditDocente && (
+                                    {can.update && (
                                         <Button variant="primary"
                                             as={Link}
                                             href={route('docentes.edit', docente.id)}
@@ -75,7 +72,7 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                                             Editar
                                         </Button>
                                     )}
-                                    {canDeleteDocente && (
+                                    {can.delete && (
                                         <Button variant="danger"
                                             onClick={handleDelete}
                                         >
