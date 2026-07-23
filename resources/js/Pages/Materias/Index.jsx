@@ -68,8 +68,28 @@ export default function Index({ auth, institutos, carreras, materias, filters = 
                     search={search}
                 />
             </div>
+
+            {/* CARDS TOTALES */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <KPICard
+                    title="Total Materias"
+                    value={totalMaterias}
+                    status="neutral"
+                />
+                <KPICard
+                    title="Materias Activas"
+                    value={materiasActivas}
+                    status="success"
+                />
+                <KPICard
+                    title="Materias Cuatrimestrales"
+                    value={materiasCuatrimestrales}
+                    status="warning"
+                />
+            </div>
+
             {/* TABLA */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="mt-6 bg-white rounded-lg shadow overflow-hidden">
 
                 <DataTable
                     columns={[
@@ -133,24 +153,6 @@ export default function Index({ auth, institutos, carreras, materias, filters = 
                 />
             </div>
 
-            {/* CARDS TOTALES */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                <KPICard
-                    title="Total Materias"
-                    value={totalMaterias}
-                    status="neutral"
-                />
-                <KPICard
-                    title="Materias Activas"
-                    value={materiasActivas}
-                    status="success"
-                />
-                <KPICard
-                    title="Materias Cuatrimestrales"
-                    value={materiasCuatrimestrales}
-                    status="warning"
-                />
-            </div>
 
         </AuthenticatedLayout>
     );

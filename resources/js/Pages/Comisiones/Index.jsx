@@ -6,6 +6,7 @@ import DataTable from '@/Components/DataTable';
 import GestionComisiones from '@/Components/Filters/GestionComisiones';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 import SearchBar from '@/Components/SearchBar';
+import KPICard from '@/Components/Dashboard/KPICard';
 
 export default function Index({ auth, comisiones, carreras, institutos, filters = [], search = '', flash}) {
 
@@ -77,6 +78,10 @@ export default function Index({ auth, comisiones, carreras, institutos, filters 
         }
     };
 
+    const totalComisiones = comisiones.meta?.total || comisiones.length;
+    const comisionesActivas = useMemo(() => comisiones.filter(m => m.estado).length, [comisiones]);
+  
+
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -94,6 +99,7 @@ export default function Index({ auth, comisiones, carreras, institutos, filters 
                     {flash.error}
                 </div>
             )}
+
                     <ListHeader
                         title="Listado de Comisiones"
                     />
@@ -112,7 +118,20 @@ export default function Index({ auth, comisiones, carreras, institutos, filters 
                         />
                     </div>
 
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <KPICard
+                            title="Total Comisiones"
+                            value={totalComisiones}
+                            status="neutral"
+                        />
+                        <KPICard
+                            title="Comisiones Activas"
+                            value={comisionesActivas}
+                            status="success"
+                        />
+                    </div>
+
+                    <div className="mt-6 bg-white rounded-lg shadow overflow-hidden">
                         <DataTable
                             dense={true}
                             columns={columns}

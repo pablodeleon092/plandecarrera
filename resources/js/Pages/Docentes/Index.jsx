@@ -78,7 +78,25 @@ export default function Index({ auth, institutos, carreras, docentes, flash, fil
                         />
                     </div>
 
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <KPICard
+                            title="Total Docentes"
+                            value={totalDocentes}
+                            status="neutral"
+                        />
+                        <KPICard
+                            title="Docentes Activos"
+                            value={docentesActivos}
+                            status="success"
+                        />
+                        <KPICard
+                            title="Docentes Inactivos"
+                            value={docentesInactivos}
+                            status="danger"
+                        />
+                    </div>
+
+                    <div className="mt-6 bg-white rounded-lg shadow overflow-hidden">
                         <DataTable
                             columns={[
                                 { key: 'legajo', 

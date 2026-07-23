@@ -83,7 +83,20 @@ export default function Index({ auth, carreras, institutos, filters = [], search
                         />
                     </div>
 
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <KPICard
+                            title="Total Carreras"
+                            value={totalCarreras}
+                            status="neutral"
+                        />
+                        <KPICard
+                            title="Carreras Activas"
+                            value={carrerasActivas}
+                            status="success"
+                        />
+                    </div>
+
+                    <div className="mt-6 bg-white rounded-lg shadow overflow-hidden">
                         <DataTable
                             columns={columns}
                             data={carreras.data}
@@ -102,19 +115,6 @@ export default function Index({ auth, carreras, institutos, filters = [], search
                     </div>
 
                     <PaginatorButtons meta={carreras?.meta} paginator={carreras} routeName={'carreras.index'} />
-
-                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <KPICard
-                            title="Total Carreras"
-                            value={totalCarreras}
-                            status="neutral"
-                        />
-                        <KPICard
-                            title="Carreras Activas"
-                            value={carrerasActivas}
-                            status="success"
-                        />
-                    </div>
 
         </AuthenticatedLayout>
     );

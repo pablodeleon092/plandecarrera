@@ -202,7 +202,18 @@ class MateriaController extends Controller
             'codigo' => 'required|string|max:50|unique:materias,codigo,' . $materia->id,
             'estado' => 'boolean',
             'regimen' => 'required|in:anual,cuatrimestral',
-            'cuatrimestre' => 'nullable|integer|min:1|max:2|required_if:regimen,cuatrimestral',
+            'cuatrimestre' => [
+                'nullable',
+                'integer',
+                'min:1',
+                Rule::when($request->regimen === 'cuatrimestral', [
+                    'required',
+                    'max:10', 
+                ]),
+                Rule::when($request->regimen === 'anual', [
+                    'max:5', 
+                ]),
+            ],
             'horas_semanales' => 'required|integer|min:1|max:40',
             'horas_totales' => 'nullable|integer|min:1'
         ]);

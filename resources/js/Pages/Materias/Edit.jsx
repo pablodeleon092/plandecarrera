@@ -156,13 +156,20 @@ export default function Edit({ auth, materia }) {
                                     <select
                                         value={data.cuatrimestre}
                                         onChange={e => setData('cuatrimestre', e.target.value)}
-                                        disabled={data.regimen === 'anual'}
-                                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${data.regimen === 'anual' ? 'bg-gray-100 cursor-not-allowed' : ''
-                                            } ${errors.cuatrimestre ? 'border-red-500' : 'border-gray-300'}`}
+                                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.cuatrimestre ? 'border-red-500' : 'border-gray-300'}
+                                        ${errors.cuatrimestre ? 'border-red-500' : 'border-gray-300'}`}
                                     >
                                         <option value="">Seleccione…</option>
-                                        <option value="1">1° Cuatrimestre</option>
-                                        <option value="2">2° Cuatrimestre</option>
+                                        <option value="1">1°</option>
+                                        <option value="2">2°</option>
+                                        <option value="3">3°</option>
+                                        <option value="4">4°</option>
+                                        <option value="5">5°</option>
+                                        <option value="6">6°</option>
+                                        <option value="7">7°</option>
+                                        <option value="8">8°</option>
+                                        <option value="9">9°</option>
+                                        <option value="10">10°</option>
                                     </select>
                                     {errors.cuatrimestre && (
                                         <p className="text-red-500 text-sm mt-1">{errors.cuatrimestre}</p>
