@@ -3,7 +3,7 @@ import DataTable from "@/Components/DataTable";
 import Button from '@/Components/Button';
 import { useForm, Link, router } from "@inertiajs/react";
 
-export default function CarreraMaterias({ carrera, planes }) {
+export default function CarreraMaterias({ carrera, planes, canUpdate = false, canDelete = false }) {
     const [planSeleccionado, setPlanSeleccionado] = useState(null);
     const [mostrandoBaja, setMostrandoBaja] = useState(false);
 
@@ -38,9 +38,16 @@ export default function CarreraMaterias({ carrera, planes }) {
             key: "acciones",
             label: "Acciones",
             render: (p) => (
-                <Button variant="info" onClick={() => { setPlanSeleccionado(p); setMostrandoBaja(false); }}>
-                    Ver Materias
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                    <Button variant="info" onClick={() => { setPlanSeleccionado(p); setMostrandoBaja(false); }}>
+                        Ver Materias
+                    </Button>
+                    {canUpdate && (
+                        <Button variant="secondary" as={Link} href={route('planes.edit', p.id)}>
+                            Editar plan
+                        </Button>
+                    )}
+                </div>
             ),
         },
 
@@ -80,19 +87,24 @@ export default function CarreraMaterias({ carrera, planes }) {
             <div>
                 <h3 className="text-2xl font-bold mb-5">Planes de Estudio: {carrera.nombre}</h3>
 
-                <Button
-                variant="primary"
-                className="mb-5"
-                as={Link}
-                href={route('planes.create', carrera.id)}
-                >
-                Agregar Plan de Estudio
-                </Button>
+                {canUpdate && (
+                    <Button
+                        variant="primary"
+                        className="mb-5"
+                        as={Link}
+                        href={route('planes.create', carrera.id)}
+                    >
+                        Agregar Plan de Estudio
+                    </Button>
+                )}
                 <DataTable 
                     columns={columnasPlanes} 
-                    data={planes} 
+                    data={planes.map((plan) => ({
+                        ...plan,
+                        can: { ...plan.can, delete: canDelete },
+                    }))}
                     emptyMessage="No hay planes registrados." 
-                    onDelete={(plan) => handleDelete(plan.id)}
+                    onDelete={canDelete ? (plan) => handleDelete(plan.id) : undefined}
                     />
             </div>
 
@@ -113,7 +125,7 @@ export default function CarreraMaterias({ carrera, planes }) {
                             </p>
                         </div>
                         <div className="flex gap-x-2">
-                            {!mostrandoBaja && (
+                            {canUpdate && !mostrandoBaja && (
                                 <Button variant="danger" onClick={() => setMostrandoBaja(true)}>
                                     Dar de Baja Plan
                                 </Button>

@@ -69,9 +69,9 @@ class CarreraController extends Controller
                 'sede' => $carrera->sede,
                 'estado' => $carrera->estado,
                 'can' => [
-                    'view'   => $user->can('consultar_carrera', $carrera),
-                    'update' => $user->can('modificar_carrera', $carrera),
-                    'delete' => $user->can('restore_carrera', $carrera),
+                    'view'   => $user->can('view', $carrera),
+                    'update' => $user->can('update', $carrera),
+                    'delete' => $user->can('delete', $carrera),
                 ]
             ]);
             
@@ -82,7 +82,7 @@ class CarreraController extends Controller
             'institutos' => $institutos,
             'filters'    => $filters,
             'can' => [
-                'create' => $user->can('crear_carrera'),
+                'create' => $user->can('create', Carrera::class),
             ],
         ]);
     }
@@ -134,6 +134,7 @@ class CarreraController extends Controller
     public function show(Carrera $carrera)
     {
         $this->authorize('view', $carrera);
+        $user = auth()->user();
         $carrera->load([
             'instituto',
             'planes.materias',
@@ -150,6 +151,10 @@ class CarreraController extends Controller
         return Inertia::render('Carreras/Show', [
             'carrera' => $carrera,
             'planes' => $planes,
+            'can' => [
+                'update' => $user->can('update', $carrera),
+                'deletePlan' => $user->can('delete', $carrera),
+            ],
         ]);
     }
 
@@ -177,58 +182,66 @@ class CarreraController extends Controller
     public function edit(Carrera $carrera)
     {
         $user = auth()->user();
-        if ($user->cannot('update', $carrera)) {
-            $rolesFriendly = [
-                'Admin_instituto' => 'Director de instituto',
-                'Coord_carrera' => 'Coordinador de carrera',
-            ];
-            $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
-            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
-            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes editar carreras de tu propio instituto.");
-        }
-        $plan = $carrera->planActual()->first();
+        $this->authorize('update', $carrera);
 
-        if (!$plan) {
-            $plan = $carrera->planes()->create([
-                'anio_comienzo' => now()->startOfYear()->toDateString(),
-                'anio_fin' => null,
-            ]);
-        }
-
-        $materiasEnPlan = $plan->materias()->get();
-        $materiasEnPlanIds = $materiasEnPlan->pluck('id');
-        $materiasDisponibles = Materia::whereNotIn('id', $materiasEnPlanIds)->get();
+        $institutos = Instituto::query()
+            ->when($user->instituto_id, fn ($query) => $query->whereKey($user->instituto_id))
+            ->orderBy('nombre', 'asc')
+            ->get(['id', 'nombre', 'siglas']);
 
         return Inertia::render('Carreras/Edit', [
-            'carrera' => $carrera,
-            'plan' => $plan,
-            'materiasEnPlan' => $materiasEnPlan,
-            'materiasDisponibles' => $materiasDisponibles,
-            'flash' => session()->only(['success', 'error']),
+            'carrera' => $carrera->load('instituto'),
+            'institutos' => $institutos,
         ]);
     }
 
     public function update(Request $request, Carrera $carrera)
     {
         $user = auth()->user();
-        if ($user->cannot('update', $carrera)) {
-            $rolesFriendly = [
-                'Admin_instituto' => 'Director de instituto',
-                'Coord_carrera' => 'Coordinador de carrera',
-            ];
-            $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
-            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
-            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes editar carreras de tu propio instituto.");
-        }
+        $this->authorize('update', $carrera);
+
         $validated = $request->validate([
-            'materias' => 'present|array',
-            'materias.*' => 'integer|exists:materias,id',
-            'plan' => 'required|integer|exists:planes,id'
+            'nombre' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('carreras', 'nombre')->ignore($carrera->id),
+            ],
+            'modalidad' => ['required', Rule::in(['presencial', 'virtual', 'mixta'])],
+            'sede' => ['required', Rule::in(['Ushuaia', 'Rio Grande', 'Ushuaia/Rio Grande'])],
+            'instituto_id' => 'required|integer|exists:institutos,id',
         ]);
 
-        $plan = $carrera->planes()->findOrFail($validated['plan']);
-        $plan->materias()->sync($validated['materias']);
+        if ($user->instituto_id && (int) $validated['instituto_id'] !== (int) $user->instituto_id) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'No puedes mover la carrera a otro instituto.');
+        }
 
-        return Redirect::route('carreras.edit', $carrera->id)->with('success', 'Plan de estudios actualizado correctamente.');
+        $carrera->update($validated);
+
+        return Redirect::route('carreras.index')
+            ->with('success', 'Carrera actualizada correctamente.');
+    }
+
+    public function destroy(Carrera $carrera)
+    {
+        $this->authorize('delete', $carrera);
+
+        $nombre = $carrera->nombre;
+
+        try {
+            $carrera->delete();
+        } catch (\Throwable $exception) {
+            \Log::error('Error eliminando carrera: ' . $exception->getMessage(), [
+                'carrera_id' => $carrera->id,
+            ]);
+
+            return Redirect::route('carreras.index')
+                ->with('error', 'No se pudo eliminar la carrera.');
+        }
+
+        return Redirect::route('carreras.index')
+            ->with('success', "La carrera '{$nombre}' fue eliminada correctamente.");
     }
 }

@@ -83,23 +83,41 @@ class PlanController extends Controller
     public function edit(Plan $plan)
     {
         // Obtenemos las materias que ya están en el plan
-        $carrera = $plan->carrera()->get();
+        $carrera = $plan->carrera;
         $this->authorize('update', $carrera);
-        $materiasEnPlan = $plan->materias()->get();
+        $materiasEnPlan = $plan->materias()->orderBy('nombre', 'asc')->get();
 
         // Obtenemos los IDs de las materias que ya están en el plan
         $materiasEnPlanIds = $materiasEnPlan->pluck('id');
 
         // Obtenemos las materias que NO están en el plan para mostrarlas como disponibles
-        $materiasDisponibles = Materia::whereNotIn('id', $materiasEnPlanIds)->get();
+        $materiasDisponibles = Materia::whereNotIn('id', $materiasEnPlanIds)
+            ->orderBy('nombre', 'asc')
+            ->get();
 
-        return Inertia::render('Carreras/Edit', [
+        return Inertia::render('Carreras/EditPlan', [
             'carrera' => $carrera,
             'plan' => $plan,
             'materiasEnPlan' => $materiasEnPlan,
             'materiasDisponibles' => $materiasDisponibles,
             'flash' => session()->only(['success', 'error']),
         ]);
+    }
+
+    public function update(Request $request, Plan $plan)
+    {
+        $carrera = $plan->carrera;
+        $this->authorize('update', $carrera);
+
+        $validated = $request->validate([
+            'materias' => 'present|array',
+            'materias.*' => 'integer|exists:materias,id',
+        ]);
+
+        $plan->materias()->sync($validated['materias']);
+
+        return Redirect::route('planes.edit', $plan)
+            ->with('success', 'Plan de estudios actualizado correctamente.');
     }
 
     public function desactivar(Request $request, Plan $plan) {
@@ -113,7 +131,7 @@ class PlanController extends Controller
     public function destroy(Plan $plan)
     {
         $carrera = $plan->carrera;
-        $this->authorize('update', $carrera);
+        $this->authorize('delete', $carrera);
         try {
             $plan->delete();
 

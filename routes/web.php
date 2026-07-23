@@ -76,6 +76,8 @@ Route::middleware('auth')->group(function () {
     //Rutas planes
     Route::get('/planes/create/{carrera}', [PlanController::class, 'create'])->name('planes.create');
     Route::post('/planes/store', [PlanController::class, 'store'])->name('planes.store');
+    Route::get('/planes/{plan}/edit', [PlanController::class, 'edit'])->name('planes.edit');
+    Route::put('/planes/{plan}', [PlanController::class, 'update'])->name('planes.update');
     Route::patch('/planes/{plan}/desactivar', [PlanController::class, 'desactivar'])->name('planes.desactivar');
     Route::delete('/planes/{plan}', [PlanController::class, 'destroy'])->name('planes.destroy');
 
