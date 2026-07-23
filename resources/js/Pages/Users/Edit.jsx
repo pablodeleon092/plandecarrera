@@ -1,5 +1,5 @@
 import Button from '@/Components/Button';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, useForm, usePage, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import InputLabel from '@/Components/InputLabel';
@@ -68,6 +68,15 @@ export default function Edit({ institutos, flash, returnTo = 'index' }) {
     };
 
     const coordinador = user.cargo === 'Coordinador de Carrera';
+
+    const isDisabled = data.cargo === "Administrador" || data.cargo === "Administrativo de Secretaria Academica";
+
+    useEffect(() => {
+        if (isDisabled) {
+            // Si el select se desactiva, reseteamos el valor en el estado de Inertia/React
+            setData('instituto_id', ''); 
+        }
+    }, [isDisabled]);
 
     return (
         <AuthenticatedLayout
@@ -240,6 +249,7 @@ export default function Edit({ institutos, flash, returnTo = 'index' }) {
                         <InputLabel htmlFor="instituto_id" value="Instituto" />
 
                         <select
+                            disabled = {isDisabled}
                             id="instituto_id"
                             name="instituto_id"
                             value={data.instituto_id}
