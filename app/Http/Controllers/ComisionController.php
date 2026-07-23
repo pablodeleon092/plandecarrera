@@ -120,7 +120,7 @@ class ComisionController extends Controller
             'can' => [
                 'view' => $user->can('view', $comision),
                 'update' => $user->can('update', $comision),
-                'delete' => $user->can('delete', $comision),
+                'delete' => $user->can('restore', $comision),
                 'deleteHorario' => $user->can('deleteAny', Horario::class),
             ],
         ]);

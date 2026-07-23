@@ -172,7 +172,7 @@ class MateriaController extends Controller
             'can' => [
                 'view' => $user->can('view', $materia),
                 'update' => $user->can('update', $materia),
-                'delete' => $user->can('delete', $materia),
+                'delete' => $user->can('restore', $materia),
             ],
         ]);
     }

@@ -48,7 +48,7 @@ export default function Register({ institutos, pendingUser = {} }) {
                 <form onSubmit={submit} className="p-6 space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="mt-4">
-                        <InputLabel htmlFor="name" value="Usuario"/>
+                        <InputLabel htmlFor="name" value="Username"/>
 
                         <TextInput
                             id="name"
