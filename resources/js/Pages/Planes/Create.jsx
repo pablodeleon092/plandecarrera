@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import Button from '@/Components/Button';
 import TableFilters from "@/Components/TableFilters";
@@ -145,6 +145,28 @@ export default function Create({ auth, carrera, materiasEnPlanAnterior, materias
             <Head title="Nuevo Plan"/>
 
             <div className="container mx-auto px-4 py-8 max-w-5xl">
+                <Button
+                    variant="secondary"
+                    as={Link}
+                    href={route('carreras.show', carrera.id)}
+                    className="mb-4 inline-flex items-center gap-2"
+                >
+                    <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                        />
+                    </svg>
+                    Volver a la carrera
+                </Button>
 
                 {/* PASO 1: Conservar Materias */}
                 {step === 1 && (

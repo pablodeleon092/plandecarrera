@@ -28,12 +28,8 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                     {/* Botón Volver */}
                     <div className="mb-4">
                         <Button variant="secondary"
-                            as={Link}
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                window.history.back();
-                            }}
+                            as="a"
+                            href={route('comisiones.index')}
                             className="flex items-center gap-2"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +152,10 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                 />
                             )}
                             {currentTab === 'horarios' && (
-                                <ComisionHorarios comision={comision} />
+                                <ComisionHorarios
+                                    comision={comision}
+                                    canDelete={can.deleteHorario}
+                                />
                             )}
                         </div>
                     </div>
