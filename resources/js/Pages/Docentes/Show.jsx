@@ -8,9 +8,13 @@ import DocenteComisiones from './Partials/DocenteComisiones'; // <--- Nuevo
 export default function Show({ auth, docente, comisiones, can = { update: false, delete: false } }) { // <--- Agregamos 'comisiones'
     const [currentTab, setCurrentTab] = useState('informacion');
 
-    const handleDelete = () => {
-        if (confirm(`¿Estás seguro de que quieres eliminar al docente ${docente.nombre} ${docente.apellido}?`)) {
-            router.delete(route('docentes.destroy', docente.id));
+    const handleToggleStatus = () => {
+        const action = docente.es_activo ? 'desactivar' : 'activar';
+
+        if (confirm(`¿Estás seguro de ${action} el "${docente.nombre}"?`)) {
+            router.patch(route('docentes.toggleStatus', docente), {}, {
+                preserveScroll: true
+            });
         }
     };
 
@@ -69,12 +73,12 @@ export default function Show({ auth, docente, comisiones, can = { update: false,
                                         </Button>
                                     )}
                                     {can.delete && (
-                                        <Button variant="danger"
-                                            onClick={handleDelete}
+                                        <Button  variant={docente.es_activo ? 'danger' : 'primary'}
+                                            onClick={handleToggleStatus}
                                         >
-                                            Eliminar
+                                            {docente.es_activo ? 'Desactivar' : 'Activar'}
                                         </Button>
-                                    )}
+                                    )}   
                                 </div>
                             </div>
                         </div>

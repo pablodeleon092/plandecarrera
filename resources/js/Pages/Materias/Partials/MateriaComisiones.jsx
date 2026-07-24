@@ -22,16 +22,21 @@ export default function MateriaComisiones({ comisiones, materia, canDelete = fal
                             >
                                 Ver Detalles
                             </Link>
-
                             {canDelete && (
                                 <Link
-                                    href={route('comisiones.destroy', comision.id)}
-                                    method="delete"
+                                    href={route('comisiones.toggleStatus', comision.id)}
+                                    method="patch"
                                     as="button"
-                                    onBefore={() => confirm('¿Estás seguro de eliminar esta comisión?')}
-                                    className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 transition"
+                                    onBefore={() => 
+                                        confirm(`¿Estás seguro de ${comision.estado ? 'desactivar' : 'activar'} esta comisión?`)
+                                    }
+                                    className={`px-3 py-1 rounded-full text-white transition ${
+                                        comision.estado 
+                                            ? 'bg-red-600 hover:bg-red-700' 
+                                            : 'bg-green-600 hover:bg-green-700'
+                                    }`}
                                 >
-                                    Eliminar
+                                    {comision.estado ? 'Desactivar' : 'Activar'}
                                 </Link>
                             )}
                         </div>

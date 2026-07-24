@@ -56,7 +56,7 @@ export default function CreateDicta({ auth, comision, periodo, flash, docente, f
                             >
                                 <option value="">-- Seleccione un cargo --</option>
                                 {docente.cargos.map(cargo => (
-                                    <option key={cargo.id} value={cargo.id}>{cargo.nombre}</option>
+                                    <option key={cargo.id} value={cargo.id}>{cargo.nombre} {cargo.dedicacion ? `(${cargo.dedicacion.nombre})` : ''}</option>
                                 ))}
                             </select>
                             {errors.cargo_id && <p className="text-red-500 text-sm mt-1">{errors.cargo_id}</p>}

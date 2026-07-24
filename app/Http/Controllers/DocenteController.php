@@ -131,7 +131,7 @@ class DocenteController extends Controller
             'comisiones' => $docente->comisiones,
             'can' => [
                 'update' => $user->can('update', $docente),
-                'delete' => $user->can('delete', $docente),
+                'delete' => $user->can('restore', $docente),
                 'manageCargos' => $user->can('manageCargos', $docente),
             ],
         ]);
