@@ -11,6 +11,7 @@ use App\Models\Docente;
 use App\Models\Dedicaciones;
 use App\Models\Dicta;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Services\ReportService;
 use App\Services\QueryFilter;
@@ -131,6 +132,7 @@ class DocenteController extends Controller
             'can' => [
                 'update' => $user->can('update', $docente),
                 'delete' => $user->can('delete', $docente),
+                'manageCargos' => $user->can('manageCargos', $docente),
             ],
         ]);
     }
@@ -203,6 +205,42 @@ class DocenteController extends Controller
             'dedicaciones' => $dedicaciones,
             'comisionId' => $validated['comision_id'] ?? null,
         ]);
+    }
+
+    /**
+     * Muestra la pantalla de selección para eliminar cargos del docente.
+     */
+    public function eliminarCargos(Docente $docente)
+    {
+        $this->authorize('manageCargos', $docente);
+        $docente->load('cargos.dedicacion');
+
+        return Inertia::render('Docentes/Cargos/Delete', [
+            'docente' => $docente,
+            'cargos' => $docente->cargos,
+        ]);
+    }
+
+    /**
+     * Elimina uno o varios cargos del docente y redirige a su ficha.
+     */
+    public function destroyCargos(Request $request, Docente $docente)
+    {
+        $this->authorize('manageCargos', $docente);
+
+        $validated = $request->validate([
+            'cargo_ids' => 'required|array|min:1',
+            'cargo_ids.*' => 'integer|exists:cargos,id',
+        ]);
+
+        DB::transaction(function () use ($docente, $validated) {
+            // Scopeado por el docente: imposible borrar cargos de otro docente.
+            $docente->cargos()->whereIn('id', $validated['cargo_ids'])->delete();
+        });
+
+        return redirect()
+            ->route('docentes.show', $docente->id)
+            ->with('success', 'Cargo(s) eliminado(s) correctamente.');
     }
 
     public function toggleStatus(Docente $docente)

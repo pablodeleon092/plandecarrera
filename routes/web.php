@@ -58,9 +58,11 @@ Route::middleware('auth')->group(function () {
     //Route::get('/docentes/exportar', [DocenteController::class, 'exportar'])->name('docentes.exportar');
     Route::get('/exportar/{tipo}', [ReportController::class, 'exportar'])->name('exportar.pdf');
     Route::resource('docentes', DocenteController::class);
-    Route::resource('cargos', CargoController::class);
+    Route::resource('cargos', CargoController::class)->only(['store']);
     Route::get('docentes/{docente}/cargo/create', [DocenteController::class, 'createCargo'])->name('docentes.cargo.create');
     Route::post('docentes/{docente}/cargo', [DocenteController::class, 'addCargo'])->name('docentes.cargo.store');
+    Route::get('docentes/{docente}/cargos/eliminar', [DocenteController::class, 'eliminarCargos'])->name('docentes.cargos.eliminar');
+    Route::delete('docentes/{docente}/cargos', [DocenteController::class, 'destroyCargos'])->name('docentes.cargos.destroy');
     Route::patch('docentes/{docente}/toggle-status', [DocenteController::class, 'toggleStatus'])->name('docentes.toggleStatus');
 
 

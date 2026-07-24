@@ -24,11 +24,7 @@ export default function Show({ auth, docente, comisiones, can = { update: false,
                     <div className="mb-4">
                         <Button variant="secondary"
                             as={Link}
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                window.history.back();
-                            }}
+                            href={route('docentes.index')}
                             className="flex items-center gap-2"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,7 +111,7 @@ export default function Show({ auth, docente, comisiones, can = { update: false,
                         {/* Contenido Dinámico */}
                         <div className="p-8">
                             {currentTab === 'informacion' ? (
-                                <DocenteInfo docente={docente} />
+                                <DocenteInfo docente={docente} can={can} />
                             ) : (
                                 <DocenteComisiones comisiones={comisiones} />
                             )}

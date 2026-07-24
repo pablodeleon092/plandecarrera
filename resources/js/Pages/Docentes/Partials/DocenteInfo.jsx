@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
 
-export default function DocenteInfo({ docente }) {
+export default function DocenteInfo({ docente, can = {} }) {
     return (
         <div className="grid md:grid-cols-2 gap-8">
             {/* Columna Izquierda: Información Principal */}
@@ -38,7 +38,17 @@ export default function DocenteInfo({ docente }) {
             {/* Columna Derecha: Cargos */}
             <div className="space-y-6">
                 <div className="bg-gray-50 rounded-lg p-6 border border-gray-100">
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">Cargos Asignados</h3>
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-semibold text-gray-500 uppercase">Cargos Asignados</h3>
+                        {docente.cargos && docente.cargos.length > 0 && can?.manageCargos && (
+                            <Link
+                                href={route('docentes.cargos.eliminar', docente.id)}
+                                className="text-sm font-medium text-red-600 hover:underline"
+                            >
+                                Eliminar cargos
+                            </Link>
+                        )}
+                    </div>
                     {docente.cargos && docente.cargos.length > 0 ? (
                         <ul className="space-y-2">
                             {docente.cargos.map(cargo => (

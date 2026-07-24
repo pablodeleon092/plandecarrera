@@ -3,28 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Cargo;
 use App\Models\Docente;
-use Inertia\Inertia;
 
 class CargoController extends Controller
 {
-    public function show(Cargo $cargo)
-    {
-        $docente = $cargo->docente;
-        $user = auth()->user();
-
-        return Inertia::render('Docentes/Cargos/Show', [
-            'cargo' => $cargo,
-            'docente' => $docente,
-            'can' => [
-                'view' => $user->can('consultar_docente'),
-                'update' => $user->can('update', $docente),
-                'delete' => $user->can('delete', $docente),
-            ],
-        ]);        
-    }
-
     public function store(Request $request)
     {
         $docenteReference = $request->validate([
@@ -59,16 +41,5 @@ class CargoController extends Controller
         return redirect()
             ->route('docentes.show', $docente->id)
             ->with('success', 'Cargo agregado exitosamente');
-    }
-
-
-    public function destroy(Cargo $cargo)
-    {
-        $docente = $cargo->docente;
-        $this->authorize('delete', $docente);
-        $cargo->delete();
-        return redirect()
-            ->route('docentes.index')
-            ->with('success', '¡El Cargo ha sido eliminado exitosamente!');    
     }
 }
