@@ -21,17 +21,24 @@ class CoordinadorAcademicoDashboard implements DashboardStrategy
     {
         $institutoId = $user->instituto_id;
 
+        if ($user->cargo === 'Administrador') {
+            $institutoId = $request->input('instituto_id') ?? Instituto::first()?->id;
+        } else {
+            if (!$institutoId) {
+                abort(403, 'Usuario sin instituto asignado');
+            }
+        }
+
         // Obtenemos los datos a través de métodos especializados
         $materiasCompartidas = $this->getMateriasCompartidas($institutoId);
         $docentesStats = $this->getDocentesStats($institutoId);
         $docentesMulti = $this->filtrarDocentesMultiCarrera($docentesStats, $institutoId);
         $superposiciones = $this->getSuperposicionesHorarias($institutoId);
+        $comisionesStats = $this->getComisionesStats($institutoId);
         
         $totalMaterias = $this->getTotalMateriasInstituto($institutoId);
 
         return Inertia::render('Gestion/DashboardCoordinadorAcademico', [
-            'auth' => ['user' => $user],
-            
             'metrics' => [
                 'sharedPercentage' => $totalMaterias > 0 
                     ? round(($materiasCompartidas->count() / $totalMaterias) * 100, 1) 
@@ -39,6 +46,9 @@ class CoordinadorAcademicoDashboard implements DashboardStrategy
                 'multiCareerTeachersCount' => $docentesMulti->count(),
                 'conflictsCount' => $superposiciones->count(), 
                 'totalCareers' => Carrera::where('instituto_id', $institutoId)->count(),
+                'totalComisiones' => $comisionesStats['totalComisiones'],
+                'comisionesSinCobertura' => $comisionesStats['comisionesSinCobertura'],
+                'porcentajeCobertura' => $comisionesStats['porcentajeCobertura'],
             ],
 
             'stats' => [
@@ -75,6 +85,32 @@ class CoordinadorAcademicoDashboard implements DashboardStrategy
                     ->filter()->unique()->values()
             ])
             ->values();
+    }
+
+    private function getComisionesStats($institutoId)
+    {
+        $anioActual = date('Y');
+
+        $totalComisiones = Comision::byInstituto($institutoId)
+            ->where('anio', $anioActual)
+            ->count();
+
+        $comisionesConCobertura = Comision::byInstituto($institutoId)
+            ->where('anio', $anioActual)
+            ->whereHas('dictas', function ($q) {
+                $q->whereHas('docente', fn($d) => $d->where('es_activo', true))
+                    ->whereHas('cargo', function ($c) {
+                        $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
+                    });
+            })
+            ->count();
+
+        return [
+            'totalComisiones' => $totalComisiones,
+            'comisionesConCobertura' => $comisionesConCobertura,
+            'comisionesSinCobertura' => max(0, $totalComisiones - $comisionesConCobertura),
+            'porcentajeCobertura' => $totalComisiones > 0 ? round(($comisionesConCobertura / $totalComisiones) * 100, 1) : 0,
+        ];
     }
 
     private function getDocentesStats($institutoId)
@@ -169,9 +205,11 @@ class CoordinadorAcademicoDashboard implements DashboardStrategy
                 'choques' => $choques->map(fn($c) => [
                     'dia' => $c->dia,
                     'materia1' => $c->materia1,
+                    'comision1_id' => $c->comision1_id,
                     'inicio1' => $c->inicio1,
                     'fin1' => $c->fin1,
                     'materia2' => $c->materia2,
+                    'comision2_id' => $c->comision2_id,
                     'inicio2' => $c->inicio2,
                     'fin2' => $c->fin2,
                 ])->values(),

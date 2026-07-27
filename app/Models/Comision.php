@@ -47,11 +47,35 @@ class Comision extends Model
     public function dictas()
     {
         return $this->hasMany(Dicta::class, 'comision_id');
-    } 
+    }
 
     public function horarios()
     {
         return $this->hasMany(Horario::class, 'comision_id');
+    }
+
+    public function periodoAcademico(): array
+    {
+        $anio = (int) $this->anio;
+
+        if ($this->materia->esAnual()) {
+            return [
+                'inicio' => sprintf('%d-01-01', $anio),
+                'fin' => sprintf('%d-12-31', $anio),
+            ];
+        }
+
+        return match ($this->cuatrimestre) {
+            '1ro' => [
+                'inicio' => sprintf('%d-01-01', $anio),
+                'fin' => sprintf('%d-08-01', $anio),
+            ],
+            '2do' => [
+                'inicio' => sprintf('%d-08-01', $anio),
+                'fin' => sprintf('%d-12-31', $anio),
+            ],
+            default => throw new \LogicException("Cuatrimestre no válido para la comisión {$this->id}."),
+        };
     }
 
     public function getDocentesWithCargoAttribute()
@@ -63,13 +87,13 @@ class Comision extends Model
             // 2. Si no fue cargada, forzar la carga (esto dispara la consulta N+1, pero es el fallback)
             $dictas = $this->dictas()->with(['docente', 'cargo'])->get();
         }
-        
+
         // 3. Mapear la colección, asegurándonos que 'docente' y 'cargo' existen
         return $dictas->map(function($dicta) {
             // Usamos null coalescing para evitar errores si las sub-relaciones no existen
             $docenteNombre = $dicta->docente->nombre ?? 'N/A';
             $docenteApellido = $dicta->docente->apellido ?? 'N/A';
-            
+
             return [
                 'id' => $dicta->docente->id ?? null,
                 'dicta_id' => $dicta->id,
@@ -87,7 +111,7 @@ class Comision extends Model
 
     public function getDocentesNamesByCargoAttribute()
     {
-        $docentesWithCargo = $this->docentes_with_cargo; 
+        $docentesWithCargo = $this->docentes_with_cargo;
         $docentesCollection = collect($docentesWithCargo);
 
         $namesByCargo = [
@@ -97,14 +121,14 @@ class Comision extends Model
             'Jefe de Trabajos Practicos' => collect(),
             'Ayudante de Primera' => collect(),
         ];
-    
+
         $uniqueDocentes = $docentesCollection->unique('id');
 
         foreach ($uniqueDocentes as $docente) {
             $cargoName = $docente['cargo'];
             $fullName = $docente['nombre'] . ' ' . $docente['apellido'];
 
-            
+
             if ($cargoName && $cargoName === 'Titular') {
                 $namesByCargo['Titular']->push($fullName);
             } elseif ($cargoName && $cargoName === 'Asociado') {
@@ -118,7 +142,7 @@ class Comision extends Model
             }
         }
 
-        
+
 
         return [
             'totalDocentes' => $uniqueDocentes->count(),
@@ -141,6 +165,11 @@ class Comision extends Model
         });
     }
 
+    public function scopeActivas($query)
+    {
+        return $query->where('estado', true);
+    }
+
     /**
      * Scope para filtrar comisiones por un array de Carrera IDs.
      * Sigue la relación a Materia y usa la lógica de planes de la materia.
@@ -157,22 +186,23 @@ class Comision extends Model
     {
         return $query->whereHas('materia', function ($q) use ($carreraId) {
             // Invoca el scope 'ByCarreras' del modelo Materia
-            $q->byCarrera ($carreraIds);
+            $q->byCarrera ($carreraId);
         });
     }
 
     public function estaCompleta()
     {
-        // Cargamos los nombres de los cargos de los dictas asociados
-        $cargos = $this->dictas->map(fn($d) => strtolower($d->cargo->nombre ?? ''));
+        // Cargamos los nombres de los cargos asociados a docentes activos
+        $dictasActivas = $this->dictas->filter(fn($d) => $d->docente && $d->docente->es_activo);
+        $cargos = $dictasActivas->map(fn($d) => strtolower($d->cargo->nombre ?? ''));
 
         // 1. Verificar Responsable (Titular o Adjunto)
-        $tieneResponsable = $cargos->contains(fn($c) => 
+        $tieneResponsable = $cargos->contains(fn($c) =>
             str_contains($c, 'titular') || str_contains($c, 'adjunto')
         );
-        
+
         // 2. Verificar Auxiliar (JTP o Ayudante)
-        $tieneAuxiliar = $cargos->contains(fn($c) => 
+        $tieneAuxiliar = $cargos->contains(fn($c) =>
             str_contains($c, 'jefe de trabajos') || str_contains($c, 'ayudante')
         );
 

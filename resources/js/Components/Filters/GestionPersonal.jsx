@@ -2,13 +2,18 @@ import React, { useState } from 'react';
 import { router } from '@inertiajs/react';
 import DynamicFilters from '@/Components/Filters/DynamicFilters';
 import { PrinterIcon } from '@heroicons/react/24/outline';
+import BtnExportar from '@/Components/Buttons/BtnExportar'; // Ajusta la ruta
 
-export default function GestionPersonal ({ institutos, carreras, dedicaciones }) {
+export default function GestionPersonal ({ institutos, carreras, dedicaciones, search = '' }) {
     // Definimos qué campos pueden ser filtrados
     const availableFields = [
-        { key: 'nombre', label: 'Nombre', type: 'string' },
-        { key: 'cargos.nombre', label: 'Cargo', type: 'string' },
-        { key: 'legajo', label: 'Legajo', type: 'number' }, // Ejemplo de número
+        { key: 'cargos.nombre', label: 'Cargo', type: 'select', options: [
+            { value: 'Titular', label: 'Titular' },
+            { value: 'Asociado', label: 'Asociado' },
+            { value: 'Adjunto', label: 'Adjunto' },
+            { value: 'Jefe de Trabajos Practicos', label: 'Jefe de Trabajos Prácticos' },
+            { value: 'Ayudante de Primera', label: 'Ayudante de Primera' },
+        ]},
         { key: 'es_activo', label: 'Estado', type: 'select', 
           options: [{ value: '1', label: 'Activo' }, { value: '0', label: 'Inactivo' }] 
         },
@@ -35,10 +40,31 @@ export default function GestionPersonal ({ institutos, carreras, dedicaciones })
 
     const [activeFilters, setActiveFilters] = useState([]);
 
-    const handleApplyFilters = (key, value) => {
-        const newFilters = { ...activeFilters, [key]: value };
-        router.get(route('docentes.index'), 
-        newFilters, {
+    const handleApplyFilters = () => {
+        const params = new URLSearchParams();
+
+        if (search) {
+            params.set('search', search);
+        }
+
+        activeFilters.forEach((filter, index) => {
+            params.append(`filters[${index}][field]`, filter.field);
+            params.append(`filters[${index}][operator]`, filter.operator);
+
+            if (typeof filter.value === 'object' && filter.value !== null) {
+                params.append(`filters[${index}][value][min]`, filter.value.min || '');
+                params.append(`filters[${index}][value][max]`, filter.value.max || '');
+            } else {
+                params.append(`filters[${index}][value]`, filter.value || '');
+            }
+        });
+
+        const query = params.toString();
+        const url = query
+            ? `${route('docentes.index')}?${query}`
+            : route('docentes.index');
+
+        router.get(url, {}, {
             preserveScroll: true,
             preserveState: true,
             replace: true,
@@ -46,30 +72,6 @@ export default function GestionPersonal ({ institutos, carreras, dedicaciones })
     };
 
 
-    const handleExportarPdf = () => {
-        // 1. Creamos el objeto de búsqueda de la URL
-        const params = new URLSearchParams();
-
-        activeFilters.forEach((filter, index) => {
-            if (typeof filter.value === 'object' && filter.value !== null) {
-                params.append(`filters[${index}][field]`, filter.field);
-                params.append(`filters[${index}][operator]`, filter.operator);
-                params.append(`filters[${index}][value][min]`, filter.value.min || '');
-                params.append(`filters[${index}][value][max]`, filter.value.max || '');
-            } else {
-                params.append(`filters[${index}][field]`, filter.field);
-                params.append(`filters[${index}][operator]`, filter.operator);
-                params.append(`filters[${index}][value]`, filter.value || '');
-            }
-        });
-
-        // 3. Construimos la URL final
-        const baseUrl = route('docentes.exportar');
-        const fullUrl = `${baseUrl}?${params.toString()}`;
-
-        // 4. Redireccionamos (esto disparará la descarga en el navegador)
-        window.location.href = fullUrl;
-    };
     
     return (
             <div className="p-4 bg-white border rounded shadow-sm">
@@ -82,22 +84,14 @@ export default function GestionPersonal ({ institutos, carreras, dedicaciones })
                 {/* BOTÓN APLICAR: Posicionado a la derecha del área de filtros */}
                 <div className="flex justify-end mt-4 border-t pt-4">
                     <button 
+                        type="button"
                         onClick={handleApplyFilters}
                         className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition shadow-sm"
                     >
                         Aplicar Filtros
                     </button>
                 </div>
-                        <button
-                            onClick={handleExportarPdf}
-                            className="inline-flex items-center px-4 py-2 bg-red-600 border 
-                            border-transparent rounded-md font-semibold 
-                            text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:border-red-900 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150"
-                            title="Exportar lista filtrada a PDF"
-                        >
-                            <PrinterIcon className="w-4 h-4" />
-                            Exportar PDF
-                        </button>
+                    <BtnExportar tipo="docentes" filters={activeFilters} />
             </div>
         </div>
     );

@@ -56,36 +56,36 @@ VALUES
     (4, 'IF003', 'Algorítmica y Programación I', true, 'cuatrimestral', 2, 8, 120, NOW(), NOW()),
     (5, 'MA008', 'Elementos de Lógica y Matemática Discreta', true, 'cuatrimestral', 2, 8, 120, NOW(), NOW()),
     (6, 'MA046', 'Análisis Matemático', true, 'cuatrimestral', 2, 11, 165, NOW(), NOW()),
-    (7, 'IF004', 'Sistemas y Organizaciones', true, 'cuatrimestral', 3, 6, 90, NOW(), NOW()),
-    (8, 'IF005', 'Arquitectura de Computadoras', true, 'cuatrimestral', 3, 8, 120, NOW(), NOW()),
-    (9, 'IF006', 'Algorítmica y Programación II', true, 'cuatrimestral', 3, 8, 120, NOW(), NOW()),
-    (10, 'MA006', 'Estadística', true, 'cuatrimestral', 3, 6, 90, NOW(), NOW()),
-    (11, 'IF007', 'Bases de Datos I', true, 'cuatrimestral', 4, 9, 135, NOW(), NOW()),
-    (12, 'IF030', 'Programación y Diseño Orientado a Objetos', true, 'cuatrimestral', 4, 8, 120, NOW(), NOW()),
-    (13, 'IF031', 'Ingeniería de Software I', true, 'cuatrimestral', 4, 10, 150, NOW(), NOW()),
-    (14, 'IF009', 'Laboratorio de Programación y Lenguajes', true, 'cuatrimestral', 5, 6, 90, NOW(), NOW()),
-    (15, 'IF013', 'Fundamentos Teóricos de Informática', true, 'cuatrimestral', 5, 8, 120, NOW(), NOW()),
-    (16, 'IF033', 'Ingeniería de Software II', true, 'cuatrimestral', 5, 8, 120, NOW(), NOW()),
-    (17, 'IF038', 'Introducción a la Concurrencia', true, 'cuatrimestral', 5, 4, 60, NOW(), NOW()),
-    (18, 'IF044', 'Bases de Datos II', true, 'cuatrimestral', 6, 8, 120, NOW(), NOW()),
-    (19, 'IF037', 'Sistemas Operativos', true, 'cuatrimestral', 6, 8, 120, NOW(), NOW()),
-    (20, 'IF055', 'Laboratorio de Software', true, 'cuatrimestral', 6, 7, 105, NOW(), NOW()),
-    (21, 'IF056', 'Seminario de Aspectos Legales y Profesionales I', true, 'cuatrimestral', 6, 4, 60, NOW(), NOW()),
-    (22, 'IF019', 'Redes y Transmisión de Datos', true, 'cuatrimestral', 7, 9, 135, NOW(), NOW()),
-    (23, 'IF020', 'Paradigmas y Lenguajes de Programación', true, 'cuatrimestral', 7, 8, 120, NOW(), NOW()),
-    (24, 'IF017', 'Taller de nuevas Tecnologías', true, 'cuatrimestral', 7, 6, 90, NOW(), NOW()),
-    (25, 'IF022', 'Sistemas Distribuidos', true, 'cuatrimestral', 8, 8, 120, NOW(), NOW()),
-    (26, 'IF035', 'Ingeniería de Software III', true, 'cuatrimestral', 8, 8, 120, NOW(), NOW()),
-    (27, 'IF057', 'Seminario de Aspectos Legales y Profesionales II', true, 'cuatrimestral', 8, 4, 60, NOW(), NOW()),
-    (28, 'IF059', 'Sistemas Inteligentes', true, 'cuatrimestral', 8, 6, 90, NOW(), NOW()),
-    (29, 'IF060', 'Sistemas de Tiempo Real', true, 'cuatrimestral', 9, 7, 105, NOW(), NOW()),
-    (30, 'IF061', 'Sistemas Paralelos', true, 'cuatrimestral', 9, 6, 90, NOW(), NOW()),
-    (31, 'IF062', 'Bases de Datos Distribuidas', true, 'cuatrimestral', 9, 6, 90, NOW(), NOW()),
-    (32, 'IF063', 'Seminario de Seguridad', true, 'cuatrimestral', 9, 4, 60, NOW(), NOW()),
-    (33, 'IF027', 'Modelos y Simulación', true, 'cuatrimestral', 10, 6, 90, NOW(), NOW()),
-    (34, 'IF042', 'Proyecto de Software', true, 'cuatrimestral', 10, 8, 120, NOW(), NOW()),
+    (7, 'IF004', 'Sistemas y Organizaciones', true, 'cuatrimestral', 1, 6, 90, NOW(), NOW()),
+    (8, 'IF005', 'Arquitectura de Computadoras', true, 'cuatrimestral', 1, 8, 120, NOW(), NOW()),
+    (9, 'IF006', 'Algorítmica y Programación II', true, 'cuatrimestral', 1, 8, 120, NOW(), NOW()),
+    (10, 'MA006', 'Estadística', true, 'cuatrimestral', 1, 6, 90, NOW(), NOW()),
+    (11, 'IF007', 'Bases de Datos I', true, 'cuatrimestral', 2, 9, 135, NOW(), NOW()),
+    (12, 'IF030', 'Programación y Diseño Orientado a Objetos', true, 'cuatrimestral', 2, 8, 120, NOW(), NOW()),
+    (13, 'IF031', 'Ingeniería de Software I', true, 'cuatrimestral', 2, 10, 150, NOW(), NOW()),
+    (14, 'IF009', 'Laboratorio de Programación y Lenguajes', true, 'cuatrimestral', 1, 6, 90, NOW(), NOW()),
+    (15, 'IF013', 'Fundamentos Teóricos de Informática', true, 'cuatrimestral', 1, 8, 120, NOW(), NOW()),
+    (16, 'IF033', 'Ingeniería de Software II', true, 'cuatrimestral', 1, 8, 120, NOW(), NOW()),
+    (17, 'IF038', 'Introducción a la Concurrencia', true, 'cuatrimestral', 1, 4, 60, NOW(), NOW()),
+    (18, 'IF044', 'Bases de Datos II', true, 'cuatrimestral', 2, 8, 120, NOW(), NOW()),
+    (19, 'IF037', 'Sistemas Operativos', true, 'cuatrimestral', 2, 8, 120, NOW(), NOW()),
+    (20, 'IF055', 'Laboratorio de Software', true, 'cuatrimestral', 2, 7, 105, NOW(), NOW()),
+    (21, 'IF056', 'Seminario de Aspectos Legales y Profesionales I', true, 'cuatrimestral', 2, 4, 60, NOW(), NOW()),
+    (22, 'IF019', 'Redes y Transmisión de Datos', true, 'cuatrimestral', 1, 9, 135, NOW(), NOW()),
+    (23, 'IF020', 'Paradigmas y Lenguajes de Programación', true, 'cuatrimestral', 1, 8, 120, NOW(), NOW()),
+    (24, 'IF017', 'Taller de nuevas Tecnologías', true, 'cuatrimestral', 1, 6, 90, NOW(), NOW()),
+    (25, 'IF022', 'Sistemas Distribuidos', true, 'cuatrimestral', 2, 8, 120, NOW(), NOW()),
+    (26, 'IF035', 'Ingeniería de Software III', true, 'cuatrimestral', 2, 8, 120, NOW(), NOW()),
+    (27, 'IF057', 'Seminario de Aspectos Legales y Profesionales II', true, 'cuatrimestral', 2, 4, 60, NOW(), NOW()),
+    (28, 'IF059', 'Sistemas Inteligentes', true, 'cuatrimestral', 2, 6, 90, NOW(), NOW()),
+    (29, 'IF060', 'Sistemas de Tiempo Real', true, 'cuatrimestral', 1, 7, 105, NOW(), NOW()),
+    (30, 'IF061', 'Sistemas Paralelos', true, 'cuatrimestral', 1, 6, 90, NOW(), NOW()),
+    (31, 'IF062', 'Bases de Datos Distribuidas', true, 'cuatrimestral', 1, 6, 90, NOW(), NOW()),
+    (32, 'IF063', 'Seminario de Seguridad', true, 'cuatrimestral', 1, 4, 60, NOW(), NOW()),
+    (33, 'IF027', 'Modelos y Simulación', true, 'cuatrimestral', 2, 6, 90, NOW(), NOW()),
+    (34, 'IF042', 'Proyecto de Software', true, 'cuatrimestral', 2, 8, 120, NOW(), NOW()),
     (35, 'FA007', 'Acreditación de Idioma Inglés', true, 'cuatrimestral', 1, 0, 0, NOW(), NOW()),
-    (36, 'IF026', 'Tesina', true, 'anual', 10, 0, 200, NOW(), NOW())
+    (36, 'IF026', 'Tesina', true, 'anual', 2, 0, 200, NOW(), NOW())
 ON CONFLICT (codigo) DO UPDATE SET
     nombre = EXCLUDED.nombre,
     horas_semanales = EXCLUDED.horas_semanales,
@@ -468,9 +468,27 @@ ON CONFLICT (id) DO NOTHING;
 SELECT setval('public.planes_id_seq', (SELECT COALESCE(MAX(id), 0) + 1 FROM public.planes), false);
 
 -- Asociar todas las materias al plan
-INSERT INTO public.plan_materia (plan_id, materia_id)
-SELECT 1, id FROM public.materias
-ON CONFLICT (plan_id, materia_id) DO NOTHING;
+INSERT INTO public.plan_materia (plan_id, materia_id, anio) VALUES
+-- 1er Año (Cuatrimestres 1 y 2)
+  (1, 1, 1), (1, 2, 1), (1, 3, 1), -- 1er Cuat
+  (1, 4, 1), (1, 5, 1), (1, 6, 1), -- 2do Cuat
+  (1, 36, 1),   
+-- 2do Año (Cuatrimestres 1 y 2)
+  (1, 7, 2), (1, 8, 2), (1, 9, 2), (1, 10, 2), -- 1er Cuat
+  (1, 11, 2), (1, 12, 2), (1, 13, 2),          -- 2do Cuat
+
+-- 3er Año (Cuatrimestres 1 y 2)
+  (1, 14, 3), (1, 15, 3), (1, 16, 3), (1, 17, 3), -- 1er Cuat
+  (1, 18, 3), (1, 19, 3), (1, 20, 3), (1, 21, 3), -- 2do Cuat
+
+-- 4to Año (Cuatrimestres 1 y 2)
+  (1, 22, 4), (1, 23, 4), (1, 24, 4),             -- 1er Cuat
+  (1, 25, 4), (1, 26, 4), (1, 27, 4), (1, 28, 4), -- 2do Cuat
+
+-- 5to Año (Cuatrimestres 1 y 2)
+  (1, 29, 5), (1, 30, 5), (1, 31, 5), (1, 32, 5), (1, 35, 5), -- 1er Cuat (inc. Inglés)
+  (1, 33, 5), (1, 34, 5)                       -- 2do Cuat (inc. Proyecto y Tesina)
+ON CONFLICT (plan_id, materia_id) DO UPDATE SET anio = EXCLUDED.anio;
 
 COMMIT;
 

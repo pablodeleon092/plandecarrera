@@ -80,8 +80,8 @@ class SecretariaDashboard implements DashboardStrategy
         }
         $totalDocentes = $queryDocentes->count();
 
-        // Total de comisiones del año actual
-        $queryComisiones = Comision::where('anio', $anioActual);
+        // Total de comisiones activas del año actual
+        $queryComisiones = Comision::activas()->where('anio', $anioActual);
         if ($institutoId !== 'all') {
             $queryComisiones->whereHas('materia.planes.carrera', function ($q) use ($institutoId) {
                 $q->where('instituto_id', $institutoId);
@@ -90,11 +90,13 @@ class SecretariaDashboard implements DashboardStrategy
         $totalComisiones = $queryComisiones->count();
 
         // Comisiones con cobertura (con docente responsable: Titular, Asociado, o Adjunto)
-        $queryComisionesCobertura = Comision::where('anio', $anioActual)
+        $queryComisionesCobertura = Comision::activas()
+            ->where('anio', $anioActual)
             ->whereHas('dictas', function ($q) {
-                $q->whereHas('cargo', function ($c) {
-                    $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
-                });
+                $q->whereHas('docente', fn($d) => $d->where('es_activo', true))
+                    ->whereHas('cargo', function ($c) {
+                        $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
+                    });
             });
         if ($institutoId !== 'all') {
             $queryComisionesCobertura->whereHas('materia.planes.carrera', function ($q) use ($institutoId) {
@@ -215,11 +217,13 @@ class SecretariaDashboard implements DashboardStrategy
     {
         $anioActual = date('Y');
 
-        $query = Comision::where('anio', $anioActual)
+        $query = Comision::activas()
+            ->where('anio', $anioActual)
             ->whereDoesntHave('dictas', function ($q) {
-                $q->whereHas('cargo', function ($c) {
-                    $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
-                });
+                $q->whereHas('docente', fn($d) => $d->where('es_activo', true))
+                    ->whereHas('cargo', function ($c) {
+                        $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
+                    });
             })
             ->with('materia');
 
@@ -270,19 +274,22 @@ class SecretariaDashboard implements DashboardStrategy
             $totalMaterias = $materiasIds->count();
 
             // Comisiones activas de la carrera
-            $comisiones = Comision::whereIn('id_materia', $materiasIds)
+            $comisiones = Comision::activas()
+                ->whereIn('id_materia', $materiasIds)
                 ->where('anio', $anioActual)
                 ->get();
 
             $totalComisiones = $comisiones->count();
 
             // Comisiones con cobertura
-            $comisionesConCobertura = Comision::whereIn('id_materia', $materiasIds)
+            $comisionesConCobertura = Comision::activas()
+                ->whereIn('id_materia', $materiasIds)
                 ->where('anio', $anioActual)
                 ->whereHas('dictas', function ($q) {
-                    $q->whereHas('cargo', function ($c) {
-                        $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
-                    });
+                    $q->whereHas('docente', fn($d) => $d->where('es_activo', true))
+                        ->whereHas('cargo', function ($c) {
+                            $c->whereIn('nombre', ['Titular', 'Asociado', 'Adjunto']);
+                        });
                 })
                 ->count();
 

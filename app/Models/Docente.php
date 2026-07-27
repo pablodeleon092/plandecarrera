@@ -62,12 +62,9 @@ class Docente extends Model
     public function scopeDeInstituto($query, $institutoId)
     {
         return $query->whereHas('comisiones.materia.planes', function ($q) use ($institutoId) {
-
-            $q->whereNull('anio_fin') // solo planes activos
-                ->whereHas('carrera', function ($c) use ($institutoId) {
-                    $c->where('instituto_id', $institutoId);
-                });
-
+            $q->whereHas('carrera', function ($c) use ($institutoId) {
+                $c->where('instituto_id', $institutoId);
+            });
         });
     }
 

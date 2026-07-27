@@ -6,6 +6,23 @@ use App\Models\{Docente, Cargo, Instituto, Carrera, Materia, Comision, Dicta, Fu
 
 class QueryFilter
 {
+    private const SPANISH_ACCENT_REPLACEMENTS = [
+        'á' => 'a',
+        'é' => 'e',
+        'í' => 'i',
+        'ó' => 'o',
+        'ú' => 'u',
+        'ü' => 'u',
+        'ñ' => 'n',
+        'Á' => 'a',
+        'É' => 'e',
+        'Í' => 'i',
+        'Ó' => 'o',
+        'Ú' => 'u',
+        'Ü' => 'u',
+        'Ñ' => 'n',
+    ];
+
     public function apply(Builder $query, array $filters): Builder
     {
         foreach ($filters as $filter) {
@@ -17,6 +34,42 @@ class QueryFilter
 
             $this->applyFilter($query, $field, $operator, $value);
         }
+
+        return $query;
+    }
+
+    public function applySearch(Builder $query, ?string $search, array $fields): Builder
+    {
+        $search = trim((string) $search);
+
+        if ($search === '' || empty($fields)) {
+            return $query;
+        }
+
+        $normalizedSearch = mb_strtolower(
+            strtr($search, self::SPANISH_ACCENT_REPLACEMENTS),
+            'UTF-8'
+        );
+
+        $query->where(function (Builder $searchQuery) use ($fields, $search, $normalizedSearch) {
+            foreach ($fields as $field) {
+                if ($field === 'legajo') {
+                    $grammar = $searchQuery->getQuery()->getGrammar();
+                    $wrappedField = $grammar->wrap($field);
+
+                    $searchQuery->orWhereRaw(
+                        "CAST({$wrappedField} AS TEXT) LIKE ?",
+                        ["%{$normalizedSearch}%"]
+                    );
+
+                    continue;
+                }
+
+                $searchQuery->orWhere(function (Builder $fieldQuery) use ($field, $search) {
+                    $this->applyContains($fieldQuery, $field, $search);
+                });
+            }
+        });
 
         return $query;
     }
@@ -51,25 +104,55 @@ class QueryFilter
 
     protected function applyOperator($query, $field, $operator, $value)
     {
-        
         switch ($operator) {
             case 'contains':
-                $query->where($field, 'ILIKE', "%{$value}%"); // Uso ILIKE para PostgreSQL (insensible a mayúsculas)
-                
+                $this->applyContains($query, $field, $value);
                 break;
+
             case 'equals':
                 $query->where($field, '=', $value);
-  
                 break;
+
             case 'not_equals':
                 $query->where($field, '!=', $value);
                 break;
+
+            // --- Casos solicitados ---
+            case 'greater':
+                $query->where($field, '>', $value);
+                break;
+
+            case 'less':
+                $query->where($field, '<', $value);
+                break;
+
             case 'between':
                 if (isset($value['min'], $value['max'])) {
                     $query->whereBetween($field, [$value['min'], $value['max']]);
                 }
                 break;
-            // Otros operadores...
         }
+    }
+
+    protected function applyContains($query, $field, $value): void
+    {
+        $grammar = $query->getQuery()->getGrammar();
+        $normalizedField = 'lower('.$grammar->wrap($field).')';
+        $bindings = [];
+
+        foreach (self::SPANISH_ACCENT_REPLACEMENTS as $accented => $plain) {
+            $normalizedField = "replace({$normalizedField}, ?, ?)";
+            $bindings[] = $accented;
+            $bindings[] = $plain;
+        }
+
+        $normalizedValue = mb_strtolower(
+            strtr((string) $value, self::SPANISH_ACCENT_REPLACEMENTS),
+            'UTF-8'
+        );
+
+        $bindings[] = "%{$normalizedValue}%";
+
+        $query->whereRaw("{$normalizedField} LIKE ?", $bindings);
     }
 }

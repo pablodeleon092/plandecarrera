@@ -1,15 +1,45 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 import { useState, useMemo } from 'react';
+import Button from '@/Components/Button';
 import Materias from './Partials/Materias';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
 import DocentesList from './Partials/DocentesList';
 
-export default function Dashboard({ user, institutos, materias, docentes, selectedInstitutoId: initialInstitutoId, selectedCarreraId: initialCarreraId, currentView: initialView }) {
+const CARGOS_DISPONIBLES = [
+    'Administrador',
+    'Secretaría académica',
+    'Director de instituto',
+    'Coordinador Academico',
+    'Administrativo de instituto',
+    'Coordinador de Carrera',
+    'Consejero'
+];
+
+const CARGOS_CON_VISTA_GLOBAL = new Set([
+    'Administrador',
+    'Secretaría académica',
+]);
+
+export default function Dashboard({
+    user,
+    institutos,
+    materias,
+    docentes,
+    selectedInstitutoId: initialInstitutoId,
+    selectedCarreraId: initialCarreraId,
+    currentView: initialView,
+    canViewAllInstitutos = false,
+}) {
     // 1. STATE 
-    const [selectedInstitutoId, setSelectedInstitutoId] = useState(initialInstitutoId || (institutos.length > 0 ? institutos[0].id : null));
+    const [selectedInstitutoId, setSelectedInstitutoId] = useState(
+        initialInstitutoId || (canViewAllInstitutos ? 'all' : (institutos[0]?.id ?? null))
+    );
     const [selectedCarreraId, setSelectedCarreraId] = useState(initialCarreraId || 'all');
+    const [selectedCargo, setSelectedCargo] = useState(user.cargo || '');
     const [currentView, setCurrentView] = useState(initialView || 'materias');
+    const canSelectAllInstitutos =
+        canViewAllInstitutos && CARGOS_CON_VISTA_GLOBAL.has(selectedCargo);
 
     // ----------------------------------------------------------------------
     // 2. LÓGICA DE DATOS
@@ -23,11 +53,15 @@ export default function Dashboard({ user, institutos, materias, docentes, select
 
     // B. Carreras Disponibles
     const carrerasDisponibles = useMemo(() => {
+        if (selectedInstitutoId === 'all') {
+            return institutos.flatMap(inst => inst.carreras ?? []);
+        }
+
         if (!selectedInstituto || !selectedInstituto.carreras) {
             return [];
         }
         return selectedInstituto.carreras;
-    }, [selectedInstituto]);
+    }, [institutos, selectedInstituto, selectedInstitutoId]);
 
 
     // ----------------------------------------------------------------------
@@ -35,7 +69,8 @@ export default function Dashboard({ user, institutos, materias, docentes, select
     // ----------------------------------------------------------------------
 
     const handleInstitutoChange = (e) => {
-        const newInstitutoId = parseInt(e.target.value);
+        const rawValue = e.target.value;
+        const newInstitutoId = rawValue === 'all' ? 'all' : Number(rawValue);
 
         // 1. Actualizar el estado local
         setSelectedInstitutoId(newInstitutoId);
@@ -43,7 +78,7 @@ export default function Dashboard({ user, institutos, materias, docentes, select
         // 2. Disparar la petición a Laravel con los nuevos filtros
         router.get(route('dashboard'), {
             instituto_id: newInstitutoId,
-            carrera_id: 'all', // Resetear la carrera al cambiar de instituto
+            selected_carrera: 'all', // Resetear la carrera al cambiar de instituto
             view: currentView
         }, {
             // Esto evita que se recargue toda la página, solo actualiza las props.
@@ -51,6 +86,17 @@ export default function Dashboard({ user, institutos, materias, docentes, select
             preserveState: true,
             replace: true,
         });
+    };
+
+    const handleCargoChange = (e) => {
+        const newCargo = e.target.value;
+
+        setSelectedCargo(newCargo);
+        setSelectedCarreraId('all');
+
+        if (!CARGOS_CON_VISTA_GLOBAL.has(newCargo) && selectedInstitutoId === 'all') {
+            setSelectedInstitutoId(institutos[0]?.id ?? null);
+        }
     };
 
     const handleCarreraChange = (e) => {
@@ -62,7 +108,7 @@ export default function Dashboard({ user, institutos, materias, docentes, select
         // 2. Disparar la petición a Laravel, conservando el instituto actual
         router.get(route('dashboard'), {
             instituto_id: selectedInstitutoId,
-            carrera_id: newCarreraId,
+            selected_carrera: newCarreraId,
             view: currentView
         }, {
             preserveScroll: true,
@@ -70,22 +116,6 @@ export default function Dashboard({ user, institutos, materias, docentes, select
             replace: true,
         });
     };
-
-    const handleTabChange = (view) => {
-        setCurrentView(view);
-
-        router.get(route('dashboard'), {
-            instituto_id: selectedInstitutoId,
-            carrera_id: selectedCarreraId,
-            view: view
-        }, {
-            preserveScroll: true,
-            preserveState: true,
-            replace: true,
-        });
-    };
-
-
 
 
     // ----------------------------------------------------------------------
@@ -98,122 +128,112 @@ export default function Dashboard({ user, institutos, materias, docentes, select
         ...carrerasDisponibles.map(c => ({ id: c.id, nombre: c.nombre }))
     ];
 
+    const handleRoleOverride = (e) => {
+        const cargo = selectedCargo;
+        router.get(route('dashboard'), {
+            // Pasamos el cargo elegido al backend
+            view: cargo,
+            instituto_id: selectedInstitutoId,
+            selected_carrera: selectedCarreraId,
+        }, {
+            preserveScroll: true,
+            replace: true,
+        });
+    };
 
     return (
         <AuthenticatedLayout
             user={user}
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard de Gestión
-                </h2>
+                <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                        Seleccionador de Dashboard
+                    </h2>
+                </div>
             }
         >
             <Head title="Dashboard" />
 
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg p-6">
+            <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg p-6">
+                {/* SELECTORES DE FILTRO */}
+                <div className="flex flex-col md:flex-row items-start gap-6 mb-8">
 
-                        {/* SELECTORES DE FILTRO (Permanecen en el Dashboard) */}
-                        <div className="flex flex-col md:flex-row gap-6 mb-8">
-
-                            {/* Selector de Instituto */}
-                            <div className="w-full md:w-1/2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="instituto_select">
-                                    Seleccionar Instituto
-                                </label>
-                                <select
-                                    id="instituto_select"
-                                    value={selectedInstitutoId || ''}
-                                    onChange={handleInstitutoChange}
-                                    disabled={institutos.length <= 1}
-                                    className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                >
-                                    {institutos.map(inst => (
-                                        <option key={inst.id} value={inst.id}>
-                                            {inst.nombre}
-                                        </option>
-                                    ))}
-                                </select>
-                                {institutos.length <= 1 && (
-                                    <p className="mt-2 text-xs text-gray-500">
-                                        Solo tiene acceso a su instituto.
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Selector de Carreras */}
-                            <div className="w-full md:w-1/2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="carrera_select">
-                                    Seleccionar Carrera
-                                </label>
-                                <select
-                                    id="carrera_select"
-                                    value={selectedCarreraId}
-                                    onChange={handleCarreraChange}
-                                    disabled={carrerasDisponibles.length === 0}
-                                    className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full"
-                                >
-                                    {carreraOptions.map(c => (
-                                        // Aseguramos que el ID se pase como string si es numérico
-                                        <option key={c.id} value={c.id.toString()}>
-                                            {c.nombre}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                    {/* SELECTOR DE MODO ADMINISTRADOR */}
+                    {user.cargo === 'Administrador' && (
+                        <div className="w-full md:w-1/3">
+                            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="admin_role_select">
+                                Vista de Rol
+                            </label>
+                            <select
+                                id="admin_role_select"
+                                value={selectedCargo}
+                                onChange={handleCargoChange}
+                                className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm"
+                            >
+                                {CARGOS_DISPONIBLES.map(cargo => (
+                                    <option key={cargo} value={cargo}>
+                                        {cargo}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
+                    )}
 
-
-                        {/* TABS DE NAVEGACIÓN */}
-                        <div className="border-b border-gray-200 mb-6">
-                            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                                <button
-                                    onClick={() => handleTabChange('materias')}
-                                    className={`
-                                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                                        ${currentView === 'materias'
-                                            ? 'border-indigo-500 text-indigo-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
-                                    `}
-                                >
-                                    Materias
-                                </button>
-
-                                {/* Mostrar pestaña Docentes según rol (o para todos si es la lógica deseada) */}
-                                <button
-                                    onClick={() => handleTabChange('docentes')}
-                                    className={`
-                                        whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
-                                        ${currentView === 'docentes'
-                                            ? 'border-indigo-500 text-indigo-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
-                                    `}
-                                >
-                                    Docentes
-                                </button>
-                            </nav>
-                        </div>
-
-                        {/* CONTENIDO DE LA PESTAÑA */}
-                        {currentView === 'materias' && (
-                            <Materias materias={materias} />
-                        )}
-
-                        {currentView === 'docentes' && (
-                            <DocentesList docentes={docentes} />
-                        )}
-
+                    {/* Selector de Instituto */}
+                    <div className="w-full md:w-1/3">
+                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="instituto_select">
+                            Seleccionar Instituto
+                        </label>
+                        <select
+                            id="instituto_select"
+                            value={selectedInstitutoId || ''}
+                            onChange={handleInstitutoChange}
+                            disabled={!canSelectAllInstitutos && institutos.length <= 1}
+                            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm"
+                        >
+                            {canSelectAllInstitutos ? (
+                                <option value="all">Todos los institutos</option>
+                            ) : null}
+                            {institutos.map(inst => (
+                                <option key={inst.id} value={inst.id}>
+                                    {inst.nombre}
+                                </option>
+                            ))}
+                        </select>
+                        {!canSelectAllInstitutos && institutos.length <= 1 ? (
+                            <p className="mt-2 text-xs text-gray-500">
+                                Solo tiene acceso a su instituto.
+                            </p>
+                        ) : null}
                     </div>
-                    <PaginatorButtons
-                        meta={currentView === 'materias' ? materias.meta : docentes.meta}
-                        paginator={currentView === 'materias' ? materias : docentes}
-                        routeName={'dashboard'}
-                        routeParams={{
-                            instituto_id: selectedInstitutoId,
-                            carrera_id: selectedCarreraId,
-                            view: currentView
-                        }}
-                    />
 
+                    {/* Selector de Carreras */}
+                    <div className="w-full md:w-1/3">
+                        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="carrera_select">
+                            Seleccionar Carrera
+                        </label>
+                        <select
+                            id="carrera_select"
+                            value={selectedCarreraId}
+                            onChange={handleCarreraChange}
+                            disabled={carrerasDisponibles.length === 0}
+                            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full text-sm"
+                        >
+                            {carreraOptions.map(c => (
+                                <option key={c.id} value={c.id.toString()}>
+                                    {c.nombre}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                </div>
+                <Button variant="primary"
+                    onClick={handleRoleOverride}
+                >
+                    Cargar Vista
+                </Button>
+            </div>
         </AuthenticatedLayout>
     );
 }

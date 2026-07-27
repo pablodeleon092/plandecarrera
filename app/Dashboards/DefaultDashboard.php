@@ -18,15 +18,25 @@ class DefaultDashboard implements DashboardStrategy
     public function render(User $user, Request $request): Response
     {
         $selectedInstitutoId = $request->input('instituto_id');
-        $selectedCarreraId = $request->input('carrera_id');
+        $selectedCarreraId = $request->input('selected_carrera', 'all');
         $currentView = $request->input('view', 'materias');
 
         // 1. Obtener Institutos disponibles
         $institutosDisponibles = $this->getInstitutosPorRol($user);
+        $canViewAllInstitutos = $this->canViewAllInstitutos($user);
 
         // 2. Determinar el Instituto Seleccionado
-        if (!$selectedInstitutoId) {
+        if ($canViewAllInstitutos && (!$selectedInstitutoId || $selectedInstitutoId === 'all')) {
+            $selectedInstitutoId = 'all';
+        } elseif (
+            !$selectedInstitutoId
+            || !$institutosDisponibles->contains(
+                fn (Instituto $instituto) => (string) $instituto->id === (string) $selectedInstitutoId
+            )
+        ) {
             $selectedInstitutoId = $institutosDisponibles->first()?->id;
+        } else {
+            $selectedInstitutoId = (int) $selectedInstitutoId;
         }
 
         $materiasFiltradas = collect();
@@ -44,12 +54,22 @@ class DefaultDashboard implements DashboardStrategy
         return Inertia::render('Gestion/Dashboard', [
             'user' => $user,
             'institutos' => $institutosDisponibles,
-            'selectedInstitutoId' => (int) $selectedInstitutoId,
-            'selectedCarreraId' => $selectedCarreraId ?: 'all',
+            'selectedInstitutoId' => $selectedInstitutoId,
+            'selectedCarreraId' => $selectedCarreraId,
             'currentView' => $currentView,
+            'canViewAllInstitutos' => $canViewAllInstitutos,
             'materias' => $materiasFiltradas,
             'docentes' => $docentesFiltrados,
         ]);
+    }
+
+    private function canViewAllInstitutos(User $user): bool
+    {
+        return in_array($user->cargo, [
+            'Administrador',
+            'Secretaría académica',
+            'Administrativo de Secretaria Academica',
+        ], true);
     }
 
     // Aquí pegarás los métodos que ya tienes:
@@ -59,7 +79,7 @@ class DefaultDashboard implements DashboardStrategy
 
         if (in_array($rol, ['Administrador', 'Administrativo de Secretaria Academica'])) {
 
-            return Instituto::with('carreras.planActual')->get(['id', 'nombre']);
+            return Instituto::with('carreras')->get();
 
         } elseif (in_array($rol, ['Administrativo de instituto', 'Director de instituto', 'Coordinador Academico', 'Consejero'])) {
 
@@ -109,7 +129,9 @@ class DefaultDashboard implements DashboardStrategy
 
             // Filtrado por instituto y carrera
             ->whereHas('planes.carrera', function ($q) use ($institutoId, $carreraId, $user) {
-                $q->where('instituto_id', $institutoId);
+                if ($institutoId !== 'all') {
+                    $q->where('instituto_id', $institutoId);
+                }
 
                 if ($carreraId !== 'all' && is_numeric($carreraId)) {
                     $q->where('id', $carreraId);
@@ -126,6 +148,7 @@ class DefaultDashboard implements DashboardStrategy
                         ->with([
                             'dictas' => function ($d) use ($cargosDisponibles) {
                                 $d->with('cargo', 'docente')
+                                    ->whereHas('docente', fn($docente) => $docente->where('es_activo', true))
                                     ->whereHas('cargo', function ($c) use ($cargosDisponibles) {
                                         $c->whereIn('nombre', $cargosDisponibles);
                                     });
@@ -182,8 +205,12 @@ class DefaultDashboard implements DashboardStrategy
         $query = Docente::query();
 
         if ($selectedCarreraId && $selectedCarreraId !== 'all') {
-            $query->deInstitutoYCarrera($selectedInstitutoId, $selectedCarreraId);
-        } else {
+            if ($selectedInstitutoId !== 'all') {
+                $query->deInstituto($selectedInstitutoId);
+            }
+
+            $query->deCarrera($selectedCarreraId);
+        } elseif ($selectedInstitutoId !== 'all') {
             $query->deInstituto($selectedInstitutoId);
         }
 

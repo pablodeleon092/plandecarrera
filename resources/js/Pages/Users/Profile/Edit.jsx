@@ -4,7 +4,7 @@ import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
-export default function Edit({ mustVerifyEmail, status,user, institutos }) {
+export default function Edit({ mustVerifyEmail, status,user, institutos, can = { delete: false } }) {
     return (
         <AuthenticatedLayout
             header={
@@ -60,9 +60,11 @@ export default function Edit({ mustVerifyEmail, status,user, institutos }) {
                         <UpdatePasswordForm className="max-w-xl" />
                     </div>
 
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
-                        <DeleteUserForm className="max-w-xl" />
-                    </div>
+                    {can.delete && (
+                        <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8">
+                            <DeleteUserForm className="max-w-xl" />
+                        </div>
+                    )}
                 </div>
             </div>
         </AuthenticatedLayout>

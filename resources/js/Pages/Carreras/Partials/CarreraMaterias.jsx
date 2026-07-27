@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import DataTable from "@/Components/DataTable";
-import SecondaryButton from "@/Components/Buttons/SecondaryButton";
-import PrimaryButton from "@/Components/Buttons/PrimaryButton";
-import DangerButton from "@/Components/Buttons/DangerButton";
+import Button from '@/Components/Button';
 import { useForm, Link, router } from "@inertiajs/react";
 
-export default function CarreraMaterias({ carrera, planes }) {
+export default function CarreraMaterias({ carrera, planes, canUpdate = false, canDelete = false }) {
     const [planSeleccionado, setPlanSeleccionado] = useState(null);
     const [mostrandoBaja, setMostrandoBaja] = useState(false);
 
@@ -26,13 +24,13 @@ export default function CarreraMaterias({ carrera, planes }) {
     };
 
     const columnasPlanes = [
-        { 
-            key: "anio_comienzo", 
+        {
+            key: "anio_comienzo",
             label: "Fecha Inicio",
             render: (p) => new Date(p.anio_comienzo).toLocaleDateString('es-AR')
         },
-        { 
-            key: "anio_fin", 
+        {
+            key: "anio_fin",
             label: "Fecha Fin",
             render: (p) => p.anio_fin ? new Date(p.anio_fin).toLocaleDateString('es-AR') : <span className="text-green-600 font-semibold">Vigente</span>
         },
@@ -40,12 +38,19 @@ export default function CarreraMaterias({ carrera, planes }) {
             key: "acciones",
             label: "Acciones",
             render: (p) => (
-                <SecondaryButton onClick={() => { setPlanSeleccionado(p); setMostrandoBaja(false); }}>
-                    Ver Materias
-                </SecondaryButton>
+                <div className="flex flex-wrap gap-2">
+                    <Button variant="info" onClick={() => { setPlanSeleccionado(p); setMostrandoBaja(false); }}>
+                        Ver Materias
+                    </Button>
+                    {canUpdate && (
+                        <Button variant="secondary" as={Link} href={route('planes.edit', p.id)}>
+                            Editar plan
+                        </Button>
+                    )}
+                </div>
             ),
         },
-        
+
     ];
 
     // Columnas para la tabla de Materias (la que ya tenías)
@@ -53,7 +58,12 @@ export default function CarreraMaterias({ carrera, planes }) {
         { key: "nombre", label: "Nombre" },
         { key: "codigo", label: "Código" },
         { key: "regimen", label: "Régimen" },
-        { key: "cuatrimestre", label: "Cuatrimestre / Año" },
+        { 
+            key: "anio", 
+            label: "Año",
+            render: (m) => m.pivot?.anio || 'N/A' 
+        },
+        { key: "cuatrimestre", label: "Cuatrimestre" },
         {
             key: "acciones",
             label: "Acciones",
@@ -75,20 +85,26 @@ export default function CarreraMaterias({ carrera, planes }) {
         <div className="space-y-10">
             {/* SECCIÓN 1: Listado de Planes */}
             <div>
-                <h3 className="text-2xl font-bold mb-5">Planes de Estudio — {carrera.nombre}</h3>
+                <h3 className="text-2xl font-bold mb-5">Planes de Estudio: {carrera.nombre}</h3>
 
-                <PrimaryButton
-                className="mb-5"
-                as={Link}
-                href={route('planes.create', carrera.id)}
-                >
-                Agregar Plan de Estudio
-                </PrimaryButton>
+                {canUpdate && (
+                    <Button
+                        variant="primary"
+                        className="mb-5"
+                        as={Link}
+                        href={route('planes.create', carrera.id)}
+                    >
+                        Agregar Plan de Estudio
+                    </Button>
+                )}
                 <DataTable 
                     columns={columnasPlanes} 
-                    data={planes} 
+                    data={planes.map((plan) => ({
+                        ...plan,
+                        can: { ...plan.can, delete: canDelete },
+                    }))}
                     emptyMessage="No hay planes registrados." 
-                    onDelete={(plan) => handleDelete(plan.id)}
+                    onDelete={canDelete ? (plan) => handleDelete(plan.id) : undefined}
                     />
             </div>
 
@@ -97,7 +113,7 @@ export default function CarreraMaterias({ carrera, planes }) {
             {/* SECCIÓN 2: Detalle y Formulario de Baja */}
             {planSeleccionado && (
                 <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-sm animate-in fade-in zoom-in-95 duration-300">
-                    
+
                     {/* Encabezado con botones de acción */}
                     <div className="flex justify-between items-start mb-6">
                         <div>
@@ -108,13 +124,13 @@ export default function CarreraMaterias({ carrera, planes }) {
                                 {planSeleccionado.anio_fin ? "Este plan ya ha sido finalizado." : "Este plan se encuentra actualmente vigente."}
                             </p>
                         </div>
-                        <div className="flex space-x-2">
-                            {!mostrandoBaja && (
-                                <DangerButton onClick={() => setMostrandoBaja(true)}>
+                        <div className="flex gap-x-2">
+                            {canUpdate && !mostrandoBaja && (
+                                <Button variant="danger" onClick={() => setMostrandoBaja(true)}>
                                     Dar de Baja Plan
-                                </DangerButton>
+                                </Button>
                             )}
-                            <button onClick={() => { setPlanSeleccionado(null); setMostrandoBaja(false); }} className="px-3 py-2 text-gray-400 hover:text-gray-600 text-sm">
+                            <button type="button" onClick={() => { setPlanSeleccionado(null); setMostrandoBaja(false); }} className="px-3 py-2 text-gray-400 hover:text-gray-600 text-sm">
                                 Cerrar
                             </button>
                         </div>
@@ -127,12 +143,13 @@ export default function CarreraMaterias({ carrera, planes }) {
                             <p className="text-sm text-gray-600 mb-4">
                                 Selecciona la fecha en la que este plan dejará de tener validez para la carrera.
                             </p>
-                            
+
                             <form onSubmit={confirmarBaja} className="flex flex-col sm:flex-row items-end gap-4">
                                 <div className="flex-1">
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de finalización</label>
-                                    <input 
-                                        type="date" 
+                                    <label htmlFor="anio_fin" className="block text-sm font-medium text-gray-700 mb-1">Fecha de finalización</label>
+                                    <input
+                                        id="anio_fin"
+                                        type="date"
                                         value={data.anio_fin}
                                         onChange={e => setData('anio_fin', e.target.value)}
                                         className="w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500"
@@ -141,8 +158,8 @@ export default function CarreraMaterias({ carrera, planes }) {
                                     {errors.anio_fin && <p className="text-red-500 text-xs mt-1">{errors.anio_fin}</p>}
                                 </div>
                                 <div className="flex gap-2">
-                                    <SecondaryButton onClick={() => setMostrandoBaja(false)}>Cancelar</SecondaryButton>
-                                    <DangerButton type="submit" disabled={processing}>Confirmar Baja</DangerButton>
+                                    <Button variant="secondary" onClick={() => setMostrandoBaja(false)}>Cancelar</Button>
+                                    <Button variant="danger" type="submit" disabled={processing}>Confirmar Baja</Button>
                                 </div>
                             </form>
                         </div>

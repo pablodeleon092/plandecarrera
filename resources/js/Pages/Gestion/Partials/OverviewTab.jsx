@@ -1,8 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Chart } from "react-google-charts";
+
+const opcionesTorta = {
+    title: "Distribución de Planta Docente",
+    pieHole: 0.4, 
+    colors: ["#cbd5e1", "#4f46e5"], 
+    legend: { position: "bottom" },
+};
 
 export default function OverviewTab({ metrics, stats, materias = [], superposiciones = [] }) {
 
+    const [currentDate] = useState(() => new Date());
     
     // Gráfico de Torta: Distribución de Docentes
     const dataDocentes = [
@@ -11,15 +19,7 @@ export default function OverviewTab({ metrics, stats, materias = [], superposici
         ["Multi-Carrera", stats.multiCarrera],
     ];
 
-    const opcionesTorta = {
-        title: "Distribución de Planta Docente",
-        pieHole: 0.4, 
-        colors: ["#cbd5e1", "#4f46e5"], 
-        legend: { position: "bottom" },
-    };
-
-    const topMaterias = [...materias]
-        .sort((a, b) => b.carreras_nombres.length - a.carreras_nombres.length)
+    const topMaterias = materias.toSorted((a, b) => b.carreras_nombres.length - a.carreras_nombres.length)
         .slice(0, 5);
 
     return (
@@ -71,7 +71,7 @@ export default function OverviewTab({ metrics, stats, materias = [], superposici
                     {/* Botón decorativo abajo */}
                     <div className="mt-6 pt-4 border-t border-gray-100">
                         <p className="text-xs text-gray-400 text-center">
-                            Última actualización: {new Date().toLocaleDateString()}
+                            Última actualización: {currentDate.toLocaleDateString()}
                         </p>
                     </div>
                 </div>

@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="reporte_comisiones" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="df013db5-f76e-44d3-b0df-bcbc46d93160">
+    <parameter name="VALOR_BY_INSTITUTO" class="java.lang.String"/>
+    <parameter name="OP_BY_INSTITUTO" class="java.lang.String"/>
+    <parameter name="VALOR_BY_CARRERA" class="java.lang.String"/>
+    <parameter name="OP_BY_CARRERA" class="java.lang.String"/>
+    <parameter name="OP_NOMBRE" class="java.lang.String"/>
+    <parameter name="OP_CODIGO" class="java.lang.String"/>
+    <parameter name="VALOR_CODIGO" class="java.lang.String"/>
+    <parameter name="OP_MATERIA" class="java.lang.String"/>
+    <parameter name="VALOR_MATERIA" class="java.lang.String"/>
+    <parameter name="OP_HORAS_TOTALES" class="java.lang.String"/>
+    <parameter name="VALOR_HORAS_TOTALES" class="java.lang.String"/>
+    <parameter name="OP_HORA_INICIO" class="java.lang.String"/>
+    <parameter name="OP_HORA_FIN" class="java.lang.String"/>
+    <parameter name="VALOR_HORA_INICIO" class="java.lang.String"/>
+    <parameter name="VALOR_HORA_FIN" class="java.lang.String"/>
+    <parameter name="VALOR_ESTADO" class="java.lang.String"/>
+    <parameter name="VALOR_TURNO" class="java.lang.String"/>
+    <parameter name="VALOR_DIA_SEMANA" class="java.lang.String"/>
+    <parameter name="OP_ANIO" class="java.lang.String"/>
+    <parameter name="VALOR_ANIO" class="java.lang.String"/>
+    <parameter name="VALOR_MODALIDAD" class="java.lang.String"/>
+    <parameter name="OP_AULA" class="java.lang.String"/>
+    <parameter name="VALOR_AULA" class="java.lang.String"/>
+	<parameter name="logoPath" class="java.lang.String"/>
+<queryString>
+        <![CDATA[SELECT 
+    c.id,
+    c.codigo, 
+    m.nombre AS nombre_materia, 
+    m.cuatrimestre AS cuatrimestre_carrera,
+    c.horas_totales, 
+    c.horas_teoricas, 
+    c.horas_practicas,
+    c.anio, 
+    c.modalidad, 
+    c.sede,
+    c.turno,
+    STRING_AGG(DISTINCT h.dia_semana || ': ' || TO_CHAR(h.hora_inicio, 'HH24:MI') || ' a ' || TO_CHAR(h.hora_fin, 'HH24:MI'), ' / ') AS cronograma,
+    STRING_AGG(DISTINCT d2.nombre || ' ' || d2.apellido, ', ') AS equipo_docente
+FROM comisiones c
+JOIN materias m ON c.id_materia = m.id 
+LEFT JOIN horarios h ON h.comision_id = c.id 
+LEFT JOIN dictas d ON d.comision_id = c.id
+LEFT JOIN cargos c2 ON c2.id = d.cargo_id 
+LEFT JOIN docentes d2 ON c2.docente_id = d2.id
+LEFT JOIN plan_materia pm ON m.id = pm.materia_id
+LEFT JOIN planes p ON pm.plan_id = p.id
+LEFT JOIN carreras carr ON p.carrera_id = carr.id
+WHERE 1=1
+AND ($P{OP_BY_INSTITUTO} IS NULL OR ($P{OP_BY_INSTITUTO} = 'equals' AND carr.instituto_id = CAST($P{VALOR_BY_INSTITUTO} AS INTEGER)) OR ($P{OP_BY_INSTITUTO} = 'not_equals' AND carr.instituto_id != CAST($P{VALOR_BY_INSTITUTO} AS INTEGER)))
+AND ($P{OP_BY_CARRERA} IS NULL OR ($P{OP_BY_CARRERA} = 'equals' AND carr.id = CAST($P{VALOR_BY_CARRERA} AS INTEGER)) OR ($P{OP_BY_CARRERA} = 'not_equals' AND carr.id != CAST($P{VALOR_BY_CARRERA} AS INTEGER)))
+AND ($P{OP_CODIGO} IS NULL OR ($P{OP_CODIGO} = 'contains' AND c.codigo ILIKE '%' || $P{VALOR_CODIGO} || '%') OR ($P{OP_CODIGO} = 'equals' AND c.codigo = $P{VALOR_CODIGO}))
+AND ($P{OP_MATERIA} IS NULL OR ($P{OP_MATERIA} = 'contains' AND m.nombre ILIKE '%' || $P{VALOR_MATERIA} || '%') OR ($P{OP_MATERIA} = 'equals' AND m.nombre = $P{VALOR_MATERIA}))
+AND ($P{OP_AULA} IS NULL OR ($P{OP_AULA} = 'contains' AND h.aula ILIKE '%' || $P{VALOR_AULA} || '%') OR ($P{OP_AULA} = 'equals' AND h.aula = $P{VALOR_AULA}))   
+AND ($P{OP_ANIO} IS NULL OR ($P{OP_ANIO} = 'equals' AND c.anio = CAST($P{VALOR_ANIO} AS INTEGER) OR $P{OP_ANIO} = 'greater' AND c.anio > CAST($P{VALOR_ANIO} AS INTEGER) OR $P{OP_ANIO} = 'less' AND c.anio < CAST($P{VALOR_ANIO} AS INTEGER)))
+AND ($P{OP_HORAS_TOTALES} IS NULL OR ($P{OP_HORAS_TOTALES} = 'equals' AND c.horas_totales = CAST($P{VALOR_HORAS_TOTALES} AS INTEGER) OR $P{OP_HORAS_TOTALES} = 'greater' AND c.horas_totales > CAST($P{VALOR_HORAS_TOTALES} AS INTEGER) OR $P{OP_HORAS_TOTALES} = 'less' AND c.horas_totales < CAST($P{VALOR_HORAS_TOTALES} AS INTEGER)))
+AND ($P{VALOR_DIA_SEMANA} IS NULL OR h.dia_semana = $P{VALOR_DIA_SEMANA})
+AND ($P{VALOR_TURNO} IS NULL OR c.turno = $P{VALOR_TURNO})
+AND ($P{VALOR_MODALIDAD} IS NULL OR c.modalidad = $P{VALOR_MODALIDAD})
+AND ($P{OP_HORA_INICIO} IS NULL OR ($P{OP_HORA_INICIO} = 'greater' AND h.hora_inicio >= CAST($P{VALOR_HORA_INICIO} AS TIME) OR $P{OP_HORA_INICIO} = 'less' AND h.hora_inicio <= CAST($P{VALOR_HORA_INICIO} AS TIME) OR $P{OP_HORA_INICIO} = 'equals' AND h.hora_inicio = CAST($P{VALOR_HORA_INICIO} AS TIME)))
+AND ($P{OP_HORA_FIN} IS NULL OR ($P{OP_HORA_FIN} = 'greater' AND h.hora_fin >= CAST($P{VALOR_HORA_FIN} AS TIME) OR $P{OP_HORA_FIN} = 'less' AND h.hora_fin <= CAST($P{VALOR_HORA_FIN} AS TIME) OR $P{OP_HORA_FIN} = 'equals' AND h.hora_fin = CAST($P{VALOR_HORA_FIN} AS TIME)))
+AND ($P{VALOR_ESTADO} IS NULL OR c.estado = ($P{VALOR_ESTADO}::int::boolean))
+GROUP BY c.id, c.codigo, m.nombre, m.cuatrimestre, c.horas_totales, c.horas_teoricas, c.horas_practicas, c.anio, c.modalidad, c.sede, c.turno, c.estado
+ORDER BY c.codigo ASC;]]>
+    </queryString>
+
+    <field name="id" class="java.lang.Long"/>
+    <field name="codigo" class="java.lang.String"/>
+    <field name="nombre_materia" class="java.lang.String"/>
+    <field name="cuatrimestre_carrera" class="java.lang.Integer"/>
+    <field name="horas_totales" class="java.lang.Integer"/>
+    <field name="horas_teoricas" class="java.lang.Integer"/>
+    <field name="horas_practicas" class="java.lang.Integer"/>
+    <field name="anio" class="java.lang.Integer"/>
+    <field name="modalidad" class="java.lang.String"/>
+    <field name="sede" class="java.lang.String"/>
+    <field name="turno" class="java.lang.String"/>
+    <field name="cronograma" class="java.lang.String"/>
+    <field name="equipo_docente" class="java.lang.String"/>
+
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+
+	<title>
+		<band height="84" splitType="Stretch">
+			<staticText>
+				<reportElement mode="Opaque" x="160" y="20" width="240" height="50" forecolor="#030000" backcolor="#FFFFFF" uuid="b8f75c5d-b2ce-4324-89cd-3a0b1aeeca04"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="20"/>
+				</textElement>
+				<text><![CDATA[Reporte de Comisiones]]></text>
+			</staticText>
+			<image>
+				<reportElement x="480" y="0" width="90" height="80" uuid="6a5a289d-7bba-478b-bd01-3978f6cd70ec"/>
+				<imageExpression><![CDATA[$P{logoPath}]]></imageExpression>
+			</image>
+		</band>
+	</title>
+
+    <columnHeader>
+        <band height="31" splitType="Stretch">
+            <staticText>
+                <reportElement x="0" y="0" width="70" height="29" uuid="7c1da795-90a5-4f1c-8cc7-46e2c37cf4c8"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Codigo]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="70" y="0" width="70" height="29" uuid="29d4f47b-91ea-43e2-b4fe-70f078dee45b"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Materia]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="140" y="0" width="70" height="30" uuid="d16e4da3-6043-468e-858a-12389849898b"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Cuatrimestre Carrera]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="210" y="0" width="70" height="30" uuid="71e4ce92-4388-46d9-8339-454b1847dc75"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Horas Totales]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="280" y="0" width="70" height="30" uuid="c54013bd-94ca-41ed-a602-5cf4848c8b99"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Horas Teoricas]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="350" y="0" width="70" height="30" uuid="ab784800-bbfd-402f-b0e9-121815ce5b4d"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Horas Practicas]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="420" y="0" width="100" height="30" uuid="0b60b45e-e64e-4106-8b3a-44854c13fcd8"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Cronograma]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="520" y="0" width="110" height="30" uuid="c735d22a-8c6e-4f73-97e6-4922a2b0aaa1"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Equipo Docente]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="630" y="0" width="60" height="30" uuid="2a7d902d-ee09-4c12-9314-18a420782065"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Modalidad]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="690" y="0" width="62" height="30" uuid="1cdc4eaa-efae-42be-a933-daacc0c3a575"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Sede]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="752" y="0" width="50" height="30" uuid="31d3416e-02c7-468a-9201-698a1d7cfa8e"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <text><![CDATA[Turno]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="55" splitType="Stretch">
+            <textField isStretchWithOverflow="true">
+                <reportElement x="0" y="0" width="70" height="55" uuid="81609529-320d-48ea-ae5b-c88b7d818245"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="70" y="0" width="70" height="55" uuid="79c5d7e2-c855-4dc5-b7d5-ffd7ebd0b560"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{nombre_materia}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="140" y="0" width="70" height="55" uuid="0e0a9b3a-b34e-4eae-a4a9-efcdd54dff98"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{cuatrimestre_carrera}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="210" y="0" width="70" height="55" uuid="da898c8e-3530-4f6e-b216-1801b42bd92f"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{horas_totales}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="280" y="0" width="70" height="55" uuid="1bee4405-a1ca-4eda-826f-bc46c7131cdc"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{horas_teoricas}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="350" y="0" width="70" height="55" uuid="5957807d-c230-4355-90ed-c7dd21c29500"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{horas_practicas}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="420" y="0" width="100" height="55" uuid="c452eafc-e37f-4a8f-8ffd-a92065aa40f6"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{cronograma}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="520" y="0" width="110" height="55" uuid="db6d3104-3d50-4c5e-b361-d6ef640e50ab"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{equipo_docente}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="630" y="0" width="60" height="55" uuid="bcedeca9-193a-4355-a2ff-c82b9294811f"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{modalidad}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="690" y="0" width="62" height="55" uuid="81829b4b-8fa7-48ee-a43d-dc00a799621e"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{sede}]]></textFieldExpression>
+            </textField>
+            <textField isStretchWithOverflow="true">
+                <reportElement x="752" y="0" width="50" height="55" uuid="6522be7f-ecc3-4e1a-ab62-f9aa15d962d3"/>
+                <box><pen lineWidth="1.0"/></box>
+                <textElement textAlignment="Center"/>
+                <textFieldExpression><![CDATA[$F{turno}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="25" splitType="Stretch">
+            <frame>
+                <reportElement mode="Opaque" x="-21" y="1" width="843" height="24" backcolor="#F2EBDF" uuid="5d8169bd-4a75-48c8-8a68-6d3ad5ba9402"/>
+                <textField evaluationTime="Report">
+                    <reportElement x="783" y="1" width="40" height="20" uuid="e5e27efa-b599-499b-9ca3-848cb511cb7b"/>
+                    <textElement verticalAlignment="Middle">
+                        <font size="10"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+                </textField>
+                <textField>
+                    <reportElement x="703" y="1" width="80" height="20" uuid="18cfe1ca-f7d6-48b0-9827-28578b42a5e0"/>
+                    <textElement textAlignment="Right" verticalAlignment="Middle">
+                        <font size="10"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+                </textField>
+                <textField pattern="EEEEE dd MMMMM yyyy">
+                    <reportElement x="22" y="1" width="197" height="20" uuid="fbce24bb-3cb1-44a3-8eec-8c067ddbe5b5"/>
+                    <textElement verticalAlignment="Middle">
+                        <font size="10"/>
+                    </textElement>
+                    <textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+                </textField>
+            </frame>
+        </band>
+    </pageFooter>
+</jasperReport>

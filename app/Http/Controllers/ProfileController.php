@@ -24,6 +24,11 @@ class ProfileController extends Controller
 
         return Inertia::render('Users/Show', [
             'user' => $user,
+            'can' => [
+                'view' => $user->can('show', $user),
+                'update' => $user->can('update', $user),
+                'delete' => $user->can('delete', $user),
+            ],
         ]);
     }
 
@@ -33,6 +38,7 @@ class ProfileController extends Controller
     public function edit(Request $request): Response
     {
         $user = $request->user();
+        $this->authorize('update', $user);
         $institutos = Instituto::select('id', 'siglas')->get(); // si quieres mostrar instituto
 
         return Inertia::render('Users/Profile/Edit', [
@@ -40,6 +46,9 @@ class ProfileController extends Controller
             'status' => session('status'),
             'user' => $user,             // usuario logueado
             'institutos' => $institutos, // lista de institutos para mostrar siglas
+            'can' => [
+                'delete' => $user->can('delete', $user),
+            ],
         ]);
     }
 
@@ -48,6 +57,8 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+        $this->authorize('update', $request->user());
+
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
@@ -64,6 +75,8 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $this->authorize('delete', $request->user());
+
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);

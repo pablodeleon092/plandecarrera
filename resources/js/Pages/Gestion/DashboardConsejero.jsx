@@ -5,6 +5,13 @@ import KPICard from '@/Components/Dashboard/KPICard';
 import StatusIndicator from '@/Components/Dashboard/StatusIndicator';
 import AlertList from '@/Components/Dashboard/AlertList';
 
+const tabs = [
+    { id: 'resumen', label: 'Resumen' },
+    { id: 'carreras', label: 'Carreras' },
+    { id: 'docentes', label: 'Docentes' },
+    { id: 'tendencias', label: 'Tendencias' },
+];
+
 export default function DashboardConsejero({
     user,
     instituto,
@@ -16,6 +23,7 @@ export default function DashboardConsejero({
     evolucionHistorica,
 }) {
     const [currentTab, setCurrentTab] = useState('resumen');
+    const [currentDate] = useState(() => new Date());
 
     // Preparar alertas de docentes sobrecargados
     const alertasSobrecarga = docentesSobrecargados.map(doc => ({
@@ -30,14 +38,6 @@ export default function DashboardConsejero({
         description: `Comisión: ${mat.comisionNombre} - ${mat.turno}`,
         details: `Sede: ${mat.sede}`,
     }));
-
-    const tabs = [
-        { id: 'resumen', label: 'Resumen' },
-        { id: 'carreras', label: 'Carreras' },
-        { id: 'docentes', label: 'Docentes' },
-        { id: 'alertas', label: 'Alertas', badge: alertasSobrecarga.length + alertasSinCobertura.length },
-        { id: 'tendencias', label: 'Tendencias' },
-    ];
 
     return (
         <AuthenticatedLayout
@@ -62,7 +62,7 @@ export default function DashboardConsejero({
                                     Estado General del Instituto
                                 </h3>
                                 <p className="text-gray-600 mt-1">
-                                    Año {new Date().getFullYear()}
+                                    Año {currentDate.getFullYear()}
                                 </p>
                             </div>
                             <StatusIndicator status={resumenEjecutivo.estadoGeneral} />
@@ -99,9 +99,10 @@ export default function DashboardConsejero({
 
                     {/* TABS DE NAVEGACIÓN */}
                     <div className="border-b border-gray-200 mb-6">
-                        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                        <nav className="-mb-px flex gap-x-8" aria-label="Tabs">
                             {tabs.map(tab => (
                                 <button
+                                    type="button"
                                     key={tab.id}
                                     onClick={() => setCurrentTab(tab.id)}
                                     className={`
@@ -134,7 +135,7 @@ export default function DashboardConsejero({
                                 </h3>
                                 <div className="space-y-3">
                                     {distribucionDedicaciones.map((item, index) => (
-                                        <div key={index} className="flex items-center justify-between">
+                                        <div key={item.nombre || index} className="flex items-center justify-between">
                                             <div className="flex-1">
                                                 <div className="flex items-center justify-between mb-1">
                                                     <span className="text-sm font-medium text-gray-700">
@@ -199,7 +200,7 @@ export default function DashboardConsejero({
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {estadisticasCarreras.map((carrera, index) => (
-                                        <tr key={index} className="hover:bg-gray-50">
+                                        <tr key={carrera.carreraNombre || index} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                 {carrera.carreraNombre}
                                             </td>
@@ -212,8 +213,8 @@ export default function DashboardConsejero({
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center">
                                                     <span className={`text-sm font-semibold ${carrera.porcentajeCobertura >= 90 ? 'text-green-600' :
-                                                            carrera.porcentajeCobertura >= 70 ? 'text-yellow-600' :
-                                                                'text-red-600'
+                                                        carrera.porcentajeCobertura >= 70 ? 'text-yellow-600' :
+                                                            'text-red-600'
                                                         }`}>
                                                         {carrera.porcentajeCobertura}%
                                                     </span>
@@ -240,7 +241,7 @@ export default function DashboardConsejero({
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 {distribucionDedicaciones.map((item, index) => (
-                                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                                    <div key={item.nombre || index} className="border border-gray-200 rounded-lg p-4">
                                         <p className="text-sm text-gray-600 mb-1">{item.nombre}</p>
                                         <p className="text-2xl font-bold text-gray-900">{item.cantidad}</p>
                                         <p className="text-xs text-gray-500">{item.porcentaje}% del total</p>
@@ -276,8 +277,8 @@ export default function DashboardConsejero({
                                 </h3>
                                 {evolucionHistorica.docentes.length > 0 ? (
                                     <div className="space-y-2">
-                                        {evolucionHistorica.docentes.map((item, index) => (
-                                            <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100">
+                                        {evolucionHistorica.docentes.map((item) => (
+                                            <div key={item.anio} className="flex justify-between items-center py-2 border-b border-gray-100">
                                                 <span className="text-sm font-medium text-gray-700">Año {item.anio}</span>
                                                 <span className="text-sm text-gray-900">{item.cantidad} docentes</span>
                                             </div>
@@ -295,8 +296,8 @@ export default function DashboardConsejero({
                                 </h3>
                                 {evolucionHistorica.comisiones.length > 0 ? (
                                     <div className="space-y-2">
-                                        {evolucionHistorica.comisiones.map((item, index) => (
-                                            <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100">
+                                        {evolucionHistorica.comisiones.map((item) => (
+                                            <div key={item.anio} className="flex justify-between items-center py-2 border-b border-gray-100">
                                                 <span className="text-sm font-medium text-gray-700">Año {item.anio}</span>
                                                 <span className="text-sm text-gray-900">{item.cantidad} comisiones</span>
                                             </div>
@@ -314,8 +315,8 @@ export default function DashboardConsejero({
                                 </h3>
                                 {evolucionHistorica.carreras.length > 0 ? (
                                     <div className="space-y-2">
-                                        {evolucionHistorica.carreras.map((item, index) => (
-                                            <div key={index} className="flex justify-between items-center py-2 border-b border-gray-100">
+                                        {evolucionHistorica.carreras.map((item) => (
+                                            <div key={item.anio} className="flex justify-between items-center py-2 border-b border-gray-100">
                                                 <span className="text-sm font-medium text-gray-700">Año {item.anio}</span>
                                                 <span className="text-sm text-gray-900">{item.cantidad} carreras creadas</span>
                                             </div>

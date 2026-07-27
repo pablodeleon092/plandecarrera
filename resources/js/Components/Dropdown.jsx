@@ -1,6 +1,6 @@
 import { Transition } from '@headlessui/react';
 import { Link } from '@inertiajs/react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 
 const DropDownContext = createContext();
 
@@ -12,7 +12,7 @@ const Dropdown = ({ children }) => {
     };
 
     return (
-        <DropDownContext.Provider value={{ open, setOpen, toggleOpen }}>
+        <DropDownContext.Provider value={useMemo(() => ({ open, setOpen, toggleOpen }), [open])}>
             <div className="relative">{children}</div>
         </DropDownContext.Provider>
     );
@@ -23,12 +23,19 @@ const Trigger = ({ children }) => {
 
     return (
         <>
-            <div onClick={toggleOpen}>{children}</div>
+            <div
+                role="button"
+                tabIndex={0}
+                onClick={toggleOpen}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleOpen(); } }}
+            >{children}</div>
 
             {open && (
                 <div
                     className="fixed inset-0 z-40"
                     onClick={() => setOpen(false)}
+                    onKeyDown={(e) => { if (e.key === 'Escape') setOpen(false); }}
+                    role="presentation"
                 ></div>
             )}
         </>
@@ -69,14 +76,14 @@ const Content = ({
                 leaveTo="opacity-0 scale-95"
             >
                 <div
-                    className={`absolute z-50 mt-2 rounded-md shadow-lg ${alignmentClasses} ${widthClasses}`}
+                    className={`dropdown-content-container ${alignmentClasses} ${widthClasses}`}
                     onClick={() => setOpen(false)}
+                    onKeyDown={(e) => { if (e.key === 'Escape') { setOpen(false); e.stopPropagation(); } }}
+                    role="menu"
+                    tabIndex={-1}
                 >
                     <div
-                        className={
-                            `rounded-md ring-1 ring-black ring-opacity-5 ` +
-                            contentClasses
-                        }
+                        className={`dropdown-content-inner ${contentClasses}`}
                     >
                         {children}
                     </div>
@@ -90,10 +97,7 @@ const DropdownLink = ({ className = '', children, ...props }) => {
     return (
         <Link
             {...props}
-            className={
-                'block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none ' +
-                className
-            }
+            className={`dropdown-link ${className}`.trim()}
         >
             {children}
         </Link>

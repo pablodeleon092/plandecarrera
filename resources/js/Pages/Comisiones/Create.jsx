@@ -1,15 +1,16 @@
+import Button from '@/Components/Button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
+import { useState } from 'react';
 
 export default function Create({ auth, materias, materia, flash }) {
 
+    const [currentDate] = useState(() => new Date());
 
     const { data, setData, post, processing, errors } = useForm({
         codigo: '',
         nombre: '',
-        turno: 'Mañana',
+        turno: 'mañana',
         modalidad: 'presencial',
         sede: 'Ushuaia',
         cuatrimestre: '1ro',
@@ -20,8 +21,6 @@ export default function Create({ auth, materias, materia, flash }) {
         id_materia: materia.id || '',
     });
 
-
-
     const submit = (e) => {
         e.preventDefault();
 
@@ -31,7 +30,7 @@ export default function Create({ auth, materias, materia, flash }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Crear Nuevo Comision</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Crear Nueva Comision</h2>}
         >
             <Head title="Crear Comision" />
 
@@ -57,8 +56,9 @@ export default function Create({ auth, materias, materia, flash }) {
                                     {errors.codigo && <div className="text-red-600 mt-1 text-sm">{errors.codigo}</div>}
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Materia</label>
+                                    <label htmlFor="materia_nombre" className="block text-sm font-medium text-gray-700">Materia</label>
                                     <input
+                                        id="materia_nombre"
                                         type="text"
                                         value={materia.nombre}
                                         readOnly
@@ -88,8 +88,8 @@ export default function Create({ auth, materias, materia, flash }) {
                                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                         required
                                     >
-                                        <option value="Mañana">Mañana</option>
-                                        <option value="Tarde">Tarde</option>
+                                        <option value="mañana">Mañana</option>
+                                        <option value="tarde">Tarde</option>
                                     </select>
                                     {errors.turno && <div className="text-red-600 mt-1 text-sm">{errors.turno}</div>}
                                 </div>
@@ -154,7 +154,7 @@ export default function Create({ auth, materias, materia, flash }) {
                                     >
                                         <option value="">Seleccionar año</option>
                                         {[...Array(4)].map((_, i) => {
-                                            const year = new Date().getFullYear() + i;
+                                            const year = currentDate.getFullYear() + i;
                                             return (
                                                 <option key={year} value={year}>
                                                     {year}
@@ -192,8 +192,8 @@ export default function Create({ auth, materias, materia, flash }) {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end space-x-4">
-                                <DangerButton
+                            <div className="flex justify-end gap-x-4">
+                                <Button variant="danger"
                                     as={Link}
                                     href="#"
                                     onClick={(e) => {
@@ -202,13 +202,13 @@ export default function Create({ auth, materias, materia, flash }) {
                                     }}
                                 >
                                     Cancelar
-                                </DangerButton>
-                                <PrimaryButton
+                                </Button>
+                                <Button variant="primary"
                                     type="submit"
                                     disabled={processing}
                                 >
                                     {processing ? 'Guardando...' : 'Crear Comisión'}
-                                </PrimaryButton>
+                                </Button>
                             </div>
                         </form>
                     </div>

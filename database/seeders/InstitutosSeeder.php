@@ -13,15 +13,18 @@ class InstitutosSeeder extends Seeder
      */
     public function run(): void
     {
-        Instituto::insert([
-            ['nombre' => 'Instituto de Ciencias Polares, Ambiente y Recursos Naturales', 
-             'siglas' => 'ICPA  '],
-            ['nombre' => 'Instituto de Cultura Sociedad y Estado', 
-             'siglas' => 'ICSE'],
-            ['nombre' => 'Instituto de Desarrollo Económico e Innovación', 
-             'siglas' => 'IDEI'],
-            ['nombre' => 'Instituto de la Educación y del Conocimiento', 
-             'siglas' => 'IEC'],
-        ]);
+        $institutos = [
+            ['nombre' => 'Instituto de Ciencias Polares, Ambiente y Recursos Naturales', 'siglas' => 'ICPA'],
+            ['nombre' => 'Instituto de Cultura Sociedad y Estado', 'siglas' => 'ICSE'],
+            ['nombre' => 'Instituto de Desarrollo Económico e Innovación', 'siglas' => 'IDEI'],
+            ['nombre' => 'Instituto de la Educación y del Conocimiento', 'siglas' => 'IEC'],
+        ];
+
+        foreach ($institutos as $inst) {
+            Instituto::updateOrCreate(
+                ['nombre' => $inst['nombre']],
+                ['siglas' => $inst['siglas']]
+            );
+        }
     }
 }

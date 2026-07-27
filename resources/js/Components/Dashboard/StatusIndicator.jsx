@@ -37,7 +37,7 @@ export default function StatusIndicator({ status, label }) {
     const config = getStatusConfig();
 
     return (
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-x-3">
             <div className={`w-4 h-4 rounded-full ${config.color} shadow-lg animate-pulse`}></div>
             <span className={`text-sm font-semibold ${config.textColor} px-3 py-1 rounded-full ${config.bgColor}`}>
                 {config.label}

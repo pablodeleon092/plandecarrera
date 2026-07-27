@@ -1,5 +1,5 @@
+import Button from '@/Components/Button';
 import { Link } from '@inertiajs/react';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
 
 export default function ListHeader({ title, buttonLabel, buttonRoute }) {
     return (
@@ -9,9 +9,9 @@ export default function ListHeader({ title, buttonLabel, buttonRoute }) {
                 <Link
                     href={buttonRoute}
                 >
-                    <PrimaryButton>
+                    <Button variant="primary">
                         {buttonLabel}
-                    </PrimaryButton>
+                    </Button>
                 </Link>
             )}
         </div>

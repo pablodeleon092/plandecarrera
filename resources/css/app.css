@@ -1,3 +1,150 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    /* Botones principales */
+    .btn-primary {
+        @apply inline-flex items-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-green-700 focus:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 active:bg-green-900;
+    }
+    
+    .btn-secondary {
+        @apply inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 shadow-sm transition duration-150 ease-in-out hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25;
+    }
+
+    .btn-danger {
+        @apply inline-flex items-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 active:bg-red-700;
+    }
+
+    .btn-info {
+        @apply inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-blue-700 focus:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:bg-blue-900;
+    }
+
+    /* Botones de icono */
+    .btn-icon-danger {
+        @apply text-red-600 hover:text-red-900 transition;
+    }
+
+    .btn-icon-success {
+        @apply text-green-600 hover:text-green-900 transition;
+    }
+
+    .btn-icon-primary {
+        @apply text-blue-600 hover:text-blue-900 transition;
+    }
+
+    .btn-icon-toggle-on {
+        @apply text-green-500 hover:text-green-700 transition;
+    }
+
+    .btn-icon-toggle-off {
+        @apply text-red-500 hover:text-red-700 transition;
+    }
+    
+    /* Paginador */
+    .paginator-container {
+        @apply mt-4 flex items-center justify-between;
+    }
+    .paginator-text {
+        @apply text-sm text-gray-600;
+    }
+    .paginator-buttons {
+        @apply inline-flex items-center space-x-2;
+    }
+    .btn-paginator-nav {
+        @apply px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition;
+    }
+    .btn-paginator-page {
+        @apply px-3 py-1 rounded-lg transition bg-white border border-gray-300 text-gray-700 hover:bg-indigo-50 hover:border-indigo-500;
+    }
+    .btn-paginator-page-active {
+        @apply px-3 py-1 rounded-lg transition bg-indigo-600 text-white shadow-md;
+    }
+    .paginator-ellipsis {
+        @apply px-3 py-1 text-gray-500;
+    }
+
+    /* Form Inputs */
+    .input-text {
+        @apply rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500;
+    }
+    .input-label {
+        @apply block text-sm font-medium text-gray-700;
+    }
+    .input-error {
+        @apply text-sm text-red-600;
+    }
+    .input-checkbox {
+        @apply rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500;
+    }
+
+    select:disabled {
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+    border-color: #e5e7eb;
+    }
+    
+    /* Dropdown */
+    .dropdown-content-container {
+        @apply absolute z-50 mt-2 rounded-md shadow-lg;
+    }
+    .dropdown-content-inner {
+        @apply rounded-md ring-1 ring-black ring-opacity-5;
+    }
+    .dropdown-link {
+        @apply block w-full px-4 py-2 text-start text-sm leading-5 text-gray-700 transition duration-150 ease-in-out hover:bg-gray-100 focus:bg-gray-100 focus:outline-none;
+    }
+
+    /* Navigation */
+    .nav-link {
+        @apply inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium leading-5 transition duration-150 ease-in-out focus:outline-none;
+    }
+    .nav-link-active {
+        @apply border-indigo-400 text-gray-900 focus:border-indigo-700;
+    }
+    .nav-link-inactive {
+        @apply border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 focus:border-gray-300 focus:text-gray-700;
+    }
+
+    .responsive-nav-link {
+        @apply flex w-full items-start border-l-4 py-2 pe-4 ps-3 text-base font-medium transition duration-150 ease-in-out focus:outline-none;
+    }
+    .responsive-nav-link-active {
+        @apply border-indigo-400 bg-indigo-50 text-indigo-700 focus:border-indigo-700 focus:bg-indigo-100 focus:text-indigo-800;
+    }
+    .responsive-nav-link-inactive {
+        @apply border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800 focus:border-gray-300 focus:bg-gray-50 focus:text-gray-800;
+    }
+
+    /* Modal */
+    .modal-overlay {
+        @apply fixed inset-0 z-50 flex transform items-center overflow-y-auto px-4 py-6 transition-all sm:px-0;
+    }
+    .modal-backdrop {
+        @apply absolute inset-0 bg-gray-500/75;
+    }
+    .modal-panel {
+        @apply mb-6 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full;
+    }
+
+    /* DataTable */
+    .datatable-container {
+        @apply bg-white rounded-lg shadow overflow-hidden;
+    }
+    .datatable-table {
+        @apply min-w-full divide-y divide-gray-200;
+    }
+    .datatable-thead {
+        @apply bg-gray-50;
+    }
+    .datatable-th {
+        @apply text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+    }
+    .datatable-tbody {
+        @apply bg-white divide-y divide-gray-200;
+    }
+    .datatable-empty {
+        @apply px-6 py-8 text-center text-gray-500;
+    }
+}

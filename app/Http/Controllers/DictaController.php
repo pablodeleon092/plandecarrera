@@ -25,14 +25,30 @@ class DictaController extends Controller
 
         // Obtener la comisión
         $comision = Comision::with('materia')->findOrFail($request->comision_id);
+        $this->authorize('update', $comision);
 
+        $docente = \App\Models\Docente::with('cargos.dedicacion')->findOrFail($request->docente_id);
 
-        $docente = \App\Models\Docente::with('cargos')->findOrFail($request->docente_id);
+        if ($docente->cargos->isEmpty()) {
+            if ($request->user()->can('manageCargos', $docente)) {
+                return redirect()
+                    ->route('docentes.cargo.create', [
+                        'docente' => $docente,
+                        'comision_id' => $comision->id,
+                    ])
+                    ->with('error', 'El docente no tiene cargos registrados. Agregá uno para poder asignarlo a la comisión.');
+            }
+
+            return redirect()
+                ->route('comisiones.show', $comision)
+                ->with('error', 'El docente no tiene cargos registrados y no tenés permiso para agregarlos.');
+        }
 
         $funcionesAulicas = FuncionAulica::all();
 
         return Inertia::render('Comisiones/Dictas/Create', [
             'comision' => $comision,
+            'periodo' => $comision->periodoAcademico(),
             'docente' => $docente,
             'funcionesAulicas' => $funcionesAulicas,
         ]);
@@ -46,18 +62,19 @@ class DictaController extends Controller
                 'docente_id' => 'required|exists:docentes,id',
                 'cargo_id' => 'required|exists:cargos,id',
                 'horas_frente_aula' => 'required|integer|min:0',
-                'modalidad_presencia' => 'required|in:presencial,virtual,mixta',
-                'ano_inicio' => 'required|date',
-                'año_fin' => 'nullable|date|after_or_equal:ano_inicio',
                 'funcion_aulica_id' => 'nullable|exists:funciones_aulicas,id',
             ], [
                 'comision_id.required' => 'La comisión es obligatoria',
                 'docente_id.required' => 'El docente es obligatorio',
                 'cargo_id.required' => 'El cargo es obligatorio',
                 'horas_frente_aula.required' => 'Debe ingresar las horas frente al aula',
-                'modalidad_presencia.required' => 'Debe seleccionar la modalidad de presencia',
-                'ano_inicio.required' => 'El año de inicio es obligatorio',
             ]);
+
+            $comision = Comision::with('materia')->findOrFail($validated['comision_id']);
+            $periodo = $comision->periodoAcademico();
+            $validated['modalidad_presencia'] = $comision->modalidad;
+            $validated['ano_inicio'] = $periodo['inicio'];
+            $validated['año_fin'] = $periodo['fin'];
 
             // Evitar duplicados
             $exists = Dicta::where('comision_id', $validated['comision_id'])
@@ -101,14 +118,15 @@ class DictaController extends Controller
     public function edit(Dicta $dicta)
     {
 
-        $dicta->load(['comision', 'docente']);
-
+        $dicta->load(['comision.materia', 'docente']);
+        $this->authorize('update', $dicta->comision);
         $cargos = $dicta->docente->cargos;
         
         $funcionesAulicas = FuncionAulica::all();
 
         return Inertia::render('Comisiones/Dictas/Edit', [
             'dicta' => $dicta,
+            'periodo' => $dicta->comision->periodoAcademico(),
             'cargos' => $cargos,
             'funcionesAulicas' => $funcionesAulicas,
         ]);
@@ -128,9 +146,6 @@ class DictaController extends Controller
                 'docente_id' => 'required|exists:docentes,id',
                 'cargo_id' => 'required|exists:cargos,id',
                 'horas_frente_aula' => 'required|integer|min:0',
-                'modalidad_presencia' => 'required|in:presencial,virtual,mixta',
-                'ano_inicio' => 'required|date',
-                'año_fin' => 'nullable|date|after_or_equal:ano_inicio',
                 'funcion_aulica_id' => 'nullable|exists:funciones_aulicas,id',
             ], [
                 // ... Mensajes de error (abreviado) ...
@@ -138,10 +153,13 @@ class DictaController extends Controller
                 'docente_id.required' => 'El docente es obligatorio',
                 'cargo_id.required' => 'El cargo es obligatorio',
                 'horas_frente_aula.required' => 'Debe ingresar las horas frente al aula',
-                'modalidad_presencia.required' => 'Debe seleccionar la modalidad de presencia',
-                'ano_inicio.required' => 'El año de inicio es obligatorio',
-                'año_fin.after_or_equal' => 'El año de fin debe ser igual o posterior al año de inicio.',
             ]);
+
+            $comision = Comision::with('materia')->findOrFail($validated['comision_id']);
+            $periodo = $comision->periodoAcademico();
+            $validated['modalidad_presencia'] = $comision->modalidad;
+            $validated['ano_inicio'] = $periodo['inicio'];
+            $validated['año_fin'] = $periodo['fin'];
 
             // 3. Ejecutar la actualización dentro de una transacción
             DB::transaction(function () use ($dicta, $validated, $originalData) {
@@ -178,18 +196,9 @@ class DictaController extends Controller
     {
         $dicta = \App\Models\Dicta::findOrFail($id);
         $comisionId = $dicta->comision_id;
-
+        $this->authorize('delete', $dicta->comision);
         try {
             DB::transaction(function () use ($dicta) {
-                
-                // 1. Ejecutar el recalculo del cargo/docente ANTES de la eliminación
-                // El servicio NormativaAsignacion recalcula basándose en las Dictas restantes.
-                // Para el cálculo correcto, el servicio debe manejar la eliminación del registro.
-                // NOTA IMPORTANTE: En el nuevo diseño, la eliminación DEBE ir primero
-                
-                // **FLUJO RECOMENDADO PARA ELIMINACIÓN CON RECALCULO TOTAL:**
-                
-                // 1. Cargar referencias para el recalculo
                 $docente = $dicta->docente;
                 $cargo = $dicta->cargo;
 
@@ -203,7 +212,7 @@ class DictaController extends Controller
 
             });
 
-            return redirect()->route('comisiones.show', $comisionId)
+            return redirect()->back()
                 ->with('success', 'Vinculación del docente eliminada exitosamente.');
         } catch (Exception $e) {
             // Manejar cualquier fallo de la transacción

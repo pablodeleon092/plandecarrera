@@ -7,10 +7,12 @@ import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
 import GestionPersonal from '@/Components/Filters/GestionPersonal';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
+import KPICard from '@/Components/Dashboard/KPICard';
+import { usePermissions } from '@/Hooks/usePermissions';
+import SearchBar from '@/Components/SearchBar';
 
-
-export default function Index({ auth, institutos, carreras, docentes, flash, dedicaciones}) {
-
+export default function Index({ auth, institutos, carreras, docentes, flash, filters = [], search = '', dedicaciones}) {
+    const { canCreateDocente, canDeleteDocente } = usePermissions();
 
     // Función que maneja la eliminación de un docente
     const handleDelete = (id, nombre, apellido) => {
@@ -29,9 +31,9 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
     };
 
     // Calcular totales para las tarjetas de resumen
-    const totalDocentes = docentes.meta?.total || docentes.data.length;
-    const docentesActivos = useMemo(() => docentes.data.filter(d => d.es_activo).length, [docentes.data]);
-    const docentesInactivos = useMemo(() => docentes.data.filter(d => !d.es_activo).length, [docentes.data]);
+    const totalDocentes = docentes.meta?.total || docentes.length;
+    const docentesActivos = useMemo(() => docentes.filter(d => d.es_activo).length, [docentes]);
+    const docentesInactivos = useMemo(() => docentes.filter(d => !d.es_activo).length, [docentes]);
 
 
     return (
@@ -52,10 +54,19 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                         </div>
                     )}
 
-                    <ListHeader
-                        title="Listado de Docentes"
-                        buttonLabel="Agregar Docente"
-                        buttonRoute={route('docentes.create')}
+                    { canCreateDocente && (
+                        <ListHeader
+                            title="Listado de Docentes"
+                            buttonLabel="Agregar Docente"
+                            buttonRoute={route('docentes.create')}
+                        />  
+                    )}
+
+                    <SearchBar
+                        routeName="docentes.index"
+                        initialValue={search}
+                        filters={{ filters }}
+                        placeholder="Buscar por nombre, apellido o legajo…"
                     />
 
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -63,10 +74,29 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                             institutos = {institutos}
                             carreras = {carreras}
                             dedicaciones={dedicaciones}
+                            search={search}
                         />
                     </div>
 
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <KPICard
+                            title="Total Docentes"
+                            value={totalDocentes}
+                            status="neutral"
+                        />
+                        <KPICard
+                            title="Docentes Activos"
+                            value={docentesActivos}
+                            status="success"
+                        />
+                        <KPICard
+                            title="Docentes Inactivos"
+                            value={docentesInactivos}
+                            status="danger"
+                        />
+                    </div>
+
+                    <div className="mt-6 bg-white rounded-lg shadow overflow-hidden">
                         <DataTable
                             columns={[
                                 { key: 'legajo', 
@@ -83,27 +113,18 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                                 {
                                     key: 'cargos', label: 'Cargos', render: (doc) => (
                                         doc.cargos.length > 0
-                                            ? doc.cargos
-                                                .map(cargo => (
-                                                    <Link
-                                                        key={cargo.id}
-                                                        href={route('cargos.show', cargo.id)}
-                                                        className="text-indigo-600 hover:underline"
-                                                    >
-                                                        {cargo.nombre}
-                                                    </Link>
-                                                )).reduce((prev, curr) => [prev, ', ', curr]) : '—'
+                                            ? doc.cargos.map(cargo => cargo.nombre).join(', ')
+                                            : '—'
                                     )
                                 },
                                 {
                                     key: 'materias',
                                     label: 'Materias',
                                     render: (doc) => {
-                                        if (!doc.dictas) return <span className="text-gray-400">Sin materias</span>;
-                                        const links = doc.dictas.map((dicta) => {
-                                            const materia = dicta.comision?.materia;
-                                            if (!materia) return null;
-                                            return (
+                                        if (!doc.materias) return <span className="text-gray-400">Sin materias</span>;
+                                        const links = doc.materias.flatMap((materia) => {
+                                            if (!materia) return [];
+                                            return [
                                                 <Link
                                                     key={materia.id}
                                                     href={route('materias.show', materia.id)} 
@@ -111,15 +132,15 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                                                 >
                                                     {materia.nombre}
                                                 </Link>
-                                            );
-                                        }).filter(Boolean); 
+                                            ];
+                                        });
                                         return links.length > 0 
-                                            ? <div className="flex flex-col space-y-1">{links}</div>
+                                            ? <div className="flex flex-col gap-y-1">{links}</div>
                                             : <span className="text-gray-400">Sin materias</span>;
                                     }
                                 }
                             ]}
-                            data={docentes.data}
+                            data={docentes}
                             onShow={(docente) => router.visit(route('docentes.show', docente.id))}
                             onEdit={(docente) => router.visit(route('docentes.edit', docente.id))}
                             onDelete={(docente) => handleDelete(docente.id, docente.nombre, docente.apellido)}
@@ -134,26 +155,22 @@ export default function Index({ auth, institutos, carreras, docentes, flash, ded
                             }
                         />
                     </div>
-                    <PaginatorButtons meta={docentes.meta} paginator={docentes} routeName={'docentes.index'}
-                    />
-
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Total Docentes</p>
-                            <p className="text-2xl font-bold text-gray-900">{totalDocentes}</p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Docentes Activos</p>
-                            <p className="text-2xl font-bold text-green-600">
-                                {docentesActivos}
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Docentes Inactivos</p>
-                            <p className="text-2xl font-bold text-red-600">
-                                {docentesInactivos}
-                            </p>
-                        </div>
+                        <KPICard
+                            title="Total Docentes"
+                            value={totalDocentes}
+                            status="neutral"
+                        />
+                        <KPICard
+                            title="Docentes Activos"
+                            value={docentesActivos}
+                            status="success"
+                        />
+                        <KPICard
+                            title="Docentes Inactivos"
+                            value={docentesInactivos}
+                            status="danger"
+                        />
                     </div>
         </AuthenticatedLayout>
     );

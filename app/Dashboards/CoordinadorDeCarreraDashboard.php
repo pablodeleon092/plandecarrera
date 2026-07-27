@@ -22,24 +22,31 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
 
     public function render(User $user, Request $request): Response
     {
-        $carreras = $user->carreras()->select('carreras.id', 'carreras.nombre')->get();
+        if ($user->cargo === 'Administrador') {
+            $carreras = Carrera::select('id', 'nombre')->get();
+        } else {
+            $carreras = $user->carreras()->select('carreras.id', 'carreras.nombre')->get();
+        }
+        
         $selectedCarreraId = $request->input('selected_carrera');
 
-        // Si no hay ID en el request, tomamos la primera
-        if (!$selectedCarreraId && $carreras->isNotEmpty()) {
+        // Si no hay ID en el request o es 'all', tomamos la primera
+        if ((!$selectedCarreraId || $selectedCarreraId === 'all') && $carreras->isNotEmpty()) {
             $selectedCarreraId = $carreras->first()->id;
         }
 
-        $mapaCurricular = null;
-        if ($selectedCarreraId) {
-            $mapaCurricular = $this->getResumenMapaCurricular($selectedCarreraId);
-            $coberturaPorAño = $this->getCoberturaPorAño($selectedCarreraId);
-            $equipoDocenteCarrera = $this->getEquipoDocenteCarrera($selectedCarreraId);
-            $cargaHorariaDelPlanPorAño = $this->getCargaHorariaDelPlanPorAño($selectedCarreraId);
-            $kpis = $this->getKpisCarrera($selectedCarreraId);
+        if (!$selectedCarreraId) {
+            abort(403, 'Carrera no seleccionada o inválida.');
         }
 
+        $mapaCurricular = null;
 
+        $mapaCurricular = $this->getResumenMapaCurricular($selectedCarreraId);
+        $coberturaPorAño = $this->getCoberturaPorAño($selectedCarreraId);
+        $equipoDocenteCarrera = $this->getEquipoDocenteCarrera($selectedCarreraId);
+        $cargaHorariaDelPlanPorAño = $this->getCargaHorariaDelPlanPorAño($selectedCarreraId);
+        $kpis = $this->getKpisCarrera($selectedCarreraId);
+    
 
         return Inertia::render('Gestion/DashboardCoordinador', [
             'user' => $user,
@@ -96,14 +103,16 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
         $plan = $carrera->planActual;
         if (!$plan) return null;
 
-        $materiasAgrupadas = $plan->materias->map(function ($materia) {
-            $cuat = $materia->cuatrimestre;
-            if ($materia->regimen = 'cuatrimestral') {
-                $año = ceil($cuat / 2);
-            } else {
-                $año = $cuat;
-            }
+        $plan->load([
+            'materias.comisiones.dictas.docente', 
+            'materias.comisiones.dictas.cargo'
+        ]);
 
+        $materiasAgrupadas = $plan->materias->map(function ($materia) {
+
+        $año = $materia->pivot->anio ?? 'N/A'; 
+
+        $cuat = $materia->cuatrimestre ?? 'Sin asignar';
             $comisionesData = $materia->comisiones->map(function($comision) {
                 return [
                     'nombre' => $comision->nombre,
@@ -184,10 +193,15 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
         $plan = $carrera->planActual;
         if (!$plan) return null;
 
+        $plan->load([
+            'materias.comisiones.dictas.docente', 
+            'materias.comisiones.dictas.cargo'
+        ]);
+
         $materiasAgrupadas = $plan->materias->map(function ($materia) {
-            $cuat = $materia->cuatrimestre;
-            // Corrección de lógica de año
-            $año = ($materia->regimen == 'cuatrimestral') ? ceil($cuat / 2) : $cuat;
+            $año = $materia->pivot->anio ?? 'N/A'; 
+
+            $cuat = $materia->cuatrimestre ?? 'Sin asignar';
 
             $comisionesData = $materia->comisiones->map(function($comision) {
                 // Sumamos las horas que los docentes efectivamente tienen frente al aula
@@ -239,7 +253,10 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
 
     private function getKpisCarrera($carreraId)
     {
-        $carrera = Carrera::findOrFail($carreraId);
+        $carrera = Carrera::with([
+            'planActual.materias.comisiones.dictas.docente',
+            'planActual.materias.comisiones.dictas.cargo',
+        ])->findOrFail($carreraId);
 
         $plan = $carrera->planActual;
 

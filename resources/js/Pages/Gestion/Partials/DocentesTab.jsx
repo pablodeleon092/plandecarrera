@@ -60,9 +60,9 @@ export default function DocentesTab({ docentes = [] }) {
                                 <td className="px-6 py-4">
                                     <div className="flex flex-wrap gap-2">
                                         {/*  lista de nombres de carreras */}
-                                        {docente.carreras_lista && docente.carreras_lista.map((carrera, index) => (
+                                        {docente.carreras_lista && docente.carreras_lista.map((carrera) => (
                                             <span 
-                                                key={index}
+                                                key={carrera}
                                                 className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200"
                                             >
                                                 {carrera}

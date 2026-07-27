@@ -1,17 +1,16 @@
+import Button from '@/Components/Button';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
-export default function Create({ auth, docente, dedicaciones, flash }) {
+export default function Create({ auth, docente, dedicaciones, flash, comisionId = null }) {
 
     const { data, setData, post, processing, errors } = useForm({
         cargo: '',
         dedicacion_id: '',
         docente_id: docente.id,
+        comision_id: comisionId || '',
     });
 
     const submit = (e) => {
@@ -83,8 +82,8 @@ export default function Create({ auth, docente, dedicaciones, flash }) {
                                 <InputError message={errors.dedicacion_id} className="mt-2" />
                             </div>
 
-                            <div className="flex justify-end space-x-4">
-                                <DangerButton
+                            <div className="flex justify-end gap-x-4">
+                                <Button variant="danger"
                                     as={Link}
                                     href="#"
                                     onClick={(e) => {
@@ -93,13 +92,13 @@ export default function Create({ auth, docente, dedicaciones, flash }) {
                                     }}
                                 >
                                     Cancelar
-                                </DangerButton>
-                                <PrimaryButton
+                                </Button>
+                                <Button variant="primary"
                                     type="submit"
                                     disabled={processing}
                                 >
                                     {processing ? 'Guardando...' : 'Agregar Cargo'}
-                                </PrimaryButton>
+                                </Button>
                             </div>
                         </form>
                     </div>

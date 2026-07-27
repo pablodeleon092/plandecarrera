@@ -14,16 +14,16 @@ use App\Factories\DashboardFactory;
 
 class DashboardController extends Controller
 {
-
     public function home(Request $request)
     {
         $user = Auth::user();
 
-        // Resolvemos la estrategia según el cargo
-        $strategy = DashboardFactory::make($user->cargo);
+        // Obtenemos el cargo opcional que el administrador quiere ver
+        $targetCargo = $request->query('view');
 
-        // Ejecutamos el renderizado de esa estrategia
+        // Pasamos tanto el cargo real como el deseado a la Factory
+        $strategy = DashboardFactory::make($user->cargo, $targetCargo);
+
         return $strategy->render($user, $request);
     }
-    
 }

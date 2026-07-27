@@ -5,8 +5,10 @@ import ListHeader from '@/Components/ListHeader';
 import DataTable from '@/Components/DataTable';
 import GestionComisiones from '@/Components/Filters/GestionComisiones';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
+import SearchBar from '@/Components/SearchBar';
+import KPICard from '@/Components/Dashboard/KPICard';
 
-export default function Index({ auth, comisiones, carreras, institutos, flash}) {
+export default function Index({ auth, comisiones, carreras, institutos, filters = [], search = '', flash}) {
 
 
     const handleToggleStatus = (comision) => {
@@ -23,11 +25,11 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
             nowrap: false
         },
         {
-            key: 'id_materia',
+            key: 'nombre',
             label: 'Materia',
             render: (comision) => (
                 <span>
-                    {comision.materia?.nombre || '-'}
+                    {comision.materia || '-'}
                 </span>
             ),
             nowrap: false
@@ -40,7 +42,6 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
         {
             key: 'modalidad',
             label: 'Modalidad',
-
         },
         {
             key: 'sede',
@@ -64,7 +65,7 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
                             </div>
                         ))
                     ) : (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-gray-400">-</span>
                     )}
                 </div>
             )
@@ -76,6 +77,10 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
             router.delete(route('comisiones.destroy', comision.id));
         }
     };
+
+    const totalComisiones = comisiones.meta?.total || comisiones.length;
+    const comisionesActivas = useMemo(() => comisiones.filter(m => m.estado).length, [comisiones]);
+  
 
     return (
         <AuthenticatedLayout
@@ -94,22 +99,43 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
                     {flash.error}
                 </div>
             )}
+
                     <ListHeader
                         title="Listado de Comisiones"
+                    />
+                    <SearchBar
+                        routeName="comisiones.index"
+                        initialValue={search}
+                        filters={{ filters }}
+                        placeholder="Buscar por nombre o código…"
                     />
  
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
                         <GestionComisiones
                             institutos = {institutos}
                             carreras = {carreras}
+                            search={search}
                         />
                     </div>
 
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <KPICard
+                            title="Total Comisiones"
+                            value={totalComisiones}
+                            status="neutral"
+                        />
+                        <KPICard
+                            title="Comisiones Activas"
+                            value={comisionesActivas}
+                            status="success"
+                        />
+                    </div>
+
+                    <div className="mt-6 bg-white rounded-lg shadow overflow-hidden">
                         <DataTable
                             dense={true}
                             columns={columns}
-                            data={comisiones.data}
+                            data={comisiones}
                             onShow={(comision) => router.visit(route('comisiones.show', comision.id))}
                             onEdit={(comision) => router.visit(route('comisiones.edit', comision.id))}
                             onDelete={handleDelete}
@@ -124,12 +150,11 @@ export default function Index({ auth, comisiones, carreras, institutos, flash}) 
                         />
                     </div>
 
-                    <PaginatorButtons meta={comisiones?.meta} paginator={comisiones} routeName={'comisiones.index'}/>
 
                     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="bg-white rounded-lg shadow p-4">
                             <p className="text-sm text-gray-600">Total Comisiones</p>
-                            <p className="text-2xl font-bold text-gray-900">{comisiones.meta?.total || comisiones.data.length}</p>
+                            <p className="text-2xl font-bold text-gray-900">{comisiones.meta?.total || comisiones.length}</p>
                         </div>
                     </div>
 

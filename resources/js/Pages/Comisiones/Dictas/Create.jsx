@@ -1,19 +1,14 @@
+import Button from '@/Components/Button';
 import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
-export default function CreateDicta({ auth, comision, flash, docente, funcionesAulicas }) {
+export default function CreateDicta({ auth, comision, periodo, flash, docente, funcionesAulicas }) {
     const { data, setData, post, errors } = useForm({
         comision_id: comision.id,
         docente_id: docente.id,
         cargo_id: '',
         horas_frente_aula: '',
-        modalidad_presencia: 'presencial',
-        ano_inicio: comision.anio,
-        año_fin: '',
         funcion_aulica_id: '',
     });
 
@@ -25,7 +20,7 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">Comisión: {comision.nombre}</h2>}
+            header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Comisión: {comision.nombre}</h2>}
         >
             <Head title={`Comisión: ${comision.nombre}`} />
 
@@ -51,8 +46,9 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Seleccionar Cargo */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Cargo</label>
+                            <label htmlFor="cargo_id" className="block text-gray-700 font-semibold mb-2">Cargo</label>
                             <select
+                                id="cargo_id"
                                 value={data.cargo_id}
                                 onChange={e => setData('cargo_id', e.target.value)}
                                 className="w-full border rounded px-3 py-2"
@@ -60,7 +56,7 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
                             >
                                 <option value="">-- Seleccione un cargo --</option>
                                 {docente.cargos.map(cargo => (
-                                    <option key={cargo.id} value={cargo.id}>{cargo.nombre}</option>
+                                    <option key={cargo.id} value={cargo.id}>{cargo.nombre} {cargo.dedicacion ? `(${cargo.dedicacion.nombre})` : ''}</option>
                                 ))}
                             </select>
                             {errors.cargo_id && <p className="text-red-500 text-sm mt-1">{errors.cargo_id}</p>}
@@ -68,8 +64,9 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
 
                         {/* Horas frente al aula */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Horas frente al aula</label>
+                            <label htmlFor="horas_frente_aula" className="block text-gray-700 font-semibold mb-2">Horas frente al aula</label>
                             <input
+                                id="horas_frente_aula"
                                 type="number"
                                 min="0"
                                 value={data.horas_frente_aula}
@@ -82,49 +79,47 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
 
                         {/* Modalidad Presencia */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Modalidad de presencia</label>
-                            <select
-                                value={data.modalidad_presencia}
-                                onChange={e => setData('modalidad_presencia', e.target.value)}
-                                className="w-full border rounded px-3 py-2"
-                                required
-                            >
-                                <option value="presencial">Presencial</option>
-                                <option value="virtual">Virtual</option>
-                                <option value="mixta">Mixta</option>
-                            </select>
-                            {errors.modalidad_presencia && <p className="text-red-500 text-sm mt-1">{errors.modalidad_presencia}</p>}
+                            <label htmlFor="modalidad_presencia" className="block text-gray-700 font-semibold mb-2">Modalidad de presencia</label>
+                            <input
+                                id="modalidad_presencia"
+                                type="text"
+                                value={comision.modalidad}
+                                className="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700 capitalize cursor-not-allowed"
+                                readOnly
+                            />
+                            <p className="text-sm text-gray-500 mt-1">Definida por la modalidad de la comisión.</p>
                         </div>
 
                         {/* Año Inicio */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Año Inicio</label>
+                            <label htmlFor="ano_inicio" className="block text-gray-700 font-semibold mb-2">Año Inicio</label>
                             <input
+                                id="ano_inicio"
                                 type="date"
-                                value={data.ano_inicio}
-                                onChange={e => setData('ano_inicio', e.target.value)}
-                                className="w-full border rounded px-3 py-2"
-                                required
+                                value={periodo.inicio}
+                                className="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"
+                                readOnly
                             />
-                            {errors.ano_inicio && <p className="text-red-500 text-sm mt-1">{errors.ano_inicio}</p>}
                         </div>
 
                         {/* Año Fin */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Año Fin</label>
+                            <label htmlFor="ano_fin" className="block text-gray-700 font-semibold mb-2">Año Fin</label>
                             <input
+                                id="ano_fin"
                                 type="date"
-                                value={data.año_fin}
-                                onChange={e => setData('año_fin', e.target.value)}
-                                className="w-full border rounded px-3 py-2"
+                                value={periodo.fin}
+                                className="w-full border rounded px-3 py-2 bg-gray-100 text-gray-700 cursor-not-allowed"
+                                readOnly
                             />
-                            {errors.año_fin && <p className="text-red-500 text-sm mt-1">{errors.año_fin}</p>}
+                            <p className="text-sm text-gray-500 mt-1">Período definido por el régimen y cuatrimestre de la comisión.</p>
                         </div>
 
                         {/* Función Aúlica */}
                         <div>
-                            <label className="block text-gray-700 font-semibold mb-2">Función Aúlica</label>
+                            <label htmlFor="funcion_aulica_id" className="block text-gray-700 font-semibold mb-2">Función Aúlica</label>
                             <select
+                                id="funcion_aulica_id"
                                 value={data.funcion_aulica_id}
                                 onChange={e => setData('funcion_aulica_id', e.target.value)}
                                 className="w-full border rounded px-3 py-2"
@@ -138,7 +133,7 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
                         </div>
 
                         <div className="flex justify-between items-center">
-                            <DangerButton
+                            <Button variant="danger"
                                 as={Link}
                                 href="#"
                                 onClick={(e) => {
@@ -147,12 +142,12 @@ export default function CreateDicta({ auth, comision, flash, docente, funcionesA
                                 }}
                             >
                                 Cancelar
-                            </DangerButton>
-                            <PrimaryButton
+                            </Button>
+                            <Button variant="primary"
                                 type="submit"
                             >
                                 Guardar
-                            </PrimaryButton>
+                            </Button>
                         </div>
                     </form>
                 </div>

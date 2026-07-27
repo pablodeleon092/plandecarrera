@@ -36,13 +36,17 @@ class HorarioSeeder extends Seeder
                 // La hora de fin será entre 2 y 4 horas después del inicio
                 $horaFin = $inicio->modify('+' . rand(2, 4) . ' hours')->format('H:00:00');
 
-                Horario::create([
-                    'comision_id' => $comision->id,
-                    'dia_semana'  => $dia,
-                    'hora_inicio' => $horaInicio,
-                    'hora_fin'    => $horaFin,
-                    'aula'        => 'Aula ' . fake()->numberBetween(100, 500),
-                ]);
+                Horario::firstOrCreate(
+                    [
+                        'comision_id' => $comision->id,
+                        'dia_semana'  => $dia,
+                        'hora_inicio' => $horaInicio,
+                    ],
+                    [
+                        'hora_fin'    => $horaFin,
+                        'aula'        => 'Aula ' . fake()->numberBetween(100, 500),
+                    ]
+                );
             }
         }
 

@@ -12,7 +12,7 @@ const diasLabel = {
     sabado: 'Sábado',
 };
 
-export default function ComisionHorarios({ comision }) {
+export default function ComisionHorarios({ comision, canDelete = false }) {
     const [horarios, setHorarios] = useState(comision.horarios || []);
     const [form, setForm] = useState({
         dia_semana: 'lunes',
@@ -86,7 +86,7 @@ export default function ComisionHorarios({ comision }) {
                                     <th className="px-4 py-3 text-left">Inicio</th>
                                     <th className="px-4 py-3 text-left">Fin</th>
                                     <th className="px-4 py-3 text-left">Aula</th>
-                                    <th className="px-4 py-3 text-left">Acción</th>
+                                    {canDelete && <th className="px-4 py-3 text-left">Acción</th>}
                                 </tr>
                             </thead>
                             <tbody>
@@ -96,14 +96,17 @@ export default function ComisionHorarios({ comision }) {
                                         <td className="px-4 py-3">{h.hora_inicio.substring(0, 5)}</td>
                                         <td className="px-4 py-3">{h.hora_fin.substring(0, 5)}</td>
                                         <td className="px-4 py-3">{h.aula || '—'}</td>
-                                        <td className="px-4 py-3">
-                                            <button
-                                                onClick={() => handleDelete(h.id)}
-                                                className="text-red-500 hover:text-red-700 text-xs font-medium"
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </td>
+                                        {canDelete && (
+                                            <td className="px-4 py-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleDelete(h.id)}
+                                                    className="text-red-500 hover:text-red-700 text-xs font-medium"
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>
@@ -117,9 +120,9 @@ export default function ComisionHorarios({ comision }) {
                 <h3 className="text-lg font-semibold text-gray-700 mb-3">Agregar horario</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Día</label>
+                        <label htmlFor="dia_semana" className="block text-sm font-medium text-gray-700 mb-1">Día</label>
                         <select
-                            name="dia_semana"
+                            id="dia_semana"                            name="dia_semana"
                             value={form.dia_semana}
                             onChange={handleChange}
                             className="block w-full border-gray-300 rounded-md shadow-sm text-sm"
@@ -130,8 +133,9 @@ export default function ComisionHorarios({ comision }) {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Hora inicio</label>
+                        <label htmlFor="hora_inicio" className="block text-sm font-medium text-gray-700 mb-1">Hora inicio</label>
                         <input
+                            id="hora_inicio"
                             type="text"
                             name="hora_inicio"
                             value={form.hora_inicio}
@@ -141,8 +145,9 @@ export default function ComisionHorarios({ comision }) {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Hora fin</label>
+                        <label htmlFor="hora_fin" className="block text-sm font-medium text-gray-700 mb-1">Hora fin</label>
                         <input
+                            id="hora_fin"
                             type="text"
                             name="hora_fin"
                             value={form.hora_fin}
@@ -153,8 +158,9 @@ export default function ComisionHorarios({ comision }) {
                         {errors.hora_fin && <p className="text-red-500 text-xs mt-1">{errors.hora_fin}</p>}
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Aula (opcional)</label>
+                        <label htmlFor="aula" className="block text-sm font-medium text-gray-700 mb-1">Aula (opcional)</label>
                         <input
+                            id="aula"
                             type="text"
                             name="aula"
                             value={form.aula}
@@ -166,6 +172,7 @@ export default function ComisionHorarios({ comision }) {
                 </div>
                 <div className="mt-4">
                     <button
+                        type="button"
                         onClick={handleAdd}
                         disabled={processing}
                         className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"

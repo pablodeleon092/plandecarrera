@@ -1,15 +1,12 @@
+import Button from '@/Components/Button';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 
 export default function Edit({ auth, materia }) {
     const { data, setData, put, processing, errors } = useForm({
         nombre: materia.nombre,
         codigo: materia.codigo,
-        estado: materia.estado,
         regimen: materia.regimen,
         cuatrimestre: materia.cuatrimestre || '',
         horas_semanales: materia.horas_semanales,
@@ -35,7 +32,7 @@ export default function Edit({ auth, materia }) {
         >
             <Head title="Editar Materia" />
                     <div className="mb-4">
-                        <SecondaryButton
+                        <Button variant="secondary"
                             as={Link}
                             href="#"
                             onClick={(e) => {
@@ -53,7 +50,7 @@ export default function Edit({ auth, materia }) {
                                 />
                             </svg>
                             Volver
-                        </SecondaryButton>
+                        </Button>
                     </div>
 
                     <div className="mb-8">
@@ -69,10 +66,11 @@ export default function Edit({ auth, materia }) {
 
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-2">
                                         Nombre de la Materia *
                                     </label>
                                     <input
+                                        id="nombre"
                                         type="text"
                                         value={data.nombre}
                                         onChange={e => setData('nombre', e.target.value)}
@@ -86,10 +84,11 @@ export default function Edit({ auth, materia }) {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="codigo" className="block text-sm font-medium text-gray-700 mb-2">
                                         Código *
                                     </label>
                                     <input
+                                        id="codigo"
                                         type="text"
                                         value={data.codigo}
                                         onChange={e => setData('codigo', e.target.value.toUpperCase())}
@@ -101,20 +100,6 @@ export default function Edit({ auth, materia }) {
                                         <p className="text-red-500 text-sm mt-1">{errors.codigo}</p>
                                     )}
                                 </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Estado *
-                                    </label>
-                                    <select
-                                        value={data.estado}
-                                        onChange={e => setData('estado', e.target.value === 'true')}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="true">Activo</option>
-                                        <option value="false">Inactivo</option>
-                                    </select>
-                                </div>
                             </div>
                         </div>
 
@@ -125,10 +110,11 @@ export default function Edit({ auth, materia }) {
 
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="regimen" className="block text-sm font-medium text-gray-700 mb-2">
                                         Régimen *
                                     </label>
                                     <select
+                                        id="regimen"
                                         value={data.regimen}
                                         onChange={e => {
                                             setData('regimen', e.target.value);
@@ -154,13 +140,20 @@ export default function Edit({ auth, materia }) {
                                     <select
                                         value={data.cuatrimestre}
                                         onChange={e => setData('cuatrimestre', e.target.value)}
-                                        disabled={data.regimen === 'anual'}
-                                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${data.regimen === 'anual' ? 'bg-gray-100 cursor-not-allowed' : ''
-                                            } ${errors.cuatrimestre ? 'border-red-500' : 'border-gray-300'}`}
+                                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.cuatrimestre ? 'border-red-500' : 'border-gray-300'}
+                                        ${errors.cuatrimestre ? 'border-red-500' : 'border-gray-300'}`}
                                     >
-                                        <option value="">Seleccione...</option>
-                                        <option value="1">1° Cuatrimestre</option>
-                                        <option value="2">2° Cuatrimestre</option>
+                                        <option value="">Seleccione…</option>
+                                        <option value="1">1°</option>
+                                        <option value="2">2°</option>
+                                        <option value="3">3°</option>
+                                        <option value="4">4°</option>
+                                        <option value="5">5°</option>
+                                        <option value="6">6°</option>
+                                        <option value="7">7°</option>
+                                        <option value="8">8°</option>
+                                        <option value="9">9°</option>
+                                        <option value="10">10°</option>
                                     </select>
                                     {errors.cuatrimestre && (
                                         <p className="text-red-500 text-sm mt-1">{errors.cuatrimestre}</p>
@@ -176,10 +169,11 @@ export default function Edit({ auth, materia }) {
 
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="horas_semanales" className="block text-sm font-medium text-gray-700 mb-2">
                                         Horas Semanales *
                                     </label>
                                     <input
+                                        id="horas_semanales"
                                         type="number"
                                         min="1"
                                         max="40"
@@ -195,10 +189,11 @@ export default function Edit({ auth, materia }) {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <label htmlFor="horas_totales" className="block text-sm font-medium text-gray-700 mb-2">
                                         Horas Totales
                                     </label>
                                     <input
+                                        id="horas_totales"
                                         type="number"
                                         value={data.horas_totales}
                                         readOnly
@@ -213,7 +208,7 @@ export default function Edit({ auth, materia }) {
                         </div>
 
                         <div className="flex gap-4 pt-6 border-t">
-                            <DangerButton
+                            <Button variant="danger"
                                 as={Link}
                                 href="#"
                                 onClick={(e) => {
@@ -223,8 +218,8 @@ export default function Edit({ auth, materia }) {
                                 className="flex-1 justify-center"
                             >
                                 Cancelar
-                            </DangerButton>
-                            <PrimaryButton
+                            </Button>
+                            <Button variant="primary"
                                 type="button"
                                 onClick={handleSubmit}
                                 disabled={processing}
@@ -236,10 +231,10 @@ export default function Edit({ auth, materia }) {
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
-                                        Actualizando...
+                                        Actualizando…
                                     </span>
                                 ) : 'Actualizar Materia'}
-                            </PrimaryButton>
+                            </Button>
                         </div>
                     </div>
 

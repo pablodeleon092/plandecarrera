@@ -73,27 +73,29 @@ export default function PaginatorButtons({ meta = null, paginator = null, onPage
 
 
     return (
-        <div className="mt-4 flex items-center justify-between">
-            <div className="text-sm text-gray-600">
+        <div className="paginator-container">
+            <div className="paginator-text">
                 {`Página ${current_page} de ${last_page}`}
             </div>
-            <div className="inline-flex items-center space-x-2"> {/* Reducido el espacio a space-x-2 */}
+            <div className="paginator-buttons"> {/* Reducido el espacio a space-x-2 */}
                 <button
+                    type="button"
                     onClick={() => goTo(current_page - 1)}
                     disabled={current_page <= 1}
-                    className="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition"
+                    className="btn-paginator-nav"
                 >
                     Anterior
                 </button>
 
                 {finalPages.map((p, index) => (
                     p === '...' ? (
-                        <span key={index} className="px-3 py-1 text-gray-500">...</span>
+                        <span key={`ellipsis-${index}`} className="paginator-ellipsis">...</span>
                     ) : (
-                        <button 
-                            key={index}
+                        <button
+                            type="button"
+                            key={p}
                             onClick={() => goTo(p)}
-                            className={`px-3 py-1 rounded-lg transition ${p === current_page ? 'bg-indigo-600 text-white shadow-md' : 'bg-white border border-gray-300 text-gray-700 hover:bg-indigo-50 hover:border-indigo-500'}`}
+                            className={p === current_page ? 'btn-paginator-page-active' : 'btn-paginator-page'}
                         >
                             {p}
                         </button>
@@ -101,9 +103,10 @@ export default function PaginatorButtons({ meta = null, paginator = null, onPage
                 ))}
 
                 <button
+                    type="button"
                     onClick={() => goTo(current_page + 1)}
                     disabled={current_page >= last_page}
-                    className="px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition"
+                    className="btn-paginator-nav"
                 >
                     Siguiente
                 </button>

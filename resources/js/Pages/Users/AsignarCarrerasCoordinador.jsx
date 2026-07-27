@@ -1,14 +1,20 @@
+import Button from '@/Components/Button';
+import InputError from '@/Components/InputError';
 import React, { useState, useEffect } from 'react';
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
 // Nota: Se asume que recibes las props: auth, coordinador, carrerasAsignadas, carrerasRestantes, flash.
-// Tu componente original usaba 'plan' y 'carrera', he asumido que necesitas 'coordinador' para la ruta PUT.
-export default function AsignarCarrerasCoordinador({ auth, coordinador, carrerasAsignadas, carrerasRestantes, flash }) {
+export default function AsignarCarrerasCoordinador({
+    auth,
+    coordinador,
+    carrerasAsignadas,
+    carrerasRestantes,
+    flash,
+    creationMode = false,
+}) {
 
     // 1. RENOMBRAR ESTADOS
     const [carrerasCoordinador, setCarrerasCoordinador] = useState(carrerasAsignadas || []); // Carreras ya asignadas
@@ -18,40 +24,46 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
         const { source, destination } = result;
         if (!destination) return;
 
-        // IDs para los droppables
         const COORD_ID = 'carrerasCoordinador';
-        const DISP_ID = 'carrerasDisponibles';
 
-        // Determinar listas fuente y destino
         const sourceState = source.droppableId === COORD_ID ? carrerasCoordinador : carrerasDisponibles;
-        const destState = destination.droppableId === COORD_ID ? carrerasCoordinador : carrerasDisponibles;
 
+        // Reorden dentro de la misma lista: una sola copia, sacar y reinsertar sobre ella.
+        if (source.droppableId === destination.droppableId) {
+            const list = Array.from(sourceState);
+            const [moved] = list.splice(source.index, 1);
+            list.splice(destination.index, 0, moved);
+
+            if (source.droppableId === COORD_ID) setCarrerasCoordinador(list);
+            else setCarrerasDisponibles(list);
+            return;
+        }
+
+        // Movimiento entre listas distintas: se conserva la lógica actual.
+        const destState = destination.droppableId === COORD_ID ? carrerasCoordinador : carrerasDisponibles;
         const sourceList = Array.from(sourceState);
         const destList = Array.from(destState);
 
-        // Mover el elemento
         const [moved] = sourceList.splice(source.index, 1);
         destList.splice(destination.index, 0, moved);
 
-        // Actualizar estados
-        if (source.droppableId === destination.droppableId) {
-            // Reorden dentro de la misma lista
-            if (source.droppableId === COORD_ID) setCarrerasCoordinador(sourceList);
-            else setCarrerasDisponibles(sourceList);
+        if (source.droppableId === COORD_ID) {
+            setCarrerasCoordinador(sourceList);
+            setCarrerasDisponibles(destList);
         } else {
-            // Mover entre listas
-            if (source.droppableId === COORD_ID) {
-                setCarrerasCoordinador(sourceList);
-                setCarrerasDisponibles(destList);
-            } else {
-                setCarrerasCoordinador(destList);
-                setCarrerasDisponibles(sourceList);
-            }
+            setCarrerasCoordinador(destList);
+            setCarrerasDisponibles(sourceList);
         }
     };
 
     // 2. ADAPTAR useForm A LA NUEVA LÓGICA (Coordinador y Carreras)
-    const { setData, put, processing: isPutting } = useForm({
+    const {
+        setData,
+        post,
+        patch,
+        processing,
+        errors,
+    } = useForm({
         // El backend espera un array de IDs de las carreras asignadas
         carreras_ids: carrerasCoordinador.map(c => c.id),
     });
@@ -64,6 +76,13 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
     const guardarCambios = (e) => {
         if (e && e.preventDefault) e.preventDefault();
 
+        if (creationMode) {
+            post(route('users.coordinator-carreras.store'), {
+                preserveScroll: true,
+            });
+            return;
+        }
+
         if (!coordinador || !coordinador.id) {
             alert('No se encontró el coordinador para guardar la asignación.');
             return;
@@ -71,25 +90,15 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
 
         // 3. CAMBIAR RUTA PUT: PUT a la ruta de asignación del coordinador (ej: /coordinadores/{id}/carreras)
         // Se asume que tienes una ruta para actualizar las asignaciones de un coordinador.
-        router.patch(route('coordinadores.carreras.update', coordinador.id), {
-            carreras_ids: carrerasCoordinador.map(c => c.id)
-        }, {
+        patch(route('coordinadores.carreras.update', coordinador.id), {
             // Opciones de Inertia van en el tercer argumento
             preserveScroll: true,
             preserveState: true,
+            replace: true,
             onSuccess: () => console.log('Carreras asignadas actualizadas con éxito.'),
             onError: (errors) => console.error('Error al guardar:', errors),
         });
     };
-
-    // La lógica de desactivar carrera no aplica aquí, se elimina o se reemplaza por otra acción de coordinador si es necesario
-    // Dejo la estructura del código de desactivación por si quieres adaptar una acción de 'coordinador'
-    const [isDeactivating, setIsDeactivating] = useState(false);
-    const desactivarCoordinador = (e) => {
-        e.preventDefault();
-        // ... Lógica para desactivar el coordinador si aplica ...
-    };
-
 
     return (
         <AuthenticatedLayout
@@ -163,23 +172,26 @@ export default function AsignarCarrerasCoordinador({ auth, coordinador, carreras
                     </table>
                 </DragDropContext>
 
-                <div className="flex justify-end items-center mt-6">
-                    {/* Botón de desactivación, si aplica a un coordinador */}
-                    <DangerButton
-                        onClick={desactivarCoordinador}
-                        disabled={isPutting || isDeactivating}
-                        className="mr-4" // Añadir margen derecho
-                    >
-                        Desactivar Coordinador
-                    </DangerButton>
+                <InputError message={errors.carreras_ids} className="mt-2" />
+
+                <div className={`flex items-center mt-6 ${creationMode ? 'justify-between' : 'justify-end'}`}>
+                    {creationMode && (
+                        <Button
+                            as={Link}
+                            href={route('users.create')}
+                            variant="secondary"
+                        >
+                            Volver atrás
+                        </Button>
+                    )}
 
                     {/* Botón Guardar Cambios */}
-                    <PrimaryButton
+                    <Button variant="primary"
                         onClick={guardarCambios}
-                        disabled={isPutting || isDeactivating}
+                        disabled={processing}
                     >
-                        {isPutting ? 'Guardando...' : 'Guardar asignación'}
-                    </PrimaryButton>
+                        {processing ? 'Guardando...' : 'Guardar asignación'}
+                    </Button>
                 </div>
 
         </AuthenticatedLayout>

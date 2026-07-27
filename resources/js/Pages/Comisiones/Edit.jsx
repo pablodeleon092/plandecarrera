@@ -1,18 +1,18 @@
+import Button from '@/Components/Button';
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
+import { useState } from 'react';
 
 export default function Edit({ auth, materias, comision, flash }) {
 
+    const [currentDate] = useState(() => new Date());
 
     const { data, setData, put, processing, errors } = useForm({
         codigo: comision?.codigo || '',
         nombre: comision?.nombre || '',
-        turno: comision?.turno || 'Mañana',
-        modalidad: comision?.modalidad || 'Presencial',
+        turno: comision?.turno || 'mañana',
+        modalidad: comision?.modalidad || 'presencial',
         sede: comision?.sede || 'Ushuaia',
         cuatrimestre: comision?.cuatrimestre || '1ro',
         anio: comision?.anio || '',
@@ -30,9 +30,9 @@ export default function Edit({ auth, materias, comision, flash }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Crear Nuevo Comision</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Editar Comision</h2>}
         >
-            <Head title="Crear Comision" />
+            <Head title="Editar Comision" />
 
             {flash?.error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -56,21 +56,11 @@ export default function Edit({ auth, materias, comision, flash }) {
                                     {errors.codigo && <div className="text-red-600 mt-1 text-sm">{errors.codigo}</div>}
                                 </div>
                                 <div>
-                                    <label htmlFor="materia" className="block text-sm font-medium text-gray-700">Materia</label>
-                                    <select
-                                        id="id_materia"
-                                        value={data.id_materia}
-                                        onChange={(e) => setData('id_materia', e.target.value)}
-                                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-                                        required
-                                    >
-                                        <option value="">Seleccionar materia</option>
-                                        {materias.map((materia) => (
-                                            <option key={materia.id} value={materia.id}>
-                                                {materia.nombre} ({materia.codigo})
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <label className="block text-sm font-medium text-gray-700">Materia</label>
+                                    <p className="mt-1 block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-gray-900">
+                                        {comision?.materia?.nombre}
+                                        {comision?.materia?.codigo ? ` (${comision.materia.codigo})` : ''}
+                                    </p>
                                     {errors.id_materia && <div className="text-red-600 mt-1 text-sm">{errors.id_materia}</div>}
                                 </div>
                             </div>
@@ -96,8 +86,8 @@ export default function Edit({ auth, materias, comision, flash }) {
                                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                         required
                                     >
-                                        <option value="Mañana">Mañana</option>
-                                        <option value="Tarde">Tarde</option>
+                                        <option value="mañana">Mañana</option>
+                                        <option value="tarde">Tarde</option>
                                     </select>
                                     {errors.turno && <div className="text-red-600 mt-1 text-sm">{errors.turno}</div>}
                                 </div>
@@ -114,9 +104,9 @@ export default function Edit({ auth, materias, comision, flash }) {
                                         className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                                         required
                                     >
-                                        <option value="Presencial">Presencial</option>
-                                        <option value="Virtual">Virtual</option>
-                                        <option value="Mixta">Mixta</option>
+                                        <option value="presencial">Presencial</option>
+                                        <option value="virtual">Virtual</option>
+                                        <option value="mixta">Mixta</option>
                                     </select>
                                     {errors.modalidad && <div className="text-red-600 mt-1 text-sm">{errors.modalidad}</div>}
                                 </div>
@@ -161,10 +151,11 @@ export default function Edit({ auth, materias, comision, flash }) {
                                         required
                                     >
                                         <option value="">Seleccionar año</option>
-                                        {[...Array(4)].map((_, i) => {
-                                            const year = new Date().getFullYear() + i;
+                                        {[...Array(6)].map((_, i) => {
+                                            // Genera desde (Año Actual - 2) hasta (Año Actual + 3)
+                                            const year = currentDate.getFullYear() - 2 + i;
                                             return (
-                                                <option key={year} value={year}>
+                                                <option key={year} value={String(year)}>
                                                     {year}
                                                 </option>
                                             );
@@ -200,8 +191,8 @@ export default function Edit({ auth, materias, comision, flash }) {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end space-x-4">
-                                <DangerButton
+                            <div className="flex justify-end gap-x-4">
+                                <Button variant="danger"
                                     as={Link}
                                     href="#"
                                     onClick={(e) => {
@@ -210,13 +201,13 @@ export default function Edit({ auth, materias, comision, flash }) {
                                     }}
                                 >
                                     Cancelar
-                                </DangerButton>
-                                <PrimaryButton
+                                </Button>
+                                <Button variant="primary"
                                     type="submit"
                                     disabled={processing}
                                 >
                                     {processing ? 'Guardando...' : 'Guardar Cambios'}
-                                </PrimaryButton>
+                                </Button>
                             </div>
                         </form>
                     </div>

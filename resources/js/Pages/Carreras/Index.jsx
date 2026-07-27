@@ -1,51 +1,15 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import ListHeader from '@/Components/ListHeader';
+import GestionCarreras from '@/Components/Filters/GestionCarreras';
 import DataTable from '@/Components/DataTable';
 import TableFilters from '@/Components/TableFilters';
 import PaginatorButtons from '@/Components/Buttons/PaginatorButtons';
+import KPICard from '@/Components/Dashboard/KPICard';
+import SearchBar from '@/Components/SearchBar';
 
-export default function Index({ auth, carreras, filters: initialFilters }) {
-    const [filters, setFilters] = useState({
-        search: initialFilters.search || '',
-        estado: initialFilters.estado ?? '',
-    });
-
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            router.get(route('carreras.index'), filters, {
-                preserveState: true,
-                replace: true,
-            });
-        }, 300);
-
-        return () => clearTimeout(timeout);
-    }, [filters]);
-
-    const handleFilterChange = (key, value) => {
-        setFilters(prev => ({ ...prev, [key]: value }));
-    };
-
-    const filterConfig = [
-        {
-            key: 'search',
-            label: 'Buscar',
-            type: 'text',
-            value: filters.search,
-            placeholder: 'Buscar por nombre, instituto...'
-        },
-        {
-            key: 'estado',
-            label: 'Estado',
-            type: 'select',
-            value: filters.estado,
-            options: [
-                { value: 'true', label: 'Activa' },
-                { value: 'false', label: 'Inactiva' }
-            ]
-        }
-    ];
+export default function Index({ auth, carreras, institutos, filters = [], search = '', can = { create: false } }) {
 
     const columns = [
         {
@@ -79,7 +43,7 @@ export default function Index({ auth, carreras, filters: initialFilters }) {
     ];
 
     const handleDelete = (carrera) => {
-        if (confirm('¿Estás seguro de eliminar esta carrera?')) {
+        if (confirm(`¿Estás seguro de eliminar la carrera "${carrera.nombre}"? Esta acción no se puede deshacer y eliminará sus datos asociados.`)) {
             router.delete(route('carreras.destroy', carrera.id));
         }
     };
@@ -89,6 +53,10 @@ export default function Index({ auth, carreras, filters: initialFilters }) {
         router.patch(route('carreras.toggleStatus', carrera.id), {},
             { preserveScroll: true });
     };
+
+    // Calcular totales para las tarjetas de resumen
+    const totalCarreras = carreras.meta?.total || carreras.data.length;
+    const carrerasActivas = useMemo(() => carreras.data.filter(c => c.estado).length, [carreras.data]);
 
     return (
         <AuthenticatedLayout
@@ -100,16 +68,35 @@ export default function Index({ auth, carreras, filters: initialFilters }) {
                     <ListHeader
                         title="Listado de Carreras"
                         buttonLabel="Agregar Carrera"
-                        buttonRoute={route('carreras.create')}
+                        buttonRoute={can.create ? route('carreras.create') : null}
+                    />
+                    <SearchBar
+                        routeName="carreras.index"
+                        initialValue={search}
+                        filters={{ filters }}
+                        placeholder="Buscar por nombre…"
                     />
                     <div className="bg-white rounded-lg shadow p-6 mb-6">
-                        <TableFilters
-                            filters={filterConfig}
-                            onChange={handleFilterChange}
+                        <GestionCarreras
+                            institutos = {institutos}
+                            search={search}
                         />
                     </div>
 
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <KPICard
+                            title="Total Carreras"
+                            value={totalCarreras}
+                            status="neutral"
+                        />
+                        <KPICard
+                            title="Carreras Activas"
+                            value={carrerasActivas}
+                            status="success"
+                        />
+                    </div>
+
+                    <div className="mt-6 bg-white rounded-lg shadow overflow-hidden">
                         <DataTable
                             columns={columns}
                             data={carreras.data}
@@ -128,14 +115,6 @@ export default function Index({ auth, carreras, filters: initialFilters }) {
                     </div>
 
                     <PaginatorButtons meta={carreras?.meta} paginator={carreras} routeName={'carreras.index'} />
-
-                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <p className="text-sm text-gray-600">Total Carreras</p>
-                            <p className="text-2xl font-bold text-gray-900">{carreras.meta?.total || carreras.data.length}</p>
-                        </div>
-                        {/* Aquí puedes agregar más tarjetas de estadísticas si lo necesitas */}
-                    </div>
 
         </AuthenticatedLayout>
     );

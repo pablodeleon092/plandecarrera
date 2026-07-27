@@ -4,14 +4,18 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { usePermissions } from '@/Hooks/usePermissions';
 
 export default function AuthenticatedLayout({ header, children }) {
-    const user = usePage().props.auth.user;
-    const { auth } = usePage().props;
-
-
-    const canViewUsers =
-        auth?.user?.permissions?.includes('consultar_usuario');
+    const page = usePage();
+    const user = page.props.auth.user;
+    const { canViewUsers, isAdmin } = usePermissions();
+    const currentUrl = new URL(window.location.href);
+    const dashboardView = currentUrl.searchParams.get('view');
+    const showDashboardSelectorBack =
+        isAdmin &&
+        currentUrl.pathname === '/' &&
+        Boolean(dashboardView);
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -28,7 +32,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </Link>
                             </div>
 
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                            <div className="hidden gap-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink
                                     href={route('dashboard')}
                                     active={route().current('dashboard')}
@@ -135,6 +139,8 @@ export default function AuthenticatedLayout({ header, children }) {
 
                         <div className="-me-2 flex items-center sm:hidden">
                             <button
+                                type="button"
+                                aria-label={showingNavigationDropdown ? "Cerrar menú de navegación" : "Abrir menú de navegación"}
                                 onClick={() =>
                                     setShowingNavigationDropdown(
                                         (previousState) => !previousState,
@@ -239,6 +245,31 @@ export default function AuthenticatedLayout({ header, children }) {
 
             <main>
                 <div className="py-12">
+                    {showDashboardSelectorBack && (
+                        <div className="mx-auto mb-4 w-[95%]">
+                            <Link
+                                href={route('dashboard')}
+                                replace
+                                className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            >
+                                <svg
+                                    aria-hidden="true"
+                                    className="h-4 w-4"
+                                    viewBox="0 0 20 20"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.8"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M15.5 10H4.5m0 0 4-4m-4 4 4 4"
+                                    />
+                                </svg>
+                                Volver al selector de dashboards
+                            </Link>
+                        </div>
+                    )}
                     <div className="mx-auto w-[95%]">
                         {children}
                     </div>

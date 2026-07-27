@@ -1,11 +1,11 @@
+import Button from '@/Components/Button';
 // Updated ComisionDocentes.jsx using DataTable
 import React, { useState, useMemo } from "react";
 import { Link, router } from "@inertiajs/react";
 import TableFilters from "@/Components/TableFilters";
 import DataTable from "@/Components/DataTable";
-import DangerButton from "@/Components/Buttons/DangerButton";
 
-export default function ComisionDocentes({ comision, docentes, allDocentes, filters: initialFilters = {} }) {
+export default function ComisionDocentes({ comision, docentes, allDocentes, can = { update: false }, filters: initialFilters = {} }) {
     const [filters, setFilters] = useState({
         search: initialFilters.search || "",
     });
@@ -46,7 +46,7 @@ export default function ComisionDocentes({ comision, docentes, allDocentes, filt
             key: "acciones",
             label: "Acciones",
             render: (d) => (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-x-3">
                     <Link href={route("dictas.edit", d.dicta_id)} className="text-blue-600 hover:underline">
                         Editar
                     </Link>
@@ -55,16 +55,18 @@ export default function ComisionDocentes({ comision, docentes, allDocentes, filt
                         Ver
                     </Link>
 
-                    <DangerButton
-                        onClick={() => {
-                            if (confirm("¿Eliminar docente de esta comisión?")) {
-                                router.delete(route("dictas.destroy", d.dicta_id));
-                            }
-                        }}
-                        className="px-3 py-1 text-xs"
-                    >
-                        Eliminar
-                    </DangerButton>
+                    {can.delete && (
+                        <Button variant="danger"
+                            onClick={() => {
+                                if (confirm("¿Eliminar docente de esta comisión?")) {
+                                    router.delete(route("dictas.destroy", d.dicta_id));
+                                }
+                            }}
+                            className="px-3 py-1 text-xs"
+                        >
+                            Eliminar
+                        </Button>
+                    )}
                 </div>
             ),
         },
@@ -89,20 +91,22 @@ export default function ComisionDocentes({ comision, docentes, allDocentes, filt
                 {docentesFiltrados.length > 0 && (
                     <ul className="border border-gray-200 rounded-md shadow-sm bg-white max-h-60 overflow-y-auto">
                         {docentesFiltrados.map((docente) => (
-                            <li
-                                key={docente.id}
-                                className="p-2 hover:bg-blue-50 cursor-pointer flex justify-between items-center"
-                                onClick={() =>
-                                (window.location.href = route("dictas.create", {
-                                    comision_id: comision.id,
-                                    docente_id: docente.id,
-                                }))
-                                }
-                            >
-                                <span>
-                                    {docente.nombre} {docente.apellido}
-                                </span>
-                                <span className="text-sm text-gray-500">Legajo: {docente.legajo || "—"}</span>
+                            <li key={docente.id} className="p-2">
+                                <button
+                                    type="button"
+                                    className="hover:bg-blue-50 cursor-pointer flex justify-between items-center w-full"
+                                    onClick={() =>
+                                    (window.location.href = route("dictas.create", {
+                                        comision_id: comision.id,
+                                        docente_id: docente.id,
+                                    }))
+                                    }
+                                >
+                                    <span>
+                                        {docente.nombre} {docente.apellido}
+                                    </span>
+                                    <span className="text-sm text-gray-500">Legajo: {docente.legajo || "—"}</span>
+                                </button>
                             </li>
                         ))}
                     </ul>

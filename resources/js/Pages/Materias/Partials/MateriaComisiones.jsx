@@ -1,7 +1,7 @@
 // resources/js/Pages/Materias/Partials/MateriaComisiones.jsx
 import { Link } from '@inertiajs/react';
 
-export default function MateriaComisiones({ comisiones, materia }) {
+export default function MateriaComisiones({ comisiones, materia, canDelete = false }) {
     return (
         <div>
             <h3 className="text-2xl font-bold mb-6">Comisiones de la Materia</h3>
@@ -15,23 +15,30 @@ export default function MateriaComisiones({ comisiones, materia }) {
                         </span>
 
                         {/* Contenedor de acciones */}
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center gap-x-4">
                             <Link
                                 href={route('comisiones.show', comision.id)}
                                 className="text-blue-600 hover:underline"
                             >
                                 Ver Detalles
                             </Link>
-
-                            <Link
-                                href={route('comisiones.destroy', comision.id)}
-                                method="delete"
-                                as="button"
-                                onBefore={() => confirm('¿Estás seguro de eliminar esta comisión?')}
-                                className="bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 transition"
-                            >
-                                Eliminar
-                            </Link>
+                            {canDelete && (
+                                <Link
+                                    href={route('comisiones.toggleStatus', comision.id)}
+                                    method="patch"
+                                    as="button"
+                                    onBefore={() => 
+                                        confirm(`¿Estás seguro de ${comision.estado ? 'desactivar' : 'activar'} esta comisión?`)
+                                    }
+                                    className={`px-3 py-1 rounded-full text-white transition ${
+                                        comision.estado 
+                                            ? 'bg-red-600 hover:bg-red-700' 
+                                            : 'bg-green-600 hover:bg-green-700'
+                                    }`}
+                                >
+                                    {comision.estado ? 'Desactivar' : 'Activar'}
+                                </Link>
+                            )}
                         </div>
                     </li>
                 ))}

@@ -1,22 +1,23 @@
+import Button from '@/Components/Button';
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import MateriaInfo from './Partials/MateriaInfo';
 import MateriaComisiones from './Partials/MateriaComisiones';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
-export default function Show({ auth, materia, comisiones }) {
+export default function Show({ auth, materia, flash, comisiones, can = { update: false, delete: false } }) {
 
     const [currentTab, setCurrentTab] = useState('informacion');
 
-    const handleDelete = () => {
-        if (confirm(`¿Estás seguro de eliminar la materia "${materia.nombre}"?`)) {
-            router.delete(route('materias.destroy', materia.id));
+    const handleToggleStatus = () => {
+        const action = materia.estado ? 'desactivar' : 'activar';
+
+        if (confirm(`¿Estás seguro de ${action} la materia "${materia.nombre}"?`)) {
+            router.patch(route('materias.toggleStatus', materia.id), {}, {
+                preserveScroll: true,
+            });
         }
     };
-
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -31,7 +32,7 @@ export default function Show({ auth, materia, comisiones }) {
 
                     {/* Botón Volver */}
                     <div className="mb-4">
-                        <SecondaryButton
+                        <Button variant="secondary"
                             as={Link}
                             href="#"
                             onClick={(e) => {
@@ -49,8 +50,20 @@ export default function Show({ auth, materia, comisiones }) {
                                 />
                             </svg>
                             Volver
-                        </SecondaryButton>
+                        </Button>
                     </div>
+                    {/* Flash Messages */}
+                    {flash?.success && (
+                        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                            {flash.success}
+                        </div>
+                    )}
+
+                    {flash?.error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            {flash.error}
+                        </div>
+                    )}
 
                     {/* ENCABEZADO estilo Docente */}
                     <div className="bg-white rounded-t-lg shadow-lg overflow-hidden">
@@ -77,19 +90,23 @@ export default function Show({ auth, materia, comisiones }) {
 
                                 {/* Botones */}
                                 <div className="flex gap-3">
-                                    <PrimaryButton
-                                        as={Link}
-                                        href={route('materias.edit', materia.id)}
-                                    >
-                                        Editar
-                                    </PrimaryButton>
+                                    {can.update && (
+                                        <Button variant="primary"
+                                            as={Link}
+                                            href={route('materias.edit', materia.id)}
+                                        >
+                                            Editar
+                                        </Button>
+                                    )}
 
                                     {/* Solo si querés eliminar materias */}
-                                    <DangerButton
-                                        onClick={handleDelete}
-                                    >
-                                        Eliminar
-                                    </DangerButton>
+                                    {can.delete && (
+                                        <Button  variant={materia.estado ? 'danger' : 'primary'}
+                                            onClick={handleToggleStatus}
+                                        >
+                                            {materia.estado ? 'Desactivar' : 'Activar'}
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
 
@@ -104,6 +121,7 @@ export default function Show({ auth, materia, comisiones }) {
                             <div className="flex gap-4">
 
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('informacion')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${currentTab === 'informacion'
                                         ? 'border-blue-600 text-blue-600'
@@ -114,6 +132,7 @@ export default function Show({ auth, materia, comisiones }) {
                                 </button>
 
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('comisiones')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${currentTab === 'comisiones'
                                         ? 'border-blue-600 text-blue-600'
@@ -134,6 +153,7 @@ export default function Show({ auth, materia, comisiones }) {
                                 <MateriaComisiones
                                     comisiones={comisiones}
                                     materia={materia}
+                                    canDelete={can.delete}
                                 />
                             )}
                         </div>

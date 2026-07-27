@@ -1,18 +1,17 @@
+import Button from '@/Components/Button';
 
 // resources/js/Pages/Carreras/Create.jsx
 
 import React from 'react';
 import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
+
+const modalidades = ['presencial', 'virtual', 'mixta'];
+const sedes = ['Ushuaia', 'Rio Grande', 'Ushuaia/Rio Grande'];
 
 export default function Create({ auth, institutos }) {
 
     const { flash } = usePage().props;
-
-    const modalidades = ['presencial', 'virtual', 'mixta'];
-    const sedes = ['Ushuaia', 'Rio Grande', 'Ushuaia/Rio Grande'];
 
     const { data, setData, post, processing, errors } = useForm({
         nombre: '',
@@ -59,8 +58,9 @@ export default function Create({ auth, institutos }) {
 
                                 {/* MODALIDAD */}
                                 <div className="mt-4">
-                                    <label className="block font-medium text-sm text-gray-700">Modalidad</label>
+                                    <label htmlFor="modalidad" className="block font-medium text-sm text-gray-700">Modalidad</label>
                                     <select
+                                        id="modalidad"
                                         value={data.modalidad}
                                         onChange={(e) => setData('modalidad', e.target.value)}
                                         className="w-full mt-1 block"
@@ -75,8 +75,9 @@ export default function Create({ auth, institutos }) {
 
                                 {/* SEDE */}
                                 <div className="mt-4">
-                                    <label className="block font-medium text-sm text-gray-700">Sede</label>
+                                    <label htmlFor="sede" className="block font-medium text-sm text-gray-700">Sede</label>
                                     <select
+                                        id="sede"
                                         value={data.sede}
                                         onChange={(e) => setData('sede', e.target.value)}
                                         className="w-full mt-1 block"
@@ -110,19 +111,19 @@ export default function Create({ auth, institutos }) {
 
                                 {/* BOTONES */}
                                 <div className="flex items-center justify-end mt-6">
-                                    <div className="flex justify-end space-x-4">
-                                        <DangerButton
+                                    <div className="flex justify-end gap-x-4">
+                                        <Button variant="danger"
                                             as={Link}
                                             href={route('carreras.index')}
                                         >
                                             Cancelar
-                                        </DangerButton>
-                                        <PrimaryButton
+                                        </Button>
+                                        <Button variant="primary"
                                             type="submit"
                                             disabled={processing}
                                         >
                                             {processing ? 'Guardando...' : 'Guardar Carrera'}
-                                        </PrimaryButton>
+                                        </Button>
                                     </div>
                                 </div>
 

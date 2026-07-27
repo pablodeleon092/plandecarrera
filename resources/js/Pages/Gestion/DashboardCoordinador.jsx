@@ -9,6 +9,14 @@ import {
 } from '@heroicons/react/24/solid'
 
 import DataTable from '@/Components/DataTable';
+
+const tabs = [
+    { id: 'resumen', label: 'Mapa Curricular' },
+    { id: 'coberturaPorAño', label: 'Cobertura Docentes por Año' },
+    { id: 'equipoDocenteCarrera', label: 'Equipo Docente', badge: 0 },
+    { id: 'cargaHorariaPlan', label: 'Carga Horaria' },
+];
+
 export default function DashboardCoordinador({
     user,
     carreras, // Lista para el select
@@ -34,13 +42,6 @@ export default function DashboardCoordinador({
         );
     };
 
-    const tabs = [
-        { id: 'resumen', label: 'Mapa Curricular' },
-        { id: 'coberturaPorAño', label: 'Cobertura Docentes por Año' },
-        { id: 'equipoDocenteCarrera', label: 'Equipo Docente', badge: 0 },
-        { id: 'cargaHorariaPlan', label: 'Carga Horaria' },
-    ];
-
     const columnsResumen = [
         { 
             label: 'Cuat.', 
@@ -63,7 +64,7 @@ export default function DashboardCoordinador({
                 <div className="space-y-3 my-1">
                     {materia.comisiones.length > 0 ? (
                         materia.comisiones.map((com, idx) => (
-                            <div key={idx} className="flex flex-col border-l-2 border-indigo-100 pl-3">
+                            <div key={com.nombre || idx} className="flex flex-col border-l-2 border-indigo-100 pl-3">
                                 <span className="font-medium text-indigo-700 text-xs">
                                     {com.nombre}
                                 </span>
@@ -119,7 +120,7 @@ export default function DashboardCoordinador({
                 <div className="flex flex-col gap-2 my-1">
                     {docente.cargos.length > 0 ? (
                         docente.cargos.map((cargo, idx) => (
-                            <div key={idx} className="text-xs bg-gray-50 border border-gray-100 p-2 rounded">
+                            <div key={cargo.nombre || idx} className="text-xs bg-gray-50 border border-gray-100 p-2 rounded">
                                 <div className="font-semibold text-gray-700">{cargo.nombre}</div>
                                 <div className="text-gray-500 flex gap-3 mt-1">
                                     <span>📚 Materias: {cargo.nro_materias_asig}</span>
@@ -154,7 +155,7 @@ export default function DashboardCoordinador({
                             onChange={(e) => handleCarreraChange(e.target.value)}
                             className="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                         >
-                            <option value="" disabled>Seleccionar Carrera...</option>
+                            <option value="" disabled>Seleccionar Carrera…</option>
                             {carreras.map((c) => (
                                 <option key={c.id} value={String(c.id)}>{c.nombre}</option>
                             ))}
@@ -198,9 +199,10 @@ export default function DashboardCoordinador({
 
                     {/* TABS */}
                     <div className="border-b border-gray-200 mb-6">
-                        <nav className="-mb-px flex space-x-8">
+                        <nav className="-mb-px flex gap-x-8">
                             {tabs.map(tab => (
                                 <button
+                                    type="button"
                                     key={tab.id}
                                     onClick={() => setCurrentTab(tab.id)}
                                     className={`
@@ -252,7 +254,7 @@ export default function DashboardCoordinador({
                                                 <div className="space-y-4">
                                                     {materia.comisiones.map((com, cIdx) => (
                                                         <div 
-                                                            key={cIdx} 
+                                                            key={com.nombre || cIdx} 
                                                             className={`p-2 rounded border shadow-sm transition-colors ${
                                                                 com.es_valida 
                                                                 ? 'bg-white border-gray-100' 
@@ -265,7 +267,7 @@ export default function DashboardCoordinador({
                                                             <ul className="space-y-2">
                                                                 {com.docentes.length > 0 ? (
                                                                     com.docentes.map((doc, dIdx) => (
-                                                                        <li key={dIdx} className="flex justify-between items-center text-sm">
+                                                                        <li key={doc.nombre_completo || dIdx} className="flex justify-between items-center text-sm">
                                                                             <span className="text-gray-700">{doc.nombre_completo}</span>
                                                                             <span className="text-[10px] px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full font-medium">
                                                                                 {doc.cargo}
@@ -336,7 +338,7 @@ export default function DashboardCoordinador({
 
                                                 <div className="space-y-4">
                                                     {materia.comisiones.map((com, cIdx) => (
-                                                        <div key={cIdx} className="bg-white border border-gray-200 rounded-lg p-4">
+                                                        <div key={com.nombre || cIdx} className="bg-white border border-gray-200 rounded-lg p-4">
                                                             <div className="flex justify-between items-center mb-2">
                                                                 <span className="text-sm font-bold text-slate-700">{com.nombre}</span>
                                                                 <span className={`text-xs font-bold px-2 py-1 rounded ${com.es_valida ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>

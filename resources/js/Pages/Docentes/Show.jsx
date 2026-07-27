@@ -1,19 +1,20 @@
+import Button from '@/Components/Button';
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import DocenteInfo from './Partials/DocenteInfo';             // <--- Nuevo
 import DocenteComisiones from './Partials/DocenteComisiones'; // <--- Nuevo
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
-import DangerButton from '@/Components/Buttons/DangerButton';
 
-export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 'comisiones'
-
+export default function Show({ auth, docente, comisiones, can = { update: false, delete: false } }) { // <--- Agregamos 'comisiones'
     const [currentTab, setCurrentTab] = useState('informacion');
 
-    const handleDelete = () => {
-        if (confirm(`¿Estás seguro de que quieres eliminar al docente ${docente.nombre} ${docente.apellido}?`)) {
-            router.delete(route('docentes.destroy', docente.id));
+    const handleToggleStatus = () => {
+        const action = docente.es_activo ? 'desactivar' : 'activar';
+
+        if (confirm(`¿Estás seguro de ${action} el "${docente.nombre}"?`)) {
+            router.patch(route('docentes.toggleStatus', docente), {}, {
+                preserveScroll: true
+            });
         }
     };
 
@@ -23,17 +24,11 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
             header={<h2 className="text-xl font-semibold leading-tight text-gray-800">Docente: {docente.nombre} {docente.apellido}</h2>}
         >
             <Head title={`Docente: ${docente.nombre} ${docente.apellido}`} />
-
-
                     {/* Botón Volver */}
                     <div className="mb-4">
-                        <SecondaryButton
+                        <Button variant="secondary"
                             as={Link}
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                window.history.back();
-                            }}
+                            href={route('docentes.index')}
                             className="flex items-center gap-2"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,8 +39,8 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                                     d="M10 19l-7-7m0 0l7-7m-7 7h18"
                                 />
                             </svg>
-                            Volver
-                        </SecondaryButton>
+                            Volver al Listado
+                        </Button>
                     </div>
 
                     {/* ENCABEZADO (Tu diseño original) */}
@@ -69,17 +64,21 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
-                                    <PrimaryButton
-                                        as={Link}
-                                        href={route('docentes.edit', docente.id)}
-                                    >
-                                        Editar
-                                    </PrimaryButton>
-                                    <DangerButton
-                                        onClick={handleDelete}
-                                    >
-                                        Eliminar
-                                    </DangerButton>
+                                    {can.update && (
+                                        <Button variant="primary"
+                                            as={Link}
+                                            href={route('docentes.edit', docente.id)}
+                                        >
+                                            Editar
+                                        </Button>
+                                    )}
+                                    {can.delete && (
+                                        <Button  variant={docente.es_activo ? 'danger' : 'primary'}
+                                            onClick={handleToggleStatus}
+                                        >
+                                            {docente.es_activo ? 'Desactivar' : 'Activar'}
+                                        </Button>
+                                    )}   
                                 </div>
                             </div>
                         </div>
@@ -91,6 +90,7 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                         <div className="px-8 pt-6 border-b border-gray-200">
                             <div className="flex gap-4">
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('informacion')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${currentTab === 'informacion'
                                         ? 'border-blue-600 text-blue-600'
@@ -100,6 +100,7 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                                     Información
                                 </button>
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('comisiones')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${currentTab === 'comisiones'
                                         ? 'border-blue-600 text-blue-600'
@@ -114,13 +115,13 @@ export default function Show({ auth, docente, comisiones }) { // <--- Agregamos 
                         {/* Contenido Dinámico */}
                         <div className="p-8">
                             {currentTab === 'informacion' ? (
-                                <DocenteInfo docente={docente} />
+                                <DocenteInfo docente={docente} can={can} />
                             ) : (
                                 <DocenteComisiones comisiones={comisiones} />
                             )}
                         </div>
                     </div>
-
+                            
         </AuthenticatedLayout>
     );
 }

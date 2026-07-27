@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -28,11 +29,24 @@ class StoreDocenteRequest extends FormRequest
         // Si estamos en 'store', $this->route('docente') será null.
         $docente = $this->route('docente');
         $docenteId = $docente ? $docente->id : null;
+        $legajoRules = [
+            'required',
+            'integer',
+            Rule::unique('docentes', 'legajo')->ignore($docenteId),
+        ];
+
+        if ($docente && $this->user()?->cannot('editLegajo', $docente)) {
+            $legajoRules[] = function (string $attribute, mixed $value, Closure $fail) use ($docente): void {
+                if ((int) $value !== (int) $docente->legajo) {
+                    $fail('No tenés permiso para modificar el legajo del docente.');
+                }
+            };
+        }
 
         return [
             // Usamos Rule::unique para manejar dinámicamente la creación y actualización.
             // ignorará el ID del docente actual al validar la unicidad.
-            'legajo' => ['required', 'integer', Rule::unique('docentes', 'legajo')->ignore($docenteId)],
+            'legajo' => $legajoRules,
             'nombre' => ['required', 'string', 'max:255'],
             'apellido' => ['required', 'string', 'max:255'],
             'modalidad_desempeño' => ['required', Rule::in(['Investigador', 'Desarrollo'])],

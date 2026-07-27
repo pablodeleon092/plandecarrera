@@ -16,6 +16,7 @@ class MateriaController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Materia::Class);
         $user = Auth::user();
 
         $query = Materia::query();
@@ -50,13 +51,30 @@ class MateriaController extends Controller
 
         $queryFilter = new QueryFilter;
 
-        $filters = $request->all();
+        $filters = $request->input('filters', []);
+        $search = $request->input('search');
 
-        $queryFilter->apply($query, $filters);    
+        $queryFilter->apply($query, $filters);
+        $queryFilter->applySearch($query, $search, ['nombre', 'codigo']);
 
-        $materias = $query->orderBy('id', 'desc')
-            ->paginate(15)
-            ->withQueryString();
+        $materias = $query->orderBy('nombre', 'asc')
+            ->get()
+            ->map(fn ($materia) => [
+                'id'              => $materia->id,
+                'nombre'          => $materia->nombre,
+                'codigo'          => $materia->codigo,
+                'estado'          => (bool) $materia->estado,
+                'regimen'         => $materia->regimen,
+                'cuatrimestre'    => $materia->cuatrimestre,
+                'horas_semanales' => $materia->horas_semanales,
+                'horas_totales'   => $materia->horas_totales,
+                'sede'   => $materia->sede,
+                'can' => [
+                    'view'   => $user->can('view', $materia),
+                    'update' => $user->can('update', $materia),
+                    'delete' => $user->can('delete', $materia),
+                ]
+            ]);
 
         $institutosDisponibles = $user->getInstitutosAutorizados();
         
@@ -68,20 +86,28 @@ class MateriaController extends Controller
             'materias' => $materias,
             'institutos' => $institutosDisponibles,
             'carreras' => $carreras,
+            'filters' => $filters,
+            'search' => $search,
             'flash' => [
                 'success' => session('success'),
                 'error' => session('error'),
-            ],   
+            ],
+            'can' => [
+                'create' => $user->can('create', Materia::class),
+            ],
         ]);
     }
 
     public function create()
     {
+        $this->authorize('create', Materia::Class);
         return Inertia::render('Materias/Create');
     }
 
     public function store(Request $request)
     {
+        $this->authorize('create', Materia::class);
+
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'codigo' => 'required|string|max:50|unique:materias,codigo',
@@ -135,14 +161,25 @@ class MateriaController extends Controller
 
     public function show(Materia $materia)
     {
+        $user = Auth::user();
+        if ($user->cannot('view', $materia)) {
+            return redirect()->back()->with('error', 'No tenés los permisos suficientes para ver esta materia');
+        }
+
         return Inertia::render('Materias/Show', [
             'materia' => $materia,
             'comisiones' => $materia->comisiones()->get(),
+            'can' => [
+                'view' => $user->can('view', $materia),
+                'update' => $user->can('update', $materia),
+                'delete' => $user->can('restore', $materia),
+            ],
         ]);
     }
 
     public function edit(Materia $materia)
     {
+        $this->authorize('update', $materia);
         return Inertia::render('Materias/Edit', [
             'materia' => $materia
         ]);
@@ -150,12 +187,32 @@ class MateriaController extends Controller
 
     public function update(Request $request, Materia $materia)
     {
+        $user = auth()->user();
+        if ($user->cannot('update', $materia)) {
+            $rolesFriendly = [
+                'Admin_instituto' => 'Director de instituto',
+                'Coord_carrera' => 'Coordinador de carrera',
+            ];
+            $rol = $rolesFriendly[$user->getRoleNames()->first()] ?? 'usuario';
+            $institutoNombre = $user->instituto?->nombre ?? 'tu instituto';
+            return redirect()->back()->with('error', "Como {$rol} del {$institutoNombre}, solo puedes editar materias de tu propio instituto.");
+        }
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
             'codigo' => 'required|string|max:50|unique:materias,codigo,' . $materia->id,
-            'estado' => 'boolean',
             'regimen' => 'required|in:anual,cuatrimestral',
-            'cuatrimestre' => 'nullable|integer|min:1|max:2|required_if:regimen,cuatrimestral',
+            'cuatrimestre' => [
+                'nullable',
+                'integer',
+                'min:1',
+                Rule::when($request->regimen === 'cuatrimestral', [
+                    'required',
+                    'max:10', 
+                ]),
+                Rule::when($request->regimen === 'anual', [
+                    'max:5', 
+                ]),
+            ],
             'horas_semanales' => 'required|integer|min:1|max:40',
             'horas_totales' => 'nullable|integer|min:1'
         ]);
@@ -179,6 +236,8 @@ class MateriaController extends Controller
 
     public function destroy(Materia $materia)
     {
+        $this->authorize('delete', $materia);
+
         try {
             $materia->delete();
             
@@ -192,11 +251,11 @@ class MateriaController extends Controller
 
     public function toggleStatus(Materia $materia)
     {
+        $this->authorize('restore', $materia);
         $materia->estado = !$materia->estado;
         $materia->save();
 
-        return redirect()->route('materias.index')
-            ->with('success', 'Estado de la materia actualizado exitosamente.');
+        return redirect()->back()->with('success', 'Estado de la materia actualizado exitosamente.');
     }
 
 }

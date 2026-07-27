@@ -1,36 +1,38 @@
-export default function DynamicFilters ({ fields, filters, onChange }) {
+const OPERATORS = {
+    string: [
+        { value: 'contains', label: 'Contiene' },
+        { value: 'equals', label: 'Es exactamente' },
+        { value: 'not_equals', label: 'Es distinto de' }
+    ],
+    number: [
+        { value: 'equals', label: 'Igual a' },
+        { value: 'not_equals', label: 'Distinto de' },
+        { value: 'greater', label: 'Mayor que' },
+        { value: 'less', label: 'Menor que' },
+        { value: 'between', label: 'Entre' }
+    ],
+    select: [
+        { value: 'equals', label: 'Es' },
+        { value: 'not_equals', label: 'No es' }
+    ],
+    time: [
+    { value: 'equals', label: 'A las' },
+    { value: 'greater', label: 'Después de las' },
+    { value: 'less', label: 'Antes de las' },
+    { value: 'between', label: 'Entre horas' }
+    ]
+};
 
-    const OPERATORS = {
-        string: [
-            { value: 'contains', label: 'Contiene' },
-            { value: 'equals', label: 'Es exactamente' },
-            { value: 'not_equals', label: 'Es distinto de' }
-        ],
-        number: [
-            { value: 'equals', label: 'Igual a' },
-            { value: 'not_equals', label: 'Distinto de' },
-            { value: 'greater', label: 'Mayor que' },
-            { value: 'less', label: 'Menor que' },
-            { value: 'between', label: 'Entre' }
-        ],
-        select: [
-            { value: 'equals', label: 'Es' },
-            { value: 'not_equals', label: 'No es' }
-        ],
-        time: [
-        { value: 'equals', label: 'A las' },
-        { value: 'greater', label: 'Después de las' },
-        { value: 'less', label: 'Antes de las' },
-        { value: 'between', label: 'Entre horas' }
-        ]
-    };
+export default function DynamicFilters ({ fields, filters, onChange }) {
 
     const addFilter = () => {
         const defaultField = fields[0];
         const newFilter = {
             id: Date.now(), // ID único para el key de React
             field: defaultField.key,
-            operator: OPERATORS[defaultField.type][0].value,
+            operator: defaultField.type === 'select'
+                ? 'equals'
+                : OPERATORS[defaultField.type][0].value,
             value: ''
         };
         onChange([...filters, newFilter]);
@@ -48,7 +50,9 @@ export default function DynamicFilters ({ fields, filters, onChange }) {
                 // Si cambiamos de campo, resetear el operador y el valor
                 if (key === 'field') {
                     const fieldConfig = fields.find(f => f.key === newValue);
-                    updated.operator = OPERATORS[fieldConfig.type][0].value;
+                    updated.operator = fieldConfig.type === 'select'
+                        ? 'equals'
+                        : OPERATORS[fieldConfig.type][0].value;
                     updated.value = fieldConfig.type === 'number' && updated.operator === 'between' ? { min: '', max: '' } : '';
                 }
 
@@ -85,15 +89,17 @@ export default function DynamicFilters ({ fields, filters, onChange }) {
                         </select>
 
                         {/* 2. Selección del Operador */}
-                        <select 
-                            value={filter.operator} 
-                            onChange={(e) => updateFilter(filter.id, 'operator', e.target.value)}
-                            className="border p-1 rounded"
-                        >
-                            {availableOperators.map(op => (
-                                <option key={op.value} value={op.value}>{op.label}</option>
-                            ))}
-                        </select>
+                        {fieldConfig.type !== 'select' && (
+                            <select
+                                value={filter.operator}
+                                onChange={(e) => updateFilter(filter.id, 'operator', e.target.value)}
+                                className="border p-1 rounded"
+                            >
+                                {availableOperators.map(op => (
+                                    <option key={op.value} value={op.value}>{op.label}</option>
+                                ))}
+                            </select>
+                        )}
 
                     {/* 3. Input del Valor (Dinámico) */}
                     <div className="flex-1">
@@ -103,14 +109,15 @@ export default function DynamicFilters ({ fields, filters, onChange }) {
                                 onChange={(e) => updateFilter(filter.id, 'value', e.target.value)}
                                 className="border p-1 rounded w-full"
                             >
-                                <option value="">Seleccione...</option>
+                                <option value="">Seleccione…</option>
                                 {fieldConfig.options.map(opt => (
                                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                                 ))}
                             </select>
                         ) : filter.operator === 'between' ? (
                             <div className="flex gap-2">
-                                <input 
+                                <input
+                                    aria-label="Valor mínimo"
                                     /* Si el tipo es time, usa time. Si no, usa number por defecto del between */
                                     type={fieldConfig.type === 'time' ? 'time' : 'number'} 
                                     placeholder="Min" 
@@ -119,7 +126,8 @@ export default function DynamicFilters ({ fields, filters, onChange }) {
                                     className="border p-1 rounded w-full"
                                 />
                                 <span className="self-center">-</span>
-                                <input 
+                                <input
+                                    aria-label="Valor máximo"
                                     type={fieldConfig.type === 'time' ? 'time' : 'number'} 
                                     placeholder="Max" 
                                     value={filter.value.max || ''} 
@@ -128,7 +136,8 @@ export default function DynamicFilters ({ fields, filters, onChange }) {
                                 />
                             </div>
                         ) : (
-                            <input 
+                            <input
+                                aria-label="Valor del filtro"
                                 /* Detecta si es time, number o texto normal */
                                 type={fieldConfig.type === 'time' ? 'time' : fieldConfig.type === 'number' ? 'number' : 'text'} 
                                 placeholder="Valor..." 
@@ -141,6 +150,7 @@ export default function DynamicFilters ({ fields, filters, onChange }) {
 
                         {/* 4. Botón de Eliminar */}
                         <button 
+                            type="button"
                             onClick={() => removeFilter(filter.id)}
                             className="text-red-600 hover:bg-red-100 p-1 rounded"
                             title="Quitar filtro"

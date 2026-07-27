@@ -5,7 +5,7 @@ import DataTable from '@/Components/DataTable';
 import ListHeader from '@/Components/ListHeader';
 import TableFilters from '@/Components/TableFilters';
 
-export default function Index({ auth, users }) {
+export default function Index({ auth, users, can = { create: false } }) {
     const userList = users?.data || [];
     const { delete: inertiaDelete } = useForm({});
 
@@ -22,8 +22,6 @@ export default function Index({ auth, users }) {
     // Get unique cargos and institutos for filter options
     const cargos = [...new Set(userList.map(u => u.cargo))].filter(Boolean);
     const institutos = [...new Set(userList.map(u => u.instituto?.siglas))].filter(Boolean);
-
-    const canEditusers = auth?.user?.permissions?.includes('modificar_usuario');
 
     const filterConfig = [
         {
@@ -131,7 +129,7 @@ export default function Index({ auth, users }) {
                 <ListHeader
                     title="Listado de Usuarios"
                     buttonLabel="Agregar Usuario"
-                    buttonRoute={route('users.create')}
+                    buttonRoute={can.create ? route('users.create') : null}
                 />
 
                 <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -145,20 +143,14 @@ export default function Index({ auth, users }) {
                     data={filteredData}
                     
                     onShow={(user) => router.visit(route('users.show', user.id))}
-                    onEdit={canEditusers
-                        ? (user) => router.visit(route('users.edit', user.id))
-                        : null
-                    }
-                    onDelete={canEditusers
-                        ? (user) => {
+                    onEdit={(user) => router.visit(`${route('users.edit', user.id)}?from=index`)}
+                    onDelete={(user) => {
                             if (confirm('¿Eliminar usuario?')) {
                                 // Asumo que `inertiaDelete` es una función/hook de Inertia para DELETE (como `router.delete`)
                                 inertiaDelete(route('users.destroy', user.id));
                             }
-                        }
-                        : null
-                    }
-                    onToggleStatus={canEditusers ? handleToggleStatus : null}
+                        }}
+                    onToggleStatus={handleToggleStatus}
                     statusKey="is_activo"
                     hover={true}
                     emptyMessage="No hay usuarios para mostrar."

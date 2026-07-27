@@ -1,15 +1,24 @@
+import Button from '@/Components/Button';
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import PrimaryButton from '@/Components/Buttons/PrimaryButton';
-import { Head, Link } from '@inertiajs/react';
+
+import { Head, Link, router } from '@inertiajs/react';
 import ComisionInfo from './Partials/ComisionInfo';
 import ComisionDocentes from './Partials/ComisionDocentes';
-import SecondaryButton from '@/Components/Buttons/SecondaryButton';
 import ComisionHorarios from './Partials/ComisionHorarios';
 
-export default function ShowComision({ auth, comision, flash, docentes, allDocentes }) {
+export default function ShowComision({ auth, comision, flash, docentes, allDocentes, can = { update: false, delete: false } }) {
 
     const [currentTab, setCurrentTab] = useState('informacion');
+    const handleToggleStatus = () => {
+        const action = comision.estado ? 'desactivar' : 'activar';
+
+        if (confirm(`¿Estás seguro de ${action} la comision "${comision.nombre}"?`)) {
+            router.patch(route('comisiones.toggleStatus', comision), {}, {
+                preserveScroll: true
+            });
+        }
+    };
 
     return (
         <AuthenticatedLayout
@@ -27,13 +36,9 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
 
                     {/* Botón Volver */}
                     <div className="mb-4">
-                        <SecondaryButton
-                            as={Link}
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                window.history.back();
-                            }}
+                        <Button variant="secondary"
+                            as="a"
+                            href={route('comisiones.index')}
                             className="flex items-center gap-2"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,8 +49,8 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                     d="M10 19l-7-7m0 0l7-7m-7 7h18"
                                 />
                             </svg>
-                            Volver
-                        </SecondaryButton>
+                            Volver al Listado
+                        </Button>
                     </div>
 
                     {/* Flash Messages */}
@@ -86,12 +91,21 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                 </div>
 
                                 <div className="flex gap-2">
-                                    <PrimaryButton
-                                        as={Link}
-                                        href={route('comisiones.edit', comision.id)}
-                                    >
-                                        Editar comisión
-                                    </PrimaryButton>
+                                    {can.update && (
+                                        <Button variant="primary"
+                                            as={Link}
+                                            href={route('comisiones.edit', comision.id)}
+                                        >
+                                            Editar comisión
+                                        </Button>
+                                    )}
+                                    {can.delete && (
+                                        <Button  variant={comision.estado ? 'danger' : 'primary'}
+                                            onClick={handleToggleStatus}
+                                        >
+                                            {comision.estado ? 'Desactivar' : 'Activar'}
+                                        </Button>
+                                    )}                                    
                                 </div>
                             </div>
                         </div>
@@ -104,6 +118,7 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                         <div className="px-8 pt-6 border-b border-gray-200">
                             <div className="flex gap-4">
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('informacion')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${currentTab === 'informacion'
                                         ? 'border-blue-600 text-blue-600'
@@ -114,6 +129,7 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                 </button>
 
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('docentes')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${currentTab === 'docentes'
                                         ? 'border-blue-600 text-blue-600'
@@ -125,6 +141,7 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
 
 
                                 <button
+                                    type="button"
                                     onClick={() => setCurrentTab('horarios')}
                                     className={`px-4 py-2 font-semibold transition border-b-2 ${
                                         currentTab === 'horarios'
@@ -147,10 +164,14 @@ export default function ShowComision({ auth, comision, flash, docentes, allDocen
                                     comision={comision}
                                     docentes={docentes}
                                     allDocentes={allDocentes}
+                                    can={can}
                                 />
                             )}
                             {currentTab === 'horarios' && (
-                                <ComisionHorarios comision={comision} />
+                                <ComisionHorarios
+                                    comision={comision}
+                                    canDelete={can.deleteHorario}
+                                />
                             )}
                         </div>
                     </div>

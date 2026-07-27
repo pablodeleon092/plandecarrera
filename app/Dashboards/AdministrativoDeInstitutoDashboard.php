@@ -21,6 +21,16 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
     {
         $institutoId = $user->instituto_id;
         
+        if ($user->cargo === 'Administrador') {
+            $institutoId = $request->input('instituto_id') ?? Instituto::first()?->id;
+        } else {
+            if (!$institutoId) {
+                abort(403, 'Usuario sin instituto asignado');
+            }
+        }
+
+        $instituto = Instituto::with('carreras')->findOrFail($institutoId);
+        
         // Cálculo de período lectivo
         $currentYear = date('Y');
         $currentMonth = (int)date('m');
@@ -28,7 +38,7 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
 
         return Inertia::render('Gestion/DashboardAdministrativo', [
             'user' => $user,
-            'instituto' => $user->instituto,
+            'instituto' => $instituto,
             'currentYear' => $currentYear,
             'currentSemester' => $currentSemester,
             
@@ -69,10 +79,10 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
                 'legajo' => $docente->legajo,
                 'email' => $docente->email,
                 'telefono' => $docente->telefono,
-                'campos_faltantes' => array_filter([
+                'campos_faltantes' => array_values(array_filter([
                     empty($docente->email) ? 'Email' : null,
                     empty($docente->telefono) ? 'Teléfono' : null
-                ]),
+                ])),
             ]);
 
         return [
@@ -91,8 +101,13 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
             ->whereHas('materia.planes.carrera', fn($q) => $q->where('instituto_id', $institutoId))
             ->with([
                 'materia:id,nombre,codigo',
-                'dictas.docente:id,nombre,apellido',
-                'dictas.cargo:id,nombre'
+                'dictas' => function ($q) {
+                    $q->whereHas('docente', fn($d) => $d->where('es_activo', true))
+                        ->with([
+                            'docente:id,nombre,apellido',
+                            'cargo:id,nombre',
+                        ]);
+                },
             ])
             ->orderBy('id_materia')
             ->limit(30)
@@ -145,18 +160,20 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
 
     private function getTareasPendientes($institutoId, $year, $semester)
     {
+        $semesterString = $semester == 1 ? "1ro" : "2do";
+
         $materiasSinComision = Materia::query()
             ->where('estado', true)
             ->where('cuatrimestre', $semester)
             ->whereHas('planes', fn($q) => $q->whereNull('anio_fin')->whereHas('carrera', fn($c) => $c->where('instituto_id', $institutoId)))
-            ->whereDoesntHave('comisiones', fn($q) => $q->where('anio', $year)->where('cuatrimestre', $semester))
+            ->whereDoesntHave('comisiones', fn($q) => $q->where('anio', $year)->where('cuatrimestre', $semesterString))
             ->select('id', 'nombre', 'codigo')
             ->get()
             ->map(fn($m) => ['id' => $m->id, 'nombre' => $m->nombre, 'codigo' => $m->codigo, 'tipo' => 'Sin comisión creada']);
 
         $comisionesSinDocentes = Comision::query()
             ->where('anio', $year)
-            ->where('cuatrimestre', $semester)
+            ->where('cuatrimestre', $semesterString)
             ->whereHas('materia.planes.carrera', fn($q) => $q->where('instituto_id', $institutoId))
             ->whereDoesntHave('dictas')
             ->with('materia:id,nombre,codigo')
@@ -191,12 +208,14 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
 
     private function calculateKPIs($institutoId, $year, $semester)
     {
+        $semesterString = $semester == 1 ? "1ro" : "2do";
+
         $totalDocentes = Docente::deInstituto($institutoId)->count();
         $incompletosCount = Docente::deInstituto($institutoId)
             ->where(fn($q) => $q->whereNull('email')->orWhereNull('telefono')->orWhere('email', '')->orWhere('telefono', ''))
             ->count();
         
-        $comisionesCreadas = Comision::where('anio', $year)->where('cuatrimestre', $semester)
+        $comisionesCreadas = Comision::where('anio', $year)->where('cuatrimestre', $semesterString)
             ->whereHas('materia.planes.carrera', fn($q) => $q->where('instituto_id', $institutoId))
             ->count();
 
@@ -267,8 +286,10 @@ class AdministrativoDeInstitutoDashboard implements DashboardStrategy
 
     private function getConflictosHorarios($institutoId, $year, $semester)
     {
+        $semesterString = $semester == 1 ? "1ro" : "2do";
+
         $conflictos = Dicta::query()
-            ->whereHas('comision', fn($q) => $q->where('anio', $year)->where('cuatrimestre', $semester)->whereHas('materia.planes.carrera', fn($c) => $c->where('instituto_id', $institutoId)))
+            ->whereHas('comision', fn($q) => $q->where('anio', $year)->where('cuatrimestre', $semesterString)->whereHas('materia.planes.carrera', fn($c) => $c->where('instituto_id', $institutoId)))
             ->with(['docente:id,nombre,apellido', 'comision.materia:id,nombre'])
             ->get()
             ->groupBy('docente_id')
