@@ -30,7 +30,7 @@ export default function Create({ auth, materias, materia, flash }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Crear Nuevo Comision</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Crear Nueva Comision</h2>}
         >
             <Head title="Crear Comision" />
 
