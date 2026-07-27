@@ -205,9 +205,11 @@ class CoordinadorAcademicoDashboard implements DashboardStrategy
                 'choques' => $choques->map(fn($c) => [
                     'dia' => $c->dia,
                     'materia1' => $c->materia1,
+                    'comision1_id' => $c->comision1_id,
                     'inicio1' => $c->inicio1,
                     'fin1' => $c->fin1,
                     'materia2' => $c->materia2,
+                    'comision2_id' => $c->comision2_id,
                     'inicio2' => $c->inicio2,
                     'fin2' => $c->fin2,
                 ])->values(),
