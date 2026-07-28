@@ -24,14 +24,19 @@ class NormativaAsignacion
 
         $funcion_aulica = strtolower(trim($dicta->funcionAulica->nombre));
         $cargo = $dicta->cargo;
+        
+        
+        $esTeorica = $funcion_aulica === 'teorica' ||
+        $funcion_aulica === 'teórico' ||
+        $funcion_aulica === 'responsable de cátedra' ||
+        $funcion_aulica === 'auxiliar de cátedra';
 
-        $esTeorica = $funcion_aulica === 'teorica';
-        $esPractica = $funcion_aulica === 'practica';
+        $esPractica = $funcion_aulica === 'practica' || $funcion_aulica === 'práctico';
         $esTeoricaPractica = $funcion_aulica === 'teorica/practica';
 
         $esCargoSuperior = Str::contains($cargo->nombre, ['Titular', 'Adjunto', 'Asociado']);
         $esCargoPractico = Str::contains($cargo->nombre, ['Jefe de Trabajos Practicos', 'Ayudante de Primera']);
-
+       
         if (
             ($esTeorica && $esCargoSuperior) ||
             ($esPractica && $esCargoPractico) ||

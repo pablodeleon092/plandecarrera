@@ -156,7 +156,7 @@ class CarreraController extends Controller
             'planes' => $planes,
             'can' => [
                 'update' => $user->can('update', $carrera),
-                'deletePlan' => $user->can('delete', $carrera),
+                'deletePlan' => $user->can('modificar_carrera', $carrera),
             ],
         ]);
     }

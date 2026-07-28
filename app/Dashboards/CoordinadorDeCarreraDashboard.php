@@ -259,7 +259,8 @@ class CoordinadorDeCarreraDashboard implements DashboardStrategy
         ])->findOrFail($carreraId);
 
         $plan = $carrera->planActual;
-
+        if (!$plan) return null;
+        
         $materias = $plan->materias;
         // Obtenemos todas las comisiones del plan en una sola colección
         $todasLasComisiones = $materias->flatMap->comisiones;
